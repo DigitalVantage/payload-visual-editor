@@ -84,7 +84,7 @@ export type VisualEditorRuntimeConfig = {
   view: null | { path: string }
 }
 
-export const PLUGIN_CONFIG_KEY = 'payload-inline-visual-editor'
+export const PLUGIN_CONFIG_KEY = '@digitalvantage/payload-visual-editor'
 
 export const DEFAULT_VIEW_PATH = '/visual-editor/:collectionSlug/:id'
 
@@ -93,9 +93,9 @@ export const visualEditorRuntime = (
 ): null | VisualEditorRuntimeConfig =>
   (admin?.custom?.[PLUGIN_CONFIG_KEY] as undefined | VisualEditorRuntimeConfig) ?? null
 
-const CONTROLLER_PATH = 'payload-inline-visual-editor/client#VisualEditorController'
+const CONTROLLER_PATH = '@digitalvantage/payload-visual-editor/client#VisualEditorController'
 
-const VIEW_COMPONENT_PATH = 'payload-inline-visual-editor/rsc#VisualEditorView'
+const VIEW_COMPONENT_PATH = '@digitalvantage/payload-visual-editor/rsc#VisualEditorView'
 
 type EntityKind = 'collections' | 'globals'
 
@@ -131,7 +131,7 @@ const resolveEntityOptions = (
     if (!entityOptions.url && !hasLivePreviewURL(entity, config, kind)) {
       const scope = kind === 'collections' ? 'Collection' : 'Global'
       throw new Error(
-        `[payload-inline-visual-editor] ${scope} "${entity.slug}" is enabled for the visual editor but has no Live Preview URL. ` +
+        `[@digitalvantage/payload-visual-editor] ${scope} "${entity.slug}" is enabled for the visual editor but has no Live Preview URL. ` +
           `Set admin.livePreview.url on the ${scope.toLowerCase()} (or list it in config.admin.livePreview), ` +
           `or pass a url in visualEditor({ ${kind}: { ${entity.slug}: { url } } }).`,
       )
@@ -226,7 +226,7 @@ export const visualEditor =
     const viewPath = pluginOptions.view?.path ?? DEFAULT_VIEW_PATH
     if (viewEnabled && (!viewPath.includes(':collectionSlug') || !viewPath.includes(':id'))) {
       throw new Error(
-        `[payload-inline-visual-editor] view.path "${viewPath}" must contain the :collectionSlug and :id params ` +
+        `[@digitalvantage/payload-visual-editor] view.path "${viewPath}" must contain the :collectionSlug and :id params ` +
           `(default: "${DEFAULT_VIEW_PATH}").`,
       )
     }

@@ -1,6 +1,6 @@
-import type { FieldSchemaLike } from 'payload-inline-visual-editor'
+import type { FieldSchemaLike } from '@digitalvantage/payload-visual-editor'
 
-import { resolveDataPath } from 'payload-inline-visual-editor'
+import { resolveDataPath } from '@digitalvantage/payload-visual-editor'
 import { describe, expect, it } from 'vitest'
 
 // Mirrors dev/blocks.ts (blocks → arrays → blocks) plus the unnamed-wrapper

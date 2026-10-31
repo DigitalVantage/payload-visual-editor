@@ -1,4 +1,4 @@
-import { placePopover, translateIframePoint } from 'payload-inline-visual-editor'
+import { placePopover, translateIframePoint } from '@digitalvantage/payload-visual-editor'
 import { describe, expect, it } from 'vitest'
 
 describe('translateIframePoint', () => {

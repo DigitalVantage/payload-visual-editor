@@ -1,7 +1,7 @@
-# payload-inline-visual-editor
+# @digitalvantage/payload-visual-editor
 
-[![npm version](https://img.shields.io/npm/v/payload-inline-visual-editor.svg)](https://www.npmjs.com/package/payload-inline-visual-editor)
-[![license](https://img.shields.io/npm/l/payload-inline-visual-editor.svg)](./LICENSE)
+[![npm version](https://img.shields.io/npm/v/@digitalvantage/payload-visual-editor.svg)](https://www.npmjs.com/package/@digitalvantage/payload-visual-editor)
+[![license](https://img.shields.io/npm/l/@digitalvantage/payload-visual-editor.svg)](./LICENSE)
 
 Inline visual editing for [Payload CMS](https://payloadcms.com) 3.x — browse your site in Live Preview, toggle edit mode, hover-highlight editable regions, double-click to edit any field with native Payload field UI, and add / duplicate / remove / drag-reorder blocks directly on the page. A dedicated full-screen editor view, cross-document editing drawers, and a toolbar with save / publish / locale round it out.
 
@@ -10,6 +10,8 @@ Inline visual editing for [Payload CMS](https://payloadcms.com) 3.x — browse y
 The editor is layered on top of core Live Preview: the standard save / publish / autosave / versions / locales flow keeps working unchanged, document data flows through the stock Live Preview pipeline, and every field type (Lexical, uploads, relationships, custom plugin fields) gets native editing for free.
 
 > **Status: 1.0.** The public API is stable; changes follow semver.
+>
+> This is Digital Vantage's fork of [what-digital/payload-inline-visual-editor](https://github.com/what-digital/payload-inline-visual-editor) (MIT), published under the `@digitalvantage` scope and developed for our own sites first. Import paths change scope only: `payload-inline-visual-editor` → `@digitalvantage/payload-visual-editor`, `@payload-inline-visual-editor/core` → `@digitalvantage/payload-visual-editor-core`, `@payload-inline-visual-editor/react` → `@digitalvantage/payload-visual-editor-react`.
 
 ## A look around
 
@@ -22,9 +24,9 @@ The editor is layered on top of core Live Preview: the standard save / publish /
 
 | Package | Description |
 |---|---|
-| [`payload-inline-visual-editor`](https://www.npmjs.com/package/payload-inline-visual-editor) | The Payload plugin (admin side) |
-| [`@payload-inline-visual-editor/core`](https://www.npmjs.com/package/@payload-inline-visual-editor/core) | Framework-agnostic site SDK (vanilla TS, zero runtime deps) |
-| [`@payload-inline-visual-editor/react`](https://www.npmjs.com/package/@payload-inline-visual-editor/react) | React/Next adapter: `<VisualEditing/>`, `payloadEditable()` |
+| [`@digitalvantage/payload-visual-editor`](https://www.npmjs.com/package/@digitalvantage/payload-visual-editor) | The Payload plugin (admin side) |
+| [`@digitalvantage/payload-visual-editor-core`](https://www.npmjs.com/package/@digitalvantage/payload-visual-editor-core) | Framework-agnostic site SDK (vanilla TS, zero runtime deps) |
+| [`@digitalvantage/payload-visual-editor-react`](https://www.npmjs.com/package/@digitalvantage/payload-visual-editor-react) | React/Next adapter: `<VisualEditing/>`, `payloadEditable()` |
 
 ## Requirements
 
@@ -35,14 +37,14 @@ The editor is layered on top of core Live Preview: the standard save / publish /
 ## Installation
 
 ```sh
-pnpm add payload-inline-visual-editor @payload-inline-visual-editor/react
+pnpm add @digitalvantage/payload-visual-editor @digitalvantage/payload-visual-editor-react
 ```
 
 ### 1. Add the plugin
 
 ```ts
 // payload.config.ts
-import { visualEditor } from 'payload-inline-visual-editor'
+import { visualEditor } from '@digitalvantage/payload-visual-editor'
 
 export default buildConfig({
   // ...
@@ -63,7 +65,7 @@ payload generate:importmap
 The editor maps DOM to document data through explicit `data-pve-*` attributes. Paths are form-state data paths relative to the document root, e.g. `layout.0.heading`.
 
 ```tsx
-import { payloadEditable } from '@payload-inline-visual-editor/react'
+import { payloadEditable } from '@digitalvantage/payload-visual-editor-react'
 
 <main {...payloadEditable.scope({ collection: 'pages', id: page.id })}>
   <div {...payloadEditable.container('layout')}>
@@ -89,7 +91,7 @@ The helpers return plain `Record<string, string>` props, so they are RSC/SSR-saf
 ### 3. Mount the SDK
 
 ```tsx
-import { VisualEditing } from '@payload-inline-visual-editor/react'
+import { VisualEditing } from '@digitalvantage/payload-visual-editor-react'
 
 // In the page (or layout) that Live Preview loads:
 <VisualEditing serverURL={process.env.NEXT_PUBLIC_SERVER_URL!} />
@@ -135,7 +137,7 @@ The view and its toolbar are configurable (see plugin options below): `view: { e
 **Strip attributes from production HTML.** `data-pve-*` attributes are harmless if they leak (the SDK is inert without an authenticated admin handshake), but you can keep public HTML clean:
 
 ```tsx
-import { configurePayloadEditable } from '@payload-inline-visual-editor/react'
+import { configurePayloadEditable } from '@digitalvantage/payload-visual-editor-react'
 
 // Next: at the top of the preview-capable page/layout render
 import { draftMode } from 'next/headers'
@@ -204,7 +206,7 @@ Per-entity `blockOps` gates which row operations the overlay offers. Field-level
 
 ## Attribute reference
 
-For non-React frontends, `@payload-inline-visual-editor/core` ships the same helpers as vanilla functions (`pveAttr.scope/field/row/container`), or you can write the attributes by hand:
+For non-React frontends, `@digitalvantage/payload-visual-editor-core` ships the same helpers as vanilla functions (`pveAttr.scope/field/row/container`), or you can write the attributes by hand:
 
 | Attribute | Meaning | Example |
 |---|---|---|
@@ -216,7 +218,7 @@ For non-React frontends, `@payload-inline-visual-editor/core` ships the same hel
 Mounting without React:
 
 ```ts
-import { initVisualEditing } from '@payload-inline-visual-editor/core'
+import { initVisualEditing } from '@digitalvantage/payload-visual-editor-core'
 
 if (window.self !== window.top) {
   const teardown = initVisualEditing({ serverURL: 'https://cms.example.com' })

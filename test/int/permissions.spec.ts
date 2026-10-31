@@ -1,6 +1,6 @@
-import type { PvePermissionSummary } from '@payload-inline-visual-editor/core'
+import type { PvePermissionSummary } from '@digitalvantage/payload-visual-editor-core'
 
-import { canUpdatePath, permissionKeyForPath } from '@payload-inline-visual-editor/core'
+import { canUpdatePath, permissionKeyForPath } from '@digitalvantage/payload-visual-editor-core'
 import { describe, expect, it } from 'vitest'
 
 const blockTypes = new Map([

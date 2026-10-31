@@ -5,7 +5,7 @@ import React from 'react'
 
 import type { HeaderData, PageDoc } from '@/lib/types'
 
-import { VisualEditing } from '@payload-inline-visual-editor/react'
+import { VisualEditing } from '@digitalvantage/payload-visual-editor-react'
 
 import { RenderPage } from '@/components/RenderPage'
 

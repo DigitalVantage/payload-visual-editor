@@ -1,15 +1,15 @@
-# @payload-inline-visual-editor/react
+# @digitalvantage/payload-visual-editor-react
 
-React/Next adapter for [payload-inline-visual-editor](https://github.com/what-digital/payload-inline-visual-editor) — inline visual editing for Payload CMS 3.x.
+React/Next adapter for [@digitalvantage/payload-visual-editor](https://github.com/DigitalVantage/payload-inline-visual-editor) — inline visual editing for Payload CMS 3.x.
 
-![Double-clicking a heading opens a popover with the native Payload text field, then a rich text body opens the full Lexical editor with its formatting toolbar — the page updates as you type](https://raw.githubusercontent.com/what-digital/payload-inline-visual-editor/main/docs/media/inline-editing.gif)
+![Double-clicking a heading opens a popover with the native Payload text field, then a rich text body opens the full Lexical editor with its formatting toolbar — the page updates as you type](https://raw.githubusercontent.com/DigitalVantage/payload-inline-visual-editor/main/docs/media/inline-editing.gif)
 
 ## Usage
 
 Mark up editable regions (RSC/SSR-safe — the helpers return plain string props):
 
 ```tsx
-import { payloadEditable } from '@payload-inline-visual-editor/react'
+import { payloadEditable } from '@digitalvantage/payload-visual-editor-react'
 
 <main {...payloadEditable.scope({ collection: 'pages', id: page.id })}>
   <div {...payloadEditable.container('layout')}>
@@ -28,7 +28,7 @@ import { payloadEditable } from '@payload-inline-visual-editor/react'
 Mount the SDK on pages loaded through Payload Live Preview:
 
 ```tsx
-import { VisualEditing } from '@payload-inline-visual-editor/react'
+import { VisualEditing } from '@digitalvantage/payload-visual-editor-react'
 
 <VisualEditing serverURL={process.env.NEXT_PUBLIC_SERVER_URL!} draft={(await draftMode()).isEnabled} />
 ```
@@ -36,12 +36,12 @@ import { VisualEditing } from '@payload-inline-visual-editor/react'
 Strip attributes from production HTML:
 
 ```ts
-import { configurePayloadEditable } from '@payload-inline-visual-editor/react'
+import { configurePayloadEditable } from '@digitalvantage/payload-visual-editor-react'
 
 configurePayloadEditable({ enabled: (await draftMode()).isEnabled })
 ```
 
-Requires the [`payload-inline-visual-editor`](https://www.npmjs.com/package/payload-inline-visual-editor) plugin on the Payload side. See the [full documentation](https://github.com/what-digital/payload-inline-visual-editor#readme).
+Requires the [`@digitalvantage/payload-visual-editor`](https://www.npmjs.com/package/@digitalvantage/payload-visual-editor) plugin on the Payload side. See the [full documentation](https://github.com/DigitalVantage/payload-inline-visual-editor#readme).
 
 ## License
 

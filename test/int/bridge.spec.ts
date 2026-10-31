@@ -1,7 +1,7 @@
-import type { PveMessage } from '@payload-inline-visual-editor/core'
+import type { PveMessage } from '@digitalvantage/payload-visual-editor-core'
 
-import { PROTOCOL_VERSION, SiteBridge } from '@payload-inline-visual-editor/core'
-import { AdminBridge } from 'payload-inline-visual-editor'
+import { PROTOCOL_VERSION, SiteBridge } from '@digitalvantage/payload-visual-editor-core'
+import { AdminBridge } from '@digitalvantage/payload-visual-editor'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 const ADMIN_ORIGIN = 'http://localhost:3000'

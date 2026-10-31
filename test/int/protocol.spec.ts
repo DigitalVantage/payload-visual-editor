@@ -3,7 +3,7 @@ import {
   hasCompatibleVersion,
   isPveMessage,
   PROTOCOL_VERSION,
-} from '@payload-inline-visual-editor/core'
+} from '@digitalvantage/payload-visual-editor-core'
 import { describe, expect, it } from 'vitest'
 
 describe('protocol', () => {

@@ -1,6 +1,6 @@
 'use client'
 
-import { VisualEditing } from '@payload-inline-visual-editor/react'
+import { VisualEditing } from '@digitalvantage/payload-visual-editor-react'
 import { useLivePreview } from '@payloadcms/live-preview-react'
 import React from 'react'
 

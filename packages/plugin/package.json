@@ -1,5 +1,5 @@
 {
-  "name": "payload-inline-visual-editor",
+  "name": "@digitalvantage/payload-visual-editor",
   "version": "1.0.1",
   "description": "Inline visual editor plugin for Payload CMS 3.x — click-to-edit and block operations layered on core Live Preview",
   "license": "MIT",
@@ -14,11 +14,11 @@
     "inline-editing",
     "live-preview"
   ],
-  "homepage": "https://github.com/what-digital/payload-inline-visual-editor#readme",
-  "bugs": "https://github.com/what-digital/payload-inline-visual-editor/issues",
+  "homepage": "https://github.com/DigitalVantage/payload-inline-visual-editor#readme",
+  "bugs": "https://github.com/DigitalVantage/payload-inline-visual-editor/issues",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/what-digital/payload-inline-visual-editor.git",
+    "url": "git+https://github.com/DigitalVantage/payload-inline-visual-editor.git",
     "directory": "packages/plugin"
   },
   "sideEffects": [
@@ -54,7 +54,7 @@
     "watch": "swc ./src -d ./dist --config-file .swcrc --strip-leading-paths --copy-files --watch"
   },
   "dependencies": {
-    "@payload-inline-visual-editor/core": "workspace:*"
+    "@digitalvantage/payload-visual-editor-core": "workspace:*"
   },
   "peerDependencies": {
     "@payloadcms/ui": "^3.85.0",

@@ -1,6 +1,6 @@
 import type { SerializedEditorState } from '@payloadcms/richtext-lexical/lexical'
 
-import { payloadEditable } from '@payload-inline-visual-editor/react'
+import { payloadEditable } from '@digitalvantage/payload-visual-editor-react'
 import { RichText } from '@payloadcms/richtext-lexical/react'
 import React from 'react'
 

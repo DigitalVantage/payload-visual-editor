@@ -1,8 +1,8 @@
-import type { PveOp } from '@payload-inline-visual-editor/core'
-import type { FormRowsLike } from 'payload-inline-visual-editor'
+import type { PveOp } from '@digitalvantage/payload-visual-editor-core'
+import type { FormRowsLike } from '@digitalvantage/payload-visual-editor'
 
-import { ALL_BLOCK_OPS } from '@payload-inline-visual-editor/core'
-import { normalizeBlockOps, planBlockOp, resolveRowIndexById } from 'payload-inline-visual-editor'
+import { ALL_BLOCK_OPS } from '@digitalvantage/payload-visual-editor-core'
+import { normalizeBlockOps, planBlockOp, resolveRowIndexById } from '@digitalvantage/payload-visual-editor'
 import { describe, expect, it } from 'vitest'
 
 const fields: FormRowsLike = {

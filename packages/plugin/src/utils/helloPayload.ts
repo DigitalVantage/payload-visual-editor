@@ -1,4 +1,4 @@
-import type { PveDocRef, PvePermissionSummary } from '@payload-inline-visual-editor/core'
+import type { PveDocRef, PvePermissionSummary } from '@digitalvantage/payload-visual-editor-core'
 import type { SanitizedDocumentPermissions, SanitizedFieldsPermissions } from 'payload'
 
 import type { BlockSchemaLike, FieldSchemaLike } from './fieldPaths.js'

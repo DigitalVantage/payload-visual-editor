@@ -1,11 +1,11 @@
 import type { Config } from 'payload'
 
-import { PLUGIN_CONFIG_KEY, visualEditor, visualEditorRuntime } from 'payload-inline-visual-editor'
+import { PLUGIN_CONFIG_KEY, visualEditor, visualEditorRuntime } from '@digitalvantage/payload-visual-editor'
 import { describe, expect, it } from 'vitest'
 
-const CONTROLLER_PATH = 'payload-inline-visual-editor/client#VisualEditorController'
+const CONTROLLER_PATH = '@digitalvantage/payload-visual-editor/client#VisualEditorController'
 
-const VIEW_PATH = 'payload-inline-visual-editor/rsc#VisualEditorView'
+const VIEW_PATH = '@digitalvantage/payload-visual-editor/rsc#VisualEditorView'
 
 const baseConfig = (): Config =>
   ({

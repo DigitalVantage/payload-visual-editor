@@ -56,7 +56,7 @@ declare const process: { env?: Record<string, string | undefined> } | undefined
 const warnMissingRowId = (path: string): void => {
   if (typeof process === 'undefined' || process?.env?.NODE_ENV !== 'production') {
     console.warn(
-      `[payload-inline-visual-editor] Row at "${path}" has no id — block operations will be disabled for it. ` +
+      `[@digitalvantage/payload-visual-editor] Row at "${path}" has no id — block operations will be disabled for it. ` +
         'A frontend transform likely dropped the row id; pass the id that Payload stores on every array/blocks row.',
     )
   }

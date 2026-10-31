@@ -1,4 +1,4 @@
-import { parseScope, pveAttr, serializeScope } from '@payload-inline-visual-editor/core'
+import { parseScope, pveAttr, serializeScope } from '@digitalvantage/payload-visual-editor-core'
 import { describe, expect, it, vi } from 'vitest'
 
 describe('scope serialization', () => {

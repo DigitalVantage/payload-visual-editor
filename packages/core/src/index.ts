@@ -647,7 +647,7 @@ export const initVisualEditing = (options: VisualEditingOptions): (() => void) =
 
   const offMessage = bridge.onMessage((message) => {
     if (options.debug) {
-      console.debug('[payload-inline-visual-editor]', message.type, message.payload)
+      console.debug('[@digitalvantage/payload-visual-editor]', message.type, message.payload)
     }
     switch (message.type) {
       case 'payload-visual-editor:deselect':
@@ -685,7 +685,7 @@ export const initVisualEditing = (options: VisualEditingOptions): (() => void) =
           startShimmer(entry.containerPath, entry.scope)
         } else if (message.payload.error !== 'cancelled') {
           console.warn(
-            `[payload-inline-visual-editor] Block operation failed: ${message.payload.error ?? 'unknown error'}`,
+            `[@digitalvantage/payload-visual-editor] Block operation failed: ${message.payload.error ?? 'unknown error'}`,
           )
         }
         break

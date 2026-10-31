@@ -1,9 +1,9 @@
 'use client'
 
-import type { PveMessagePayloads, PveOp, PveRegion, PveScopeRef } from '@payload-inline-visual-editor/core'
+import type { PveMessagePayloads, PveOp, PveRegion, PveScopeRef } from '@digitalvantage/payload-visual-editor-core'
 import type { ClientBlock, Labels, SanitizedFieldsPermissions } from 'payload'
 
-import { parseScope } from '@payload-inline-visual-editor/core'
+import { parseScope } from '@digitalvantage/payload-visual-editor-core'
 import { formatAdminURL } from 'payload/shared'
 import { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react'
 
@@ -353,7 +353,7 @@ export const VisualEditorController = ({ blockOps, debug }: VisualEditorControll
 
     const offMessage = bridge.onMessage((message) => {
       if (debug) {
-        console.debug('[payload-inline-visual-editor] admin ←', message.type, message.payload)
+        console.debug('[@digitalvantage/payload-visual-editor] admin ←', message.type, message.payload)
       }
       switch (message.type) {
         case 'payload-visual-editor:deselect':
@@ -367,7 +367,7 @@ export const VisualEditorController = ({ blockOps, debug }: VisualEditorControll
           setConnected(true)
           if (message.payload.draft === false) {
             console.warn(
-              '[payload-inline-visual-editor] The preview is not rendering draft content — edits will not appear until published.',
+              '[@digitalvantage/payload-visual-editor] The preview is not rendering draft content — edits will not appear until published.',
             )
           }
           break

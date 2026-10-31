@@ -1,4 +1,4 @@
-import { configurePayloadEditable, payloadEditable } from '@payload-inline-visual-editor/react'
+import { configurePayloadEditable, payloadEditable } from '@digitalvantage/payload-visual-editor-react'
 import { afterEach, describe, expect, it } from 'vitest'
 
 afterEach(() => {

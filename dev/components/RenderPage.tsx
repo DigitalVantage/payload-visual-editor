@@ -1,4 +1,4 @@
-import { payloadEditable } from '@payload-inline-visual-editor/react'
+import { payloadEditable } from '@digitalvantage/payload-visual-editor-react'
 import React from 'react'
 
 import type { HeaderData, PageDoc } from '../lib/types'

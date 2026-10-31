@@ -1,4 +1,4 @@
-import type { PveBlockOps, PveOp } from '@payload-inline-visual-editor/core'
+import type { PveBlockOps, PveOp } from '@digitalvantage/payload-visual-editor-core'
 
 import type { BlockOpsOptions } from '../index.js'
 

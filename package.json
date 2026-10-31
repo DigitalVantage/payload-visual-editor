@@ -1,5 +1,5 @@
 {
-  "name": "payload-inline-visual-editor-monorepo",
+  "name": "payload-visual-editor-monorepo",
   "private": true,
   "type": "module",
   "engines": {
@@ -11,7 +11,7 @@
     "clean": "pnpm --filter \"./packages/*\" -r clean",
     "dev": "pnpm build && pnpm --filter dev dev",
     "watch": "pnpm --filter \"./packages/*\" --parallel -r watch",
-    "test": "pnpm --filter @payload-inline-visual-editor/tests test",
-    "e2e": "pnpm build && pnpm --filter @payload-inline-visual-editor/tests e2e"
+    "test": "pnpm --filter @digitalvantage/payload-visual-editor-tests test",
+    "e2e": "pnpm build && pnpm --filter @digitalvantage/payload-visual-editor-tests e2e"
   }
 }

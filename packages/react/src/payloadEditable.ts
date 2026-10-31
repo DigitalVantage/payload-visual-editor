@@ -1,6 +1,6 @@
-import type { PveAttrRecord, PveRowRef, PveScopeRef } from '@payload-inline-visual-editor/core'
+import type { PveAttrRecord, PveRowRef, PveScopeRef } from '@digitalvantage/payload-visual-editor-core'
 
-import { pveAttr } from '@payload-inline-visual-editor/core'
+import { pveAttr } from '@digitalvantage/payload-visual-editor-core'
 
 let attributesEnabled = true
 

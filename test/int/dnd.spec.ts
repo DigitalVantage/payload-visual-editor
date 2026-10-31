@@ -3,7 +3,7 @@ import {
   detectOrientation,
   dropIndicatorLine,
   gapToMoveToIndex,
-} from '@payload-inline-visual-editor/core'
+} from '@digitalvantage/payload-visual-editor-core'
 import { describe, expect, it } from 'vitest'
 
 const rect = (top: number, left: number, height = 100, width = 400) => ({

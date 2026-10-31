@@ -1,6 +1,6 @@
 'use client'
 
-import { initVisualEditing } from '@payload-inline-visual-editor/core'
+import { initVisualEditing } from '@digitalvantage/payload-visual-editor-core'
 import { useEffect } from 'react'
 
 export type VisualEditingProps = {

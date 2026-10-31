@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
-import type { ScannedRegion } from '@payload-inline-visual-editor/core'
+import type { ScannedRegion } from '@digitalvantage/payload-visual-editor-core'
 
-import { RegionRegistry, scanRegions, toProtocolRegions } from '@payload-inline-visual-editor/core'
+import { RegionRegistry, scanRegions, toProtocolRegions } from '@digitalvantage/payload-visual-editor-core'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 beforeEach(() => {

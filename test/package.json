@@ -1,5 +1,5 @@
 {
-  "name": "@payload-inline-visual-editor/tests",
+  "name": "@digitalvantage/payload-visual-editor-tests",
   "version": "0.0.0",
   "private": true,
   "type": "module",
@@ -9,12 +9,12 @@
     "e2e": "playwright test"
   },
   "devDependencies": {
-    "@payload-inline-visual-editor/core": "workspace:*",
-    "@payload-inline-visual-editor/react": "workspace:*",
+    "@digitalvantage/payload-visual-editor-core": "workspace:*",
+    "@digitalvantage/payload-visual-editor-react": "workspace:*",
     "@playwright/test": "^1.61.1",
     "jsdom": "^29.1.1",
     "payload": "^3.91.0",
-    "payload-inline-visual-editor": "workspace:*",
+    "@digitalvantage/payload-visual-editor": "workspace:*",
     "typescript": "^5.9.3",
     "vitest": "^4.1.10"
   }

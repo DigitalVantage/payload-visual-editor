@@ -69,7 +69,7 @@ export class SiteBridge {
       this.readOnly = !hasCompatibleVersion(message)
       if (this.readOnly) {
         console.warn(
-          `[payload-inline-visual-editor] Protocol version mismatch (admin sent v${message.version}) — falling back to read-only overlay. Align plugin and SDK versions.`,
+          `[@digitalvantage/payload-visual-editor] Protocol version mismatch (admin sent v${message.version}) — falling back to read-only overlay. Align plugin and SDK versions.`,
         )
       }
       this.send('hello-ack', { draft: this.draft, sdkVersion: SDK_VERSION })

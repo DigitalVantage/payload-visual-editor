@@ -1,4 +1,4 @@
-import { buildViewPath, parseViewSegments } from 'payload-inline-visual-editor'
+import { buildViewPath, parseViewSegments } from '@digitalvantage/payload-visual-editor'
 import { describe, expect, it } from 'vitest'
 
 const TEMPLATE = '/visual-editor/:collectionSlug/:id'

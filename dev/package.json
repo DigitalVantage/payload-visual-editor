@@ -12,8 +12,8 @@
     "payload": "payload"
   },
   "dependencies": {
-    "@payload-inline-visual-editor/core": "workspace:*",
-    "@payload-inline-visual-editor/react": "workspace:*",
+    "@digitalvantage/payload-visual-editor-core": "workspace:*",
+    "@digitalvantage/payload-visual-editor-react": "workspace:*",
     "@payloadcms/db-sqlite": "^3.91.0",
     "@payloadcms/live-preview-react": "^3.91.0",
     "@payloadcms/next": "^3.91.0",
@@ -22,7 +22,7 @@
     "graphql": "^16.11.0",
     "next": "^16.4.2",
     "payload": "^3.91.0",
-    "payload-inline-visual-editor": "workspace:*",
+    "@digitalvantage/payload-visual-editor": "workspace:*",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "sharp": "^0.35.3"

@@ -1,6 +1,6 @@
-import type { PveMessage, PveMessagePayloads, PveMessageType } from '@payload-inline-visual-editor/core'
+import type { PveMessage, PveMessagePayloads, PveMessageType } from '@digitalvantage/payload-visual-editor-core'
 
-import { createPveMessage, isPveMessage } from '@payload-inline-visual-editor/core'
+import { createPveMessage, isPveMessage } from '@digitalvantage/payload-visual-editor-core'
 
 export type AdminBridgeOptions = {
   /** The Live Preview iframe's contentWindow; re-read per send so reloads are safe. */

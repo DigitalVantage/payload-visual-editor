@@ -2,7 +2,7 @@ import { sqliteAdapter } from '@payloadcms/db-sqlite'
 import { lexicalEditor } from '@payloadcms/richtext-lexical'
 import path from 'path'
 import { buildConfig } from 'payload'
-import { visualEditor } from 'payload-inline-visual-editor'
+import { visualEditor } from '@digitalvantage/payload-visual-editor'
 import sharp from 'sharp'
 import { fileURLToPath } from 'url'
 

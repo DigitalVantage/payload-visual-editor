@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { createPveMessage, initVisualEditing, PROTOCOL_VERSION } from '@payload-inline-visual-editor/core'
+import { createPveMessage, initVisualEditing, PROTOCOL_VERSION } from '@digitalvantage/payload-visual-editor-core'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 const ADMIN_ORIGIN = 'http://admin.example.com'

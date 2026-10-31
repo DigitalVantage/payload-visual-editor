@@ -1,5 +1,5 @@
 {
-  "name": "@payload-inline-visual-editor/react",
+  "name": "@digitalvantage/payload-visual-editor-react",
   "version": "1.0.1",
   "description": "React adapter for the Payload CMS inline visual editor site SDK",
   "license": "MIT",
@@ -14,11 +14,11 @@
     "inline-editing",
     "live-preview"
   ],
-  "homepage": "https://github.com/what-digital/payload-inline-visual-editor#readme",
-  "bugs": "https://github.com/what-digital/payload-inline-visual-editor/issues",
+  "homepage": "https://github.com/DigitalVantage/payload-inline-visual-editor#readme",
+  "bugs": "https://github.com/DigitalVantage/payload-inline-visual-editor/issues",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/what-digital/payload-inline-visual-editor.git",
+    "url": "git+https://github.com/DigitalVantage/payload-inline-visual-editor.git",
     "directory": "packages/react"
   },
   "publishConfig": {
@@ -45,7 +45,7 @@
     "watch": "swc ./src -d ./dist --config-file .swcrc --strip-leading-paths --watch"
   },
   "dependencies": {
-    "@payload-inline-visual-editor/core": "workspace:*"
+    "@digitalvantage/payload-visual-editor-core": "workspace:*"
   },
   "peerDependencies": {
     "react": "^19.0.0"

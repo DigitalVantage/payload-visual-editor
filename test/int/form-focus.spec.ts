@@ -7,7 +7,7 @@ import {
   focusFormField,
   isValidDataPath,
   pathFromFormElement,
-} from 'payload-inline-visual-editor'
+} from '@digitalvantage/payload-visual-editor'
 import { afterEach, describe, expect, it } from 'vitest'
 
 afterEach(() => {
