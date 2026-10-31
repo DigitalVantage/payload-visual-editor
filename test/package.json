@@ -9,12 +9,14 @@
     "e2e": "playwright test"
   },
   "devDependencies": {
+    "@digitalvantage/payload-visual-editor": "workspace:*",
     "@digitalvantage/payload-visual-editor-core": "workspace:*",
     "@digitalvantage/payload-visual-editor-react": "workspace:*",
+    "@payloadcms/translations": "3.91.0",
+    "@payloadcms/ui": "3.91.0",
     "@playwright/test": "^1.61.1",
     "jsdom": "^29.1.1",
     "payload": "^3.91.0",
-    "@digitalvantage/payload-visual-editor": "workspace:*",
     "typescript": "^5.9.3",
     "vitest": "^4.1.10"
   }

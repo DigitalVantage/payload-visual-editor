@@ -30,7 +30,8 @@ Single source of truth for project tasks. Context for each item: the project ana
 Release confidence — tests that touch the real thing (real Payload config, real tarballs, real browsers):
 
 - [x] Package lint: `publint` + `@arethetypeswrong/cli` on every package, part of `pnpm check`
-- [ ] Contract tests: build a real Payload config (`buildConfig` + `createClientConfig`) and feed it to `resolveDataPath` / `collectBlockLabels` / `resolvePopoverTarget` / `buildPermissionSummary` instead of hand-written schema mocks
+- [x] Contract tests: build a real Payload config (`buildConfig` + `createClientConfig`) and feed it to `resolveDataPath` / `collectBlockLabels` / `resolvePopoverTarget` instead of hand-written schema mocks (`test/int/client-config-contract.spec.ts`)
+- [ ] Contract test for `buildPermissionSummary` against real `docPermissions` — needs a running Payload instance (`getPayload` + SQLite in memory) to compute them
 - [ ] Playground edge cases (outside the frozen `home`/`ssr-home`): `blockReferences`, a self-referencing block, `tabs`/`row`/`collapsible` inside blocks, localized fields, a collection without drafts — each with an e2e scenario
 - [ ] Playwright on Firefox and WebKit, not only Chromium
 - [ ] Consumer smoke test: a blank Payload app installs the packed tarballs (not workspace links), builds with `next build`, and passes a browser smoke test — `pnpm release:verify`
