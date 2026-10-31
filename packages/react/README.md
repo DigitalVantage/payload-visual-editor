@@ -1,8 +1,8 @@
 # @digitalvantage/payload-visual-editor-react
 
-React/Next adapter for [@digitalvantage/payload-visual-editor](https://github.com/DigitalVantage/payload-inline-visual-editor) — inline visual editing for Payload CMS 3.x.
+React/Next adapter for [@digitalvantage/payload-visual-editor](https://github.com/DigitalVantage/payload-visual-editor) — inline visual editing for Payload CMS 3.x.
 
-![Double-clicking a heading opens a popover with the native Payload text field, then a rich text body opens the full Lexical editor with its formatting toolbar — the page updates as you type](https://raw.githubusercontent.com/DigitalVantage/payload-inline-visual-editor/main/docs/media/inline-editing.gif)
+![Double-clicking a heading opens a popover with the native Payload text field, then a rich text body opens the full Lexical editor with its formatting toolbar — the page updates as you type](https://raw.githubusercontent.com/DigitalVantage/payload-visual-editor/main/docs/media/inline-editing.gif)
 
 ## Usage
 
@@ -41,7 +41,7 @@ import { configurePayloadEditable } from '@digitalvantage/payload-visual-editor-
 configurePayloadEditable({ enabled: (await draftMode()).isEnabled })
 ```
 
-Requires the [`@digitalvantage/payload-visual-editor`](https://www.npmjs.com/package/@digitalvantage/payload-visual-editor) plugin on the Payload side. See the [full documentation](https://github.com/DigitalVantage/payload-inline-visual-editor#readme).
+Requires the [`@digitalvantage/payload-visual-editor`](https://www.npmjs.com/package/@digitalvantage/payload-visual-editor) plugin on the Payload side. See the [full documentation](https://github.com/DigitalVantage/payload-visual-editor#readme).
 
 ## License
 
