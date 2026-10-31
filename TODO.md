@@ -33,7 +33,7 @@ Release confidence — tests that touch the real thing (real Payload config, rea
 - [x] Contract tests: build a real Payload config (`buildConfig` + `createClientConfig`) and feed it to `resolveDataPath` / `collectBlockLabels` / `resolvePopoverTarget` instead of hand-written schema mocks (`test/int/client-config-contract.spec.ts`)
 - [ ] Contract test for `buildPermissionSummary` against real `docPermissions` — needs a running Payload instance (`getPayload` + SQLite in memory) to compute them
 - [x] Playground edge cases (outside the frozen `home`/`ssr-home`): `blockReferences`, a self-referencing block, `tabs`/`row`/`collapsible` inside blocks, localized fields, a collection without drafts — each with an e2e scenario
-- [x] Playwright on Firefox and WebKit, not only Chromium (WebKit needs `playwright install-deps` on this machine — not yet run)
+- [x] Playwright on Firefox and WebKit, not only Chromium
 - [x] Consumer smoke test: a blank Payload app installs the packed tarballs (not workspace links), builds with `next build`, and passes a browser smoke test — `pnpm release:verify`
 - [x] Version matrix for the smoke test: lowest supported (`payload@3.85` + Next 15) and latest (Payload + Next 16)
 - [x] RELEASING.md: release-candidate flow (`next` dist-tag, dogfood in a real project) + manual checklist (cross-origin, read-only user, locales, SSR mode, browsers)
