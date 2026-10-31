@@ -10,5 +10,5 @@
     "strict": true,
     "target": "ES2022"
   },
-  "include": ["int", "e2e", "vitest.config.ts", "playwright.config.ts"]
+  "include": ["int", "e2e", "consumer", "vitest.config.ts", "playwright.config.ts", "playwright.consumer.config.ts"]
 }

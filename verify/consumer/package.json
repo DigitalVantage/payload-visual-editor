@@ -1,0 +1,28 @@
+{
+  "name": "pve-release-verify-consumer",
+  "private": true,
+  "type": "module",
+  "//": "Versions marked RELEASE_VERIFY are rewritten per matrix entry by scripts/release-verify.sh; the plugin packages are installed from packed tarballs.",
+  "scripts": {
+    "build": "next build",
+    "generate:importmap": "payload generate:importmap",
+    "generate:types": "payload generate:types",
+    "start": "next start"
+  },
+  "dependencies": {
+    "@payloadcms/db-sqlite": "RELEASE_VERIFY",
+    "@payloadcms/next": "RELEASE_VERIFY",
+    "@payloadcms/richtext-lexical": "RELEASE_VERIFY",
+    "@payloadcms/ui": "RELEASE_VERIFY",
+    "graphql": "^16.8.1",
+    "next": "RELEASE_VERIFY",
+    "payload": "RELEASE_VERIFY",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "devDependencies": {
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "typescript": "^5.9.3"
+  }
+}

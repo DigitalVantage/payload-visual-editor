@@ -1,0 +1,6 @@
+# pnpm 10 reads install settings from here, not from package.json.
+# release-verify appends `overrides` pointing at the packed tarballs.
+onlyBuiltDependencies:
+  - esbuild
+  - sharp
+  - unrs-resolver
