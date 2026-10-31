@@ -29,6 +29,15 @@ const homePageId = async (page: Page): Promise<string> => {
   return String(id)
 }
 
+// release-verify runs this file twice: same origin, then with the site on
+// another origin (PVE_CONSUMER_SITE_URL). Assert the iframe really is there,
+// so a misconfigured pass cannot silently test the same-origin case again.
+const expectPreviewOrigin = async (page: Page): Promise<void> => {
+  const expected = new URL(process.env.PVE_CONSUMER_SITE_URL ?? page.url()).origin
+  const src = await page.locator('iframe#live-preview-iframe').getAttribute('src')
+  expect(new URL(src ?? '', page.url()).origin).toBe(expected)
+}
+
 test('the edit view connects to the page and double-click focuses the field', async ({ page }) => {
   await login(page)
   await page.goto(`/admin/collections/pages/${await homePageId(page)}`)
@@ -43,6 +52,7 @@ test('the edit view connects to the page and double-click focuses the field', as
   }
   const frame = page.frameLocator('iframe#live-preview-iframe')
   await expect(frame.locator('h1')).toHaveText('Smoke home', { timeout: 30_000 })
+  await expectPreviewOrigin(page)
 
   // Enabled only once the SDK answered the handshake
   const editToggle = page.getByRole('button', { name: 'Edit on page' })
@@ -62,6 +72,7 @@ test('the dedicated view opens a popover for a field inside a referenced block',
 
   const frame = page.frameLocator('iframe#live-preview-iframe')
   await expect(frame.locator('h1')).toHaveText('Smoke home', { timeout: 30_000 })
+  await expectPreviewOrigin(page)
   await expect(frame.locator('[data-pve-overlay]')).toHaveCount(1, { timeout: 20_000 })
 
   await frame.locator('[data-pve-field="layout.0.heading"]').dblclick()

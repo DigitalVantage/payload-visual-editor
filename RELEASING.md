@@ -19,7 +19,7 @@ pnpm e2e:browsers     # playground e2e on chromium, firefox, webkit (starts the 
 pnpm release:verify   # packed tarballs → blank Payload app → next build → browser smoke test
 ```
 
-`pnpm release:verify` (`scripts/release-verify.sh`) runs the smoke test once per matrix entry:
+`pnpm release:verify` (`scripts/release-verify.sh`) runs the smoke test once per matrix entry, twice each: with the preview on the admin's origin, then on a different one (`127.0.0.1` vs `localhost`, the same app):
 
 | Entry | Payload | Next | Why |
 |---|---|---|---|
@@ -38,7 +38,7 @@ These need a human looking at the screen. Run them on the release candidate in t
 - [ ] **Dedicated view**: popover editing of text, rich text and an upload; save, then publish from the toolbar.
 - [ ] **Read-only user** (`viewer@payloadcms.com` / `test`): no chips, no add affordances, popovers read-only.
 - [ ] **Cross-document**: double-click the header global, edit it in the drawer, save; the page reflects it.
-- [ ] **Cross-origin**: serve the site from a second origin (e.g. `next start -p 3001` with `NEXT_PUBLIC_SERVER_URL` pointing at the admin) and repeat one edit. The handshake must still connect, and nothing should be logged about a wrong `targetOrigin`.
+- [ ] **Cross-origin**: automated: `pnpm release:verify` runs the smoke test a second time with the preview on another origin (`127.0.0.1` vs `localhost`). Repeat by hand only for a real two-app setup (separate site and Payload servers, cookies across origins — see README → Cross-origin setups).
 - [ ] **Browsers by hand**: one edit plus one drag-reorder in Firefox and Safari (WebKit e2e does not cover real Safari quirks).
 - [ ] **Console**: automated: every e2e and smoke test fails on a plugin warning/error or an uncaught exception (`test/fixtures.ts`). Still glance at both frames while clicking through.
 

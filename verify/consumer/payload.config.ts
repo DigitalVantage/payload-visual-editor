@@ -9,6 +9,9 @@ import { fileURLToPath } from 'url'
 
 const dirname = path.dirname(fileURLToPath(import.meta.url))
 const serverURL = process.env.NEXT_PUBLIC_SERVER_URL ?? 'http://localhost:3457'
+// Where Live Preview loads the site from. release-verify sets it to another
+// origin (127.0.0.1 vs localhost) for its cross-origin pass; read at runtime.
+const siteURL = process.env.PVE_SITE_URL ?? serverURL
 
 export default buildConfig({
   admin: { importMap: { baseDir: dirname }, user: 'users' },
@@ -20,7 +23,7 @@ export default buildConfig({
     { slug: 'users', auth: true, fields: [] },
     {
       slug: 'pages',
-      admin: { livePreview: { url: ({ data }) => `${serverURL}/${data?.slug}` } },
+      admin: { livePreview: { url: ({ data }) => `${siteURL}/${data?.slug}` } },
       fields: [
         { name: 'title', type: 'text', required: true },
         { name: 'slug', type: 'text', required: true },

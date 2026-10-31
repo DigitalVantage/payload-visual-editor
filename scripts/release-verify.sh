@@ -32,6 +32,11 @@ stop_port() {
     pids="$(ss -ltnp "sport = :$PORT" 2>/dev/null | grep -o 'pid=[0-9]*' | cut -d= -f2 || true)"
   fi
   [ -n "$pids" ] && kill $pids 2>/dev/null || true
+  # Wait for the port to free up: a restart must not hit the old server
+  for _ in $(seq 1 20); do
+    curl -s -o /dev/null --max-time 1 "http://localhost:$PORT" || return 0
+    sleep 0.5
+  done
 }
 
 cleanup() {
@@ -61,6 +66,24 @@ tarball() { ls "$WORK/tarballs/"digitalvantage-"$1"-[0-9]*.tgz; }
 CORE="$(tarball payload-visual-editor-core)"
 REACT="$(tarball payload-visual-editor-react)"
 PLUGIN="$(tarball payload-visual-editor)"
+
+PROJECTS=()
+for browser in $BROWSERS; do PROJECTS+=("--project=$browser"); done
+
+# start_app <app dir> <site url>: `next start` with Live Preview pointed at the site url
+start_app() {
+  (
+    cd "$1"
+    NEXT_PUBLIC_SERVER_URL="http://localhost:$PORT" PVE_SITE_URL="$2" NEXT_TELEMETRY_DISABLED=1 \
+      pnpm start --port "$PORT" >>server.log 2>&1 &
+  )
+  for _ in $(seq 1 60); do
+    curl -sf "http://localhost:$PORT/admin/login" >/dev/null && return 0
+    sleep 2
+  done
+  tail -30 "$1/server.log"
+  return 1
+}
 
 declare -A RESULT=()
 for entry in "${ENTRIES[@]}"; do
@@ -113,23 +136,25 @@ EOF
     { pnpm exec payload migrate:create initial && pnpm exec payload migrate; } </dev/null >migrate.log 2>&1 || { tail -30 migrate.log; exit 1; }
     pnpm build >build.log 2>&1 || { tail -40 build.log; exit 1; }
     echo "  next build ok"
-    pnpm start --port "$PORT" >server.log 2>&1 &
-    for _ in $(seq 1 60); do
-      curl -sf "http://localhost:$PORT/admin/login" >/dev/null && break
-      sleep 2
-    done
-    curl -sf "http://localhost:$PORT/admin/login" >/dev/null || { tail -30 server.log; exit 1; }
   ); then
-    PROJECTS=()
-    for browser in $BROWSERS; do PROJECTS+=("--project=$browser"); done
-    if (cd "$ROOT/test" && PVE_CONSUMER_URL="http://localhost:$PORT" npx playwright test -c playwright.consumer.config.ts "${PROJECTS[@]}"); then
-      RESULT[$entry]=pass
-    else
-      RESULT[$entry]=fail
-    fi
-    stop_port
+    RESULT[$entry]=pass
+    # Same origin as the admin, then the site on another origin: localhost and
+    # 127.0.0.1 are different origins served by the same app. Only the Live
+    # Preview URL changes; the SDK's serverURL stays the admin origin.
+    for site in "http://localhost:$PORT" "http://127.0.0.1:$PORT"; do
+      log "[$entry] preview served from $site"
+      if ! start_app "$APP" "$site"; then
+        RESULT[$entry]=fail
+        stop_port
+        break
+      fi
+      if ! (cd "$ROOT/test" && PVE_CONSUMER_URL="http://localhost:$PORT" PVE_CONSUMER_SITE_URL="$site" \
+        npx playwright test -c playwright.consumer.config.ts "${PROJECTS[@]}"); then
+        RESULT[$entry]=fail
+      fi
+      stop_port
+    done
   else
-    stop_port
     RESULT[$entry]=fail
   fi
 done
