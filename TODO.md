@@ -36,7 +36,7 @@ Release confidence — tests that touch the real thing (real Payload config, rea
 - [x] Playwright on Firefox and WebKit, not only Chromium (WebKit needs `playwright install-deps` on this machine — not yet run)
 - [x] Consumer smoke test: a blank Payload app installs the packed tarballs (not workspace links), builds with `next build`, and passes a browser smoke test — `pnpm release:verify`
 - [x] Version matrix for the smoke test: lowest supported (`payload@3.85` + Next 15) and latest (Payload + Next 16)
-- [ ] RELEASING.md: release-candidate flow (`next` dist-tag, dogfood in a real project) + manual checklist (cross-origin, read-only user, locales, SSR mode, browsers)
+- [x] RELEASING.md: release-candidate flow (`next` dist-tag, dogfood in a real project) + manual checklist (cross-origin, read-only user, locales, SSR mode, browsers)
 
 - [ ] React component tests for the plugin (Controller, FieldPopover, DocSwitchDrawer, LocaleSwitcher) — cancel/race paths
 
