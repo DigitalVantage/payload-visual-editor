@@ -19,11 +19,33 @@ export type TabSchemaLike = {
 }
 
 export type FieldSchemaLike = {
+  /** Client configs carry global block references as slugs into `config.blocksMap`. */
+  blockReferences?: (BlockSchemaLike | string)[]
   blocks?: BlockSchemaLike[]
   fields?: FieldSchemaLike[]
   name?: string
   tabs?: TabSchemaLike[]
   type: string
+}
+
+/** `config.blocksMap` from the client config — slug → globally defined block. */
+export type BlocksMapLike = Record<string, BlockSchemaLike | undefined>
+
+/**
+ * A blocks field's blocks: `blockReferences` (resolving slugs through
+ * `blocksMap`) when present, inline `blocks` otherwise — Payload requires
+ * `blocks: []` on a field that uses references.
+ */
+export const blocksOf = (field: FieldSchemaLike, blocksMap: BlocksMapLike | undefined): BlockSchemaLike[] => {
+  const refs = field.blockReferences ?? field.blocks ?? []
+  const blocks: BlockSchemaLike[] = []
+  for (const ref of refs) {
+    const block = typeof ref === 'string' ? blocksMap?.[ref] : ref
+    if (block) {
+      blocks.push(block)
+    }
+  }
+  return blocks
 }
 
 export type ResolvedDataPath = {

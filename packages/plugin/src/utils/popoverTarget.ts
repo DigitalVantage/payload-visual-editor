@@ -1,8 +1,8 @@
 import type { SanitizedFieldPermissions, SanitizedFieldsPermissions } from 'payload'
 
-import type { BlockSchemaLike, FieldSchemaLike } from './fieldPaths.js'
+import type { BlocksMapLike, FieldSchemaLike } from './fieldPaths.js'
 
-import { resolveDataPath } from './fieldPaths.js'
+import { blocksOf, resolveDataPath } from './fieldPaths.js'
 
 /**
  * What the popover renders for a selected region: a leaf field
@@ -24,29 +24,12 @@ export type PopoverTarget = {
   path: string
 }
 
-// Client configs may carry global block references (strings into config.blocksMap)
-type BlocksFieldLike = FieldSchemaLike & {
-  blockReferences?: (BlockSchemaLike | string)[]
-}
-
 export type ResolvePopoverTargetArgs = {
   /** `config.blocksMap` from the client config — resolves string block references. */
-  blocksMap?: Record<string, BlockSchemaLike | undefined>
+  blocksMap?: BlocksMapLike
   fields: FieldSchemaLike[]
   getBlockType?: (containerPath: string, rowIndex: number) => string | undefined
   path: string
-}
-
-const blocksOf = (field: BlocksFieldLike, blocksMap: ResolvePopoverTargetArgs['blocksMap']): BlockSchemaLike[] => {
-  const refs = field.blockReferences ?? field.blocks ?? []
-  const blocks: BlockSchemaLike[] = []
-  for (const ref of refs) {
-    const block = typeof ref === 'string' ? blocksMap?.[ref] : ref
-    if (block) {
-      blocks.push(block)
-    }
-  }
-  return blocks
 }
 
 const dropLastSegment = (path: string): string => path.split('.').slice(0, -1).join('.')

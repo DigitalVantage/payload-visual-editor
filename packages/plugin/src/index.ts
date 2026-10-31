@@ -7,6 +7,7 @@ export type { BlockOpPlan, FormRowsLike } from './utils/blockOps.js'
 export { resolveDataPath } from './utils/fieldPaths.js'
 export type {
   BlockSchemaLike,
+  BlocksMapLike,
   FieldSchemaLike,
   ResolvedDataPath,
   ResolveDataPathArgs,
