@@ -1,0 +1,13 @@
+dist/
+.next/
+node_modules/
+pnpm-lock.yaml
+dev/payload-types.ts
+dev/app/(payload)/admin/importMap.js
+dev/app/(payload)/
+dev/media/
+test-results/
+playwright-report/
+*.md
+dev/next-env.d.ts
+dev/tsconfig.json

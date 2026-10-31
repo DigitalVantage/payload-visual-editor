@@ -12,6 +12,11 @@
     "dev": "pnpm build && pnpm --filter dev dev",
     "watch": "pnpm --filter \"./packages/*\" --parallel -r watch",
     "test": "pnpm --filter @digitalvantage/payload-visual-editor-tests test",
-    "e2e": "pnpm build && pnpm --filter @digitalvantage/payload-visual-editor-tests e2e"
+    "e2e": "pnpm build && pnpm --filter @digitalvantage/payload-visual-editor-tests e2e",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
+  },
+  "devDependencies": {
+    "prettier": "^3.9.10"
   }
 }
