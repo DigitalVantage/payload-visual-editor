@@ -40,7 +40,7 @@ export const resolvePopoverTarget = ({
   getBlockType,
   path,
 }: ResolvePopoverTargetArgs): null | PopoverTarget => {
-  const resolved = resolveDataPath({ fields, getBlockType, path })
+  const resolved = resolveDataPath({ blocksMap, fields, getBlockType, path })
   if (!resolved) {
     return null
   }

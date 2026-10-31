@@ -8,7 +8,7 @@ import { formatAdminURL } from 'payload/shared'
 import { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react'
 
 import type { BlockOpsOptions } from '../../index.js'
-import type { BlockSchemaLike, FieldSchemaLike } from '../../utils/fieldPaths.js'
+import type { BlocksMapLike, FieldSchemaLike } from '../../utils/fieldPaths.js'
 import type { PopoverPoint } from '../../utils/popoverPosition.js'
 import type { PopoverTarget } from '../../utils/popoverTarget.js'
 
@@ -95,6 +95,8 @@ export const VisualEditorController = ({ blockOps, debug }: VisualEditorControll
   const { addFieldRow, dispatchFields, getFields, moveFieldRow, removeFieldRow, setModified } = useForm()
   const { openModal } = useModal()
   const { config } = useConfig()
+  // Global blocks referenced by slug from `blockReferences`
+  const blocksMap = (config.blocksMap ?? {}) as BlocksMapLike
   const locale = useLocale()
   const shell = usePveShell()
   // Drawer-hosted documents render this controller too (the slot renders in
@@ -145,7 +147,7 @@ export const VisualEditorController = ({ blockOps, debug }: VisualEditorControll
     breakpoint,
     docs: [buildDocRef({ collectionSlug, globalSlug, id })],
     editMode,
-    labels: collectBlockLabels((docConfig?.fields ?? []) as unknown as FieldSchemaLike[]),
+    labels: collectBlockLabels((docConfig?.fields ?? []) as unknown as FieldSchemaLike[], blocksMap),
     locale: locale?.code,
     permissions: buildPermissionSummary({
       canPublish: Boolean(hasPublishPermission),
@@ -166,7 +168,7 @@ export const VisualEditorController = ({ blockOps, debug }: VisualEditorControll
       (region?.path === `${containerPath}.${rowIndex}` ? region.blockType : undefined)
 
     const target = resolvePopoverTarget({
-      blocksMap: (config.blocksMap ?? {}) as Record<string, BlockSchemaLike>,
+      blocksMap,
       fields: schemaFields,
       getBlockType,
       path: payload.path,
@@ -198,7 +200,7 @@ export const VisualEditorController = ({ blockOps, debug }: VisualEditorControll
     setPopover({
       anchor,
       key: `${payload.regionId}:${++popoverSeqRef.current}`,
-      label: popoverLabel(target, collectBlockLabels(schemaFields)),
+      label: popoverLabel(target, collectBlockLabels(schemaFields, blocksMap)),
       permissions,
       target,
     })
@@ -287,6 +289,7 @@ export const VisualEditorController = ({ blockOps, debug }: VisualEditorControll
     switch (plan.type) {
       case 'add': {
         const resolved = resolveDataPath({
+          blocksMap,
           fields: (docConfig?.fields ?? []) as unknown as FieldSchemaLike[],
           path: op.containerPath,
         })
@@ -329,7 +332,7 @@ export const VisualEditorController = ({ blockOps, debug }: VisualEditorControll
         return
       case 'remove': {
         const blockType = fields[op.containerPath]?.rows?.[plan.rowIndex]?.blockType
-        const labels = collectBlockLabels((docConfig?.fields ?? []) as unknown as FieldSchemaLike[])
+        const labels = collectBlockLabels((docConfig?.fields ?? []) as unknown as FieldSchemaLike[], blocksMap)
         setPendingRemove({
           label: (blockType && (labels[blockType] ?? blockType)) || 'block',
           opId: op.opId,

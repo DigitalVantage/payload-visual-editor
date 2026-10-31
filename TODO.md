@@ -9,7 +9,7 @@ Single source of truth for project tasks. Context for each item: the project ana
 
 ## Bugs
 
-- [ ] `blockReferences` (Payload global blocks) handled inconsistently: `collectBlockLabels` (`utils/helloPayload.ts`) and `resolveDataPath` (`utils/fieldPaths.ts`) only read `field.blocks` — referenced blocks get slug labels and nested containers inside them fail with `unknown-container`. Add a dev fixture using `blockReferences` + tests, then fix
+- [x] `blockReferences` (Payload global blocks) handled inconsistently: `collectBlockLabels` (`utils/helloPayload.ts`) and `resolveDataPath` (`utils/fieldPaths.ts`) only read `field.blocks` — referenced blocks get slug labels and nested containers inside them fail with `unknown-container`. Add a dev fixture using `blockReferences` + tests, then fix
 - [ ] BlocksDrawer cancel sends no `op-ack` (SDK entry hangs until the 60 s TTL); a second `add` while the drawer is open overwrites `pendingAdd` and drops the previous `opId` without an ack
 
 ## UX

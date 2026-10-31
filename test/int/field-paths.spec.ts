@@ -117,3 +117,44 @@ describe('resolveDataPath', () => {
     expect(resolve('')).toBeNull()
   })
 })
+
+// Client-config shape for global blocks (payload 3.91 createClientField):
+// the field keeps slugs in `blockReferences`, `blocks` is empty, and the block
+// definitions live in `config.blocksMap`.
+describe('resolveDataPath with block references', () => {
+  const refFields: FieldSchemaLike[] = [
+    { name: 'layout', type: 'blocks', blocks: [], blockReferences: ['hero', 'section'] },
+  ]
+  const blocksMap = { hero: heroBlock, section: sectionBlock }
+  const resolveRef = (path: string) => resolveDataPath({ blocksMap, fields: refFields, getBlockType, path })
+
+  it('resolves subfields of a referenced block', () => {
+    expect(resolveRef('layout.0.heading')).toMatchObject({ schemaPath: 'layout.hero.heading' })
+  })
+
+  it('resolves containers nested inside a referenced block', () => {
+    expect(resolveRef('layout.1.columns.0.content')).toMatchObject({
+      field: { type: 'blocks' },
+      schemaPath: 'layout.section.columns.content',
+    })
+  })
+
+  it('searches every referenced block when the block type is unknown', () => {
+    expect(resolveDataPath({ blocksMap, fields: refFields, path: 'layout.3.subheading' })).toMatchObject({
+      schemaPath: 'layout.hero.subheading',
+    })
+  })
+
+  it('accepts inline blocks mixed into blockReferences', () => {
+    const mixed: FieldSchemaLike[] = [
+      { name: 'layout', type: 'blocks', blocks: [], blockReferences: ['hero', ctaBlock] },
+    ]
+    expect(resolveDataPath({ blocksMap, fields: mixed, path: 'layout.0.label' })).toMatchObject({
+      schemaPath: 'layout.cta.label',
+    })
+  })
+
+  it('returns null when a referenced slug is missing from blocksMap', () => {
+    expect(resolveDataPath({ fields: refFields, getBlockType, path: 'layout.0.heading' })).toBeNull()
+  })
+})

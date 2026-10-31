@@ -102,6 +102,24 @@ describe('resolvePopoverTarget', () => {
     })
   })
 
+  it('resolves a leaf inside a referenced block', () => {
+    const withRefs: FieldSchemaLike[] = [
+      { name: 'layout', type: 'blocks', blocks: [], blockReferences: ['hero'] } as FieldSchemaLike,
+    ]
+    const target = resolvePopoverTarget({
+      blocksMap: { hero: heroBlock },
+      fields: withRefs,
+      getBlockType: () => 'hero',
+      path: 'layout.0.heading',
+    })
+    expect(target).toMatchObject({
+      fieldSchemaPath: 'layout.hero.heading',
+      kind: 'field',
+      parentPath: 'layout.0',
+      parentSchemaPath: 'layout.hero',
+    })
+  })
+
   it('resolves string block references through blocksMap', () => {
     const withRefs: FieldSchemaLike[] = [
       { name: 'layout', type: 'blocks', blockReferences: ['hero'] } as FieldSchemaLike,

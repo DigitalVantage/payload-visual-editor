@@ -1,7 +1,9 @@
 import type { PveDocRef, PvePermissionSummary } from '@digitalvantage/payload-visual-editor-core'
 import type { SanitizedDocumentPermissions, SanitizedFieldsPermissions } from 'payload'
 
-import type { BlockSchemaLike, FieldSchemaLike } from './fieldPaths.js'
+import type { BlockSchemaLike, BlocksMapLike, FieldSchemaLike } from './fieldPaths.js'
+
+import { blocksOf } from './fieldPaths.js'
 
 const flattenFieldPermissions = (
   fields: SanitizedFieldsPermissions | undefined,
@@ -50,12 +52,21 @@ const blockLabel = (block: BlockSchemaLike & { labels?: LabelsLike }): string =>
   return typeof singular === 'string' ? singular : block.slug
 }
 
-/** Map of block slug → display label, collected from every blocks field in the schema. */
-export const collectBlockLabels = (fields: FieldSchemaLike[]): Record<string, string> => {
+/**
+ * Map of block slug → display label, collected from every blocks field in the
+ * schema, inline blocks and `blockReferences` (via `blocksMap`) alike. Each
+ * block is visited once, so self-referencing blocks terminate.
+ */
+export const collectBlockLabels = (fields: FieldSchemaLike[], blocksMap?: BlocksMapLike): Record<string, string> => {
   const labels: Record<string, string> = {}
+  const visited = new Set<BlockSchemaLike>()
   const visitFields = (list: FieldSchemaLike[]): void => {
     for (const field of list) {
-      for (const block of field.blocks ?? []) {
+      for (const block of blocksOf(field, blocksMap)) {
+        if (visited.has(block)) {
+          continue
+        }
+        visited.add(block)
         if (!(block.slug in labels)) {
           labels[block.slug] = blockLabel(block)
         }

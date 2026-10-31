@@ -59,6 +59,8 @@ export type ResolvedDataPath = {
 }
 
 export type ResolveDataPathArgs = {
+  /** `config.blocksMap` from the client config — needed to walk into referenced blocks. */
+  blocksMap?: BlocksMapLike
   fields: FieldSchemaLike[]
   /** Resolves a row's block type (e.g. from form-state rows); falls back to searching every block. */
   getBlockType?: (containerPath: string, rowIndex: number) => string | undefined
@@ -73,7 +75,7 @@ const joinPath = (parent: string, segment: string): string => (parent ? `${paren
 const endsWithUnnamedSegment = (schemaPath: string): boolean =>
   Boolean(schemaPath.split('.').pop()?.startsWith('_index-'))
 
-type WalkContext = Pick<ResolveDataPathArgs, 'getBlockType'>
+type WalkContext = Pick<ResolveDataPathArgs, 'blocksMap' | 'getBlockType'>
 
 const resolveRows = (
   field: FieldSchemaLike,
@@ -100,9 +102,8 @@ const resolveRows = (
     return { blockType: knownBlockType, field, rowIndex, schemaPath }
   }
 
-  const candidates = knownBlockType
-    ? (field.blocks ?? []).filter((block) => block.slug === knownBlockType)
-    : (field.blocks ?? [])
+  const blocks = blocksOf(field, ctx.blocksMap)
+  const candidates = knownBlockType ? blocks.filter((block) => block.slug === knownBlockType) : blocks
   for (const block of candidates) {
     const resolved = resolveInFields(
       block.fields,
@@ -219,10 +220,15 @@ const resolveTab = (
  * matched field config plus its schema path; for paths pointing at an
  * array/blocks row, also the row index (and block type when resolvable).
  */
-export const resolveDataPath = ({ fields, getBlockType, path }: ResolveDataPathArgs): null | ResolvedDataPath => {
+export const resolveDataPath = ({
+  blocksMap,
+  fields,
+  getBlockType,
+  path,
+}: ResolveDataPathArgs): null | ResolvedDataPath => {
   const segments = path.split('.').filter(Boolean)
   if (segments.length === 0) {
     return null
   }
-  return resolveInFields(fields, segments, '', '', '', { getBlockType })
+  return resolveInFields(fields, segments, '', '', '', { blocksMap, getBlockType })
 }

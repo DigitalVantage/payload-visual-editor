@@ -9,6 +9,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 ### Fixed
 
 - The admin controller no longer calls `useDocumentDrawerContext` conditionally (it sat behind a `||` short-circuit), which violated the Rules of Hooks and could break hook order if the drawer context changed between renders.
+- Global blocks referenced through `blockReferences` now work beyond the row itself: double-clicking a field inside a referenced block opens its popover (it previously fell back to the panel), adding to an array/blocks container nested in a referenced block no longer fails with `unknown-container`, and the overlay labels referenced blocks with their `labels.singular` instead of the slug. `resolveDataPath` and `collectBlockLabels` accept an optional `blocksMap`.
 
 ## [1.0.2] — 2026-10-31
 
