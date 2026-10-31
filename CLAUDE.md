@@ -11,7 +11,7 @@ Open-source inline visual editor plugin for Payload CMS 3.x (target `payload@^3.
 | `packages/plugin` | `@digitalvantage/payload-visual-editor` | Payload plugin: config mutation + admin-side controller (injected via `edit.beforeDocumentControls`) |
 | `packages/core` | `@digitalvantage/payload-visual-editor-core` | Site SDK, vanilla TS, **zero runtime deps**: protocol, attrs, scanner, bridge, overlay |
 | `packages/react` | `@digitalvantage/payload-visual-editor-react` | React adapter: `<VisualEditing/>`, `payloadEditable()` |
-| `dev` | private | Next + Payload playground: `pages`/`posts`/`categories`/`media` collections, `header` global, `/client-mode/[slug]` + `/ssr-mode/[slug]` + `/posts/[slug]` |
+| `dev` | private | Next + Payload playground: `pages`/`posts`/`categories`/`edge-cases`/`media` collections, `header` global, `/client-mode/[slug]` + `/ssr-mode/[slug]` + `/posts/[slug]` + `/edge-cases/[slug]` |
 | `test` | private | vitest int tests (`int/`), Playwright e2e (`e2e/`, drives `dev/`) |
 
 ## Commands
@@ -48,6 +48,7 @@ Open-source inline visual editor plugin for Payload CMS 3.x (target `payload@^3.
 
 ## Dev playground fixtures
 
+- **`edge-cases` holds the schema shapes the main fixtures lack** (global blocks via `blockReferences`, wrappers inside blocks, a nested referenced container, a localized field, no drafts). Its e2e tests create their own documents and pin `?locale=en`, because the admin persists the chosen locale per user.
 - **`home` and `ssr-home` are frozen e2e fixtures** — layout indices are asserted on. New demo content belongs in `landing`/`about`/`ssr-showcase` or the posts.
 - Seed images are synthesized at seed time by `dev/lib/images.ts` (sharp + deterministic SVG gradients); `dev/media/` is gitignored so no binaries are committed.
 - `Media` needs `access: { read: () => true }` — pages render through the Local API (access bypassed) but the browser pulls files over REST, which otherwise 403s for anonymous visitors.

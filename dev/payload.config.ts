@@ -7,6 +7,7 @@ import sharp from 'sharp'
 import { fileURLToPath } from 'url'
 
 import { Categories } from './collections/Categories'
+import { cardBlock, EdgeCases, featureBlock } from './collections/EdgeCases'
 import { Media } from './collections/Media'
 import { Pages } from './collections/Pages'
 import { Posts } from './collections/Posts'
@@ -21,13 +22,24 @@ export default buildConfig({
     importMap: { baseDir: dirname },
     user: 'users',
   },
-  collections: [Pages, Posts, Categories, Media, Users],
+  // Global blocks, used through `blockReferences` (edge-cases collection)
+  blocks: [featureBlock, cardBlock],
+  collections: [Pages, Posts, Categories, EdgeCases, Media, Users],
   db: sqliteAdapter({
     client: { url: process.env.DATABASE_URI ?? `file:${path.resolve(dirname, 'dev.db')}` },
   }),
   editor: lexicalEditor(),
   globals: [Header],
   graphQL: { disable: true },
+  // Only edge-cases has a localized field; everything else is unaffected
+  localization: {
+    defaultLocale: 'en',
+    fallback: true,
+    locales: [
+      { code: 'en', label: 'English' },
+      { code: 'pl', label: 'Polski' },
+    ],
+  },
   onInit: seed,
   plugins: [visualEditor({ debug: true })],
   secret: process.env.PAYLOAD_SECRET ?? 'pve-dev-secret',
