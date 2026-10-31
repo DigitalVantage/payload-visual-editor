@@ -13,6 +13,7 @@
     "watch": "pnpm --filter \"./packages/*\" --parallel -r watch",
     "test": "pnpm --filter @digitalvantage/payload-visual-editor-tests test",
     "e2e": "pnpm build && pnpm --filter @digitalvantage/payload-visual-editor-tests e2e",
+    "e2e:browsers": "pnpm build && pnpm --filter @digitalvantage/payload-visual-editor-tests e2e:browsers",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "lint": "eslint .",

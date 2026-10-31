@@ -1,4 +1,4 @@
-import { defineConfig } from '@playwright/test'
+import { defineConfig, devices } from '@playwright/test'
 
 // The playground builds Live Preview URLs from NEXT_PUBLIC_SERVER_URL (dev/.env),
 // so the server under test must listen exactly there or the preview iframe
@@ -14,6 +14,12 @@ const port = new URL(baseURL).port || '3000'
 export default defineConfig({
   expect: { timeout: 10_000 },
   forbidOnly: Boolean(process.env.CI),
+  // `pnpm e2e` runs chromium only; `pnpm e2e:browsers` (release verification) runs all three
+  projects: [
+    { name: 'chromium', use: { ...devices['Desktop Chrome'] } },
+    { name: 'firefox', use: { ...devices['Desktop Firefox'] } },
+    { name: 'webkit', use: { ...devices['Desktop Safari'] } },
+  ],
   reporter: process.env.CI ? [['list'], ['html', { open: 'never' }]] : 'list',
   retries: process.env.CI ? 2 : 0,
   testDir: './e2e',
