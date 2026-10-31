@@ -1,6 +1,6 @@
 {
   "name": "@digitalvantage/payload-visual-editor-core",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Framework-agnostic site SDK for the Payload CMS inline visual editor",
   "license": "MIT",
   "type": "module",
