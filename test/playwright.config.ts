@@ -1,6 +1,15 @@
 import { defineConfig } from '@playwright/test'
 
-const baseURL = process.env.PVE_DEV_URL ?? 'http://localhost:3000'
+// The playground builds Live Preview URLs from NEXT_PUBLIC_SERVER_URL (dev/.env),
+// so the server under test must listen exactly there or the preview iframe
+// points at nothing.
+try {
+  process.loadEnvFile('../dev/.env')
+} catch {
+  // No dev/.env: the playground falls back to localhost:3000 as well
+}
+const baseURL = process.env.PVE_DEV_URL ?? process.env.NEXT_PUBLIC_SERVER_URL ?? 'http://localhost:3000'
+const port = new URL(baseURL).port || '3000'
 
 export default defineConfig({
   expect: { timeout: 10_000 },
@@ -18,7 +27,7 @@ export default defineConfig({
     trace: 'on-first-retry',
   },
   webServer: {
-    command: 'pnpm --filter dev dev',
+    command: `pnpm --filter dev exec next dev --port ${port}`,
     cwd: '..',
     reuseExistingServer: !process.env.CI,
     timeout: 240_000,
