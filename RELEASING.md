@@ -40,7 +40,7 @@ These need a human looking at the screen. Run them on the release candidate in t
 - [ ] **Cross-document**: double-click the header global, edit it in the drawer, save; the page reflects it.
 - [ ] **Cross-origin**: automated: `pnpm release:verify` runs the smoke test a second time with the preview on another origin (`127.0.0.1` vs `localhost`). Repeat by hand only for a real two-app setup (separate site and Payload servers, cookies across origins — see README → Cross-origin setups).
 - [ ] **Browsers by hand**: one edit plus one drag-reorder in Firefox and Safari (WebKit e2e does not cover real Safari quirks).
-- [ ] **Console**: automated: every e2e and smoke test fails on a plugin warning/error or an uncaught exception (`test/fixtures.ts`). Still glance at both frames while clicking through.
+- [ ] **Console**: automated: every e2e and smoke test fails on a plugin console warning/error in either frame (`test/fixtures.ts`). Still glance at both frames while clicking through.
 
 ## 4. Release candidate
 
