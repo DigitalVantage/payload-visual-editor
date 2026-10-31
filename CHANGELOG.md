@@ -4,6 +4,12 @@ All notable changes to this project are documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). All three packages (`@digitalvantage/payload-visual-editor`, `@digitalvantage/payload-visual-editor-core`, `@digitalvantage/payload-visual-editor-react`) are versioned in lockstep.
 
+## [Unreleased]
+
+### Fixed
+
+- The admin controller no longer calls `useDocumentDrawerContext` conditionally (it sat behind a `||` short-circuit), which violated the Rules of Hooks and could break hook order if the drawer context changed between renders.
+
 ## [1.0.2] — 2026-10-31
 
 First release from the Digital Vantage fork. Same code as 1.0.1, published under the `@digitalvantage` scope: `@digitalvantage/payload-visual-editor`, `@digitalvantage/payload-visual-editor-core`, `@digitalvantage/payload-visual-editor-react`. The dev playground runs on Payload 3.91 / Next 16.4.2.

@@ -99,7 +99,9 @@ export const VisualEditorController = ({ blockOps, debug }: VisualEditorControll
   const shell = usePveShell()
   // Drawer-hosted documents render this controller too (the slot renders in
   // drawers) — there it must stay inert, it has no iframe to talk to
-  const inDrawer = usePveDocDrawer() || Boolean(useDocumentDrawerContext().drawerSlug)
+  const inPveDocDrawer = usePveDocDrawer()
+  const { drawerSlug } = useDocumentDrawerContext()
+  const inDrawer = inPveDocDrawer || Boolean(drawerSlug)
   const uid = useId()
 
   const [editMode, setEditMode] = useState(Boolean(shell))
