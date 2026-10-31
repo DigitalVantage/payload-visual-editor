@@ -1,6 +1,6 @@
 {
   "name": "@digitalvantage/payload-visual-editor-react",
-  "version": "1.0.2",
+  "version": "1.0.3-rc.0",
   "description": "React adapter for the Payload CMS inline visual editor site SDK",
   "license": "MIT",
   "type": "module",

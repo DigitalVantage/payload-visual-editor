@@ -3,7 +3,7 @@ export const PROTOCOL_VERSION = 1
 export const MESSAGE_TYPE_PREFIX = 'payload-visual-editor'
 
 // Keep in sync with the package version on release
-export const SDK_VERSION = '1.0.2'
+export const SDK_VERSION = '1.0.3-rc.0'
 
 export type PveDocRef = {
   collection?: string

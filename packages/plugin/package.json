@@ -1,6 +1,6 @@
 {
   "name": "@digitalvantage/payload-visual-editor",
-  "version": "1.0.2",
+  "version": "1.0.3-rc.0",
   "description": "Inline visual editor plugin for Payload CMS 3.x — click-to-edit and block operations layered on core Live Preview",
   "license": "MIT",
   "type": "module",
