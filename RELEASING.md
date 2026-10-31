@@ -11,7 +11,7 @@ Manual release checklist (no CI publishing).
 
    ```sh
    pnpm clean && pnpm install
-   pnpm check   # build + lint + format + types + int tests
+   pnpm check   # build + lint + package lint + format + types + int tests
    pnpm e2e     # starts the dev playground itself
    ```
 

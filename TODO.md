@@ -29,7 +29,7 @@ Single source of truth for project tasks. Context for each item: the project ana
 
 Release confidence — tests that touch the real thing (real Payload config, real tarballs, real browsers):
 
-- [ ] Package lint: `publint` + `@arethetypeswrong/cli` on every package, part of `pnpm check`
+- [x] Package lint: `publint` + `@arethetypeswrong/cli` on every package, part of `pnpm check`
 - [ ] Contract tests: build a real Payload config (`buildConfig` + `createClientConfig`) and feed it to `resolveDataPath` / `collectBlockLabels` / `resolvePopoverTarget` / `buildPermissionSummary` instead of hand-written schema mocks
 - [ ] Playground edge cases (outside the frozen `home`/`ssr-home`): `blockReferences`, a self-referencing block, `tabs`/`row`/`collapsible` inside blocks, localized fields, a collection without drafts — each with an e2e scenario
 - [ ] Playwright on Firefox and WebKit, not only Chromium

@@ -18,16 +18,19 @@
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "typecheck": "tsc --build packages/core packages/react packages/plugin --noEmit && tsc -p test --noEmit && pnpm --filter dev generate:types && tsc -p dev --noEmit",
-    "check": "pnpm build && pnpm lint && pnpm format:check && pnpm typecheck && pnpm test",
-    "prepare": "git config core.hooksPath .githooks && git config blame.ignoreRevsFile .git-blame-ignore-revs"
+    "check": "pnpm build && pnpm lint && pnpm lint:packages && pnpm format:check && pnpm typecheck && pnpm test",
+    "prepare": "git config core.hooksPath .githooks && git config blame.ignoreRevsFile .git-blame-ignore-revs",
+    "lint:packages": "for p in core react plugin; do publint packages/$p --strict && attw --pack packages/$p --profile esm-only --format ascii --quiet || exit 1; done"
   },
   "devDependencies": {
+    "@arethetypeswrong/cli": "^0.18.5",
     "@eslint/js": "^10.0.1",
     "eslint": "^10.14.0",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-react-hooks": "^7.1.1",
     "globals": "^17.13.0",
     "prettier": "^3.9.10",
+    "publint": "^0.3.25",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.72.1"
   }
