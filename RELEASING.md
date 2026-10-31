@@ -4,7 +4,7 @@ Manual release checklist (no CI publishing).
 
 ## Pre-flight
 
-1. **Naming**: the plugin publishes as `@digitalvantage/payload-visual-editor`, with the SDK packages under the `@@digitalvantage/payload-visual-editor/*` scope. The scope must exist as an npm org before the first publish.
+1. **Naming**: the plugin publishes as `@digitalvantage/payload-visual-editor`, with the SDK packages as `@digitalvantage/payload-visual-editor-core` and `@digitalvantage/payload-visual-editor-react`. The `digitalvantage` scope must exist on npm (an org or a user of that name) before the first publish.
 2. Bump the version in `packages/{core,plugin,react}/package.json` (keep all three in lockstep) and `SDK_VERSION` in `packages/core/src/protocol.ts`.
 3. Add the release section to `CHANGELOG.md` — version heading, date, and the changes grouped under Added / Changed / Fixed / Removed / Security.
 4. Verify everything from a clean state:
