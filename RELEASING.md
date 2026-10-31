@@ -28,7 +28,7 @@ pnpm release:verify   # packed tarballs → blank Payload app → next build →
 
 It installs the packages from `pnpm pack` output (not workspace links), so it catches broken `exports`, missing `dist/` files, missing `'use client'`, import-map paths and README drift. Options: `scripts/release-verify.sh min` runs a single entry, `PVE_VERIFY_BROWSERS="chromium firefox webkit"` sets the browsers, `PVE_VERIFY_KEEP=1` keeps the temp app (with its `install.log`, `build.log`, `server.log`) for debugging, `PVE_VERIFY_PORT` moves the app off port 3457. The app runs in production mode, so its schema comes from a real `payload migrate`, as on a deployed site.
 
-WebKit needs system libraries on Linux: `sudo npx playwright install-deps webkit` (once per machine).
+WebKit needs system libraries on Linux: `pnpm --filter @digitalvantage/payload-visual-editor-tests exec playwright install-deps webkit` — no `sudo` in front: Playwright lives in `test/`, `sudo` drops the nvm `PATH`, and the command asks for the password itself (once per machine).
 
 ## 3. Manual checklist
 
