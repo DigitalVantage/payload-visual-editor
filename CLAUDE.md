@@ -20,6 +20,7 @@ Open-source inline visual editor plugin for Payload CMS 3.x (target `payload@^3.
 - `pnpm test` — vitest int tests (**run `pnpm build` first**: everything consumes built `dist/`)
 - `pnpm check` — build + lint + format check + typecheck + int tests; the local stand-in for CI, run before every commit
 - `pnpm lint` / `pnpm format` — ESLint / Prettier (`pnpm lint:fix`, `pnpm format:check`); `pnpm typecheck` also covers `test/` and `dev/` (regenerates `dev/payload-types.ts` first)
+- Git hooks live in `.githooks/` (`pre-push` runs `pnpm check`); `pnpm install` wires them up via the root `prepare` script, together with `blame.ignoreRevsFile`
 - `pnpm dev` — builds packages, then dev playground at http://localhost:3000 (admin at `/admin`, login `dev@payloadcms.com` / `test`; seeded on first run)
 - `pnpm watch` — SWC watch-rebuild of all packages (run alongside `pnpm --filter dev dev` when iterating on package code)
 - `pnpm --filter dev generate:importmap` — regenerate `dev/app/(payload)/admin/importMap.js` after adding/renaming admin components

@@ -5,7 +5,7 @@ Single source of truth for project tasks. Context for each item: the project ana
 ## Tooling
 
 - [x] ESLint + Prettier + `pnpm check` (lint + format + types + tests) — replaces CI locally
-- [ ] Pre-push hook running `pnpm check` (optional, after `pnpm check` exists)
+- [x] Pre-push hook running `pnpm check`
 
 ## Bugs
 

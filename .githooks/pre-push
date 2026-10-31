@@ -1,0 +1,4 @@
+#!/bin/sh
+# Local stand-in for CI: refuse to push a tree that fails the gate.
+# Bypass in an emergency with `git push --no-verify`.
+exec pnpm check
