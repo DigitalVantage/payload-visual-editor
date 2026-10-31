@@ -33,8 +33,14 @@ test('the edit view connects to the page and double-click focuses the field', as
   await login(page)
   await page.goto(`/admin/collections/pages/${await homePageId(page)}`)
 
+  // Payload saves the open/closed state per user, so the previous browser's
+  // run may have left it open: clicking again would close it
   const toggler = page.locator('#live-preview-toggler')
-  await toggler.click()
+  await toggler.waitFor()
+  await page.waitForLoadState('networkidle')
+  if (!(await toggler.evaluate((el) => el.classList.contains('live-preview-toggler--active')))) {
+    await toggler.click()
+  }
   const frame = page.frameLocator('iframe#live-preview-iframe')
   await expect(frame.locator('h1')).toHaveText('Smoke home', { timeout: 30_000 })
 
