@@ -10,8 +10,8 @@ Manual release checklist (no CI publishing).
 4. Verify everything from a clean state:
 
    ```sh
-   pnpm clean && pnpm install && pnpm build
-   pnpm test
+   pnpm clean && pnpm install
+   pnpm check   # build + lint + format + types + int tests
    pnpm e2e     # starts the dev playground itself
    ```
 

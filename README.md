@@ -237,6 +237,7 @@ if (window.self !== window.top) {
 pnpm install
 pnpm build        # build packages (core → plugin/react)
 pnpm test         # vitest int tests (run build first)
+pnpm check        # build + lint + format check + typecheck + int tests
 pnpm dev          # playground at http://localhost:3000
 pnpm e2e          # Playwright e2e (starts the playground itself)
 ```

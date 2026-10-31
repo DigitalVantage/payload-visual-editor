@@ -4,7 +4,7 @@ Single source of truth for project tasks. Context for each item: the project ana
 
 ## Tooling
 
-- [ ] ESLint + Prettier + `pnpm check` (lint + format + types + tests) — replaces CI locally
+- [x] ESLint + Prettier + `pnpm check` (lint + format + types + tests) — replaces CI locally
 - [ ] Pre-push hook running `pnpm check` (optional, after `pnpm check` exists)
 
 ## Bugs
@@ -23,7 +23,7 @@ Single source of truth for project tasks. Context for each item: the project ana
 ## Refactoring
 
 - [ ] Split `packages/core/src/index.ts` (`initVisualEditing`, ~700 lines) into selection / block-op / drag / message-routing modules — no behavior change
-- [ ] Split `VisualEditorController` (~600 lines) into hooks: `useAdminBridgeSession`, `useBlockOpHandler`, `useFieldPopover`, `useReverseFocusSync` — no behavior change
+- [ ] Split `VisualEditorController` (~600 lines) into hooks: `useAdminBridgeSession`, `useBlockOpHandler`, `useFieldPopover`, `useReverseFocusSync` — no behavior change. Afterwards enable the React Compiler rules of `eslint-plugin-react-hooks` (`refs`, `set-state-in-effect`, `preserve-manual-memoization`), which currently flag the latest-ref pattern there and in `FieldPopover`, `DocSwitchDrawer`, `VisualEditorScreen`
 
 ## Tests
 
