@@ -70,14 +70,25 @@ describe('pathFromFormElement', () => {
 
 describe('collectRowExpansions', () => {
   const fields = {
-    layout: { rows: [{ collapsed: true, id: 'a' }, { collapsed: false, id: 'b' }] },
+    layout: {
+      rows: [
+        { collapsed: true, id: 'a' },
+        { collapsed: false, id: 'b' },
+      ],
+    },
     'layout.0.columns': { rows: [{ id: 'c' }, { collapsed: true, id: 'd' }] },
   }
 
   it('expands every collapsed ancestor row of the path', () => {
     const expansions = collectRowExpansions(fields, 'layout.0.columns.1.heading')
     expect(expansions).toEqual([
-      { path: 'layout', updatedRows: [{ collapsed: false, id: 'a' }, { collapsed: false, id: 'b' }] },
+      {
+        path: 'layout',
+        updatedRows: [
+          { collapsed: false, id: 'a' },
+          { collapsed: false, id: 'b' },
+        ],
+      },
       { path: 'layout.0.columns', updatedRows: [{ id: 'c' }, { collapsed: false, id: 'd' }] },
     ])
   })
@@ -120,7 +131,12 @@ describe('collectRowIsolation', () => {
 
   it('skips containers already in the isolated shape', () => {
     const isolated = {
-      layout: { rows: [{ collapsed: false, id: 'a' }, { collapsed: true, id: 'b' }] },
+      layout: {
+        rows: [
+          { collapsed: false, id: 'a' },
+          { collapsed: true, id: 'b' },
+        ],
+      },
     }
     expect(collectRowIsolation(isolated, 'layout.0.heading')).toEqual([])
   })
@@ -133,16 +149,14 @@ describe('collectRowIsolation', () => {
 
 describe('focusFormField', () => {
   it('focuses the input and resolves once the target is displayed', async () => {
-    document.body.innerHTML =
-      '<div class="field-type text"><input id="field-layout__0__heading" /></div>'
+    document.body.innerHTML = '<div class="field-type text"><input id="field-layout__0__heading" /></div>'
     const element = await focusFormField({ path: 'layout.0.heading', pollIntervalMs: 10, timeoutMs: 200 })
     expect(element?.id).toBe('field-layout__0__heading')
     expect(document.activeElement?.id).toBe('field-layout__0__heading')
   })
 
   it('waits for a hidden (collapsed) field to become displayed', async () => {
-    document.body.innerHTML =
-      '<div id="wrap" style="display:none"><input id="field-layout__0__heading" /></div>'
+    document.body.innerHTML = '<div id="wrap" style="display:none"><input id="field-layout__0__heading" /></div>'
     const pending = focusFormField({ path: 'layout.0.heading', pollIntervalMs: 10, timeoutMs: 500 })
     setTimeout(() => {
       ;(document.getElementById('wrap') as HTMLElement).style.display = ''

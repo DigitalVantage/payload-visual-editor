@@ -101,11 +101,4 @@ export const layoutBlocks: Block[] = [
   relatedPostsBlock,
 ]
 
-export const postBlocks: Block[] = [
-  contentBlock,
-  mediaBlock,
-  quoteBlock,
-  galleryBlock,
-  ctaBlock,
-  relatedPostsBlock,
-]
+export const postBlocks: Block[] = [contentBlock, mediaBlock, quoteBlock, galleryBlock, ctaBlock, relatedPostsBlock]

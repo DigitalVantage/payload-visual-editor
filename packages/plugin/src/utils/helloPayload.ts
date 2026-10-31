@@ -73,11 +73,7 @@ export const collectBlockLabels = (fields: FieldSchemaLike[]): Record<string, st
   return labels
 }
 
-export const buildDocRef = (args: {
-  collectionSlug?: string
-  globalSlug?: string
-  id?: number | string
-}): PveDocRef =>
+export const buildDocRef = (args: { collectionSlug?: string; globalSlug?: string; id?: number | string }): PveDocRef =>
   args.globalSlug
     ? { global: args.globalSlug }
     : { collection: args.collectionSlug, id: args.id !== undefined ? String(args.id) : undefined }

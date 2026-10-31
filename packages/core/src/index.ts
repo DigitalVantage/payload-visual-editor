@@ -69,8 +69,7 @@ const scopeMatchesDoc = (scope: string, docs: PveDocRef[]): boolean => {
       return doc.global === parsed.global
     }
     return (
-      doc.collection === parsed.collection &&
-      (parsed.id === undefined || doc.id === undefined || doc.id === parsed.id)
+      doc.collection === parsed.collection && (parsed.id === undefined || doc.id === undefined || doc.id === parsed.id)
     )
   })
 }
@@ -212,8 +211,7 @@ export const initVisualEditing = (options: VisualEditingOptions): (() => void) =
       return container.element
     }
     const row = registry.regions.find(
-      (region) =>
-        region.kind === 'row' && region.scope === scope && containerPathOf(region.path) === containerPath,
+      (region) => region.kind === 'row' && region.scope === scope && containerPathOf(region.path) === containerPath,
     )
     return row?.element.parentElement ?? null
   }
@@ -300,9 +298,7 @@ export const initVisualEditing = (options: VisualEditingOptions): (() => void) =
     if (!rowElement) {
       return null
     }
-    return (
-      registry.regions.find((candidate) => candidate.kind === 'row' && candidate.element === rowElement) ?? null
-    )
+    return registry.regions.find((candidate) => candidate.kind === 'row' && candidate.element === rowElement) ?? null
   }
 
   const chip = new RowChip({
@@ -442,9 +438,7 @@ export const initVisualEditing = (options: VisualEditingOptions): (() => void) =
     hovered = region
     const switching = region ? isSwitchRegion(region) : false
     overlay.setHover(
-      region
-        ? { element: region.element, label: switching ? scopeLabel(region.scope) : regionLabel(region) }
-        : null,
+      region ? { element: region.element, label: switching ? scopeLabel(region.scope) : regionLabel(region) } : null,
     )
     syncChip()
 
@@ -452,10 +446,7 @@ export const initVisualEditing = (options: VisualEditingOptions): (() => void) =
       const visible = region && !switching ? region : null
       if ((visible?.regionId ?? null) !== lastHoverSent) {
         lastHoverSent = visible?.regionId ?? null
-        bridge.send(
-          'hover',
-          visible ? { path: visible.path, regionId: visible.regionId, scope: visible.scope } : null,
-        )
+        bridge.send('hover', visible ? { path: visible.path, regionId: visible.regionId, scope: visible.scope } : null)
       }
     }
   }

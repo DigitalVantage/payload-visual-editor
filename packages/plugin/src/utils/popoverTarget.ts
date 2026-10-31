@@ -37,10 +37,7 @@ export type ResolvePopoverTargetArgs = {
   path: string
 }
 
-const blocksOf = (
-  field: BlocksFieldLike,
-  blocksMap: ResolvePopoverTargetArgs['blocksMap'],
-): BlockSchemaLike[] => {
+const blocksOf = (field: BlocksFieldLike, blocksMap: ResolvePopoverTargetArgs['blocksMap']): BlockSchemaLike[] => {
   const refs = field.blockReferences ?? field.blocks ?? []
   const blocks: BlockSchemaLike[] = []
   for (const ref of refs) {

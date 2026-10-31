@@ -13,9 +13,7 @@ describe('buildViewPath', () => {
   })
 
   it('works with custom prefixes', () => {
-    expect(buildViewPath('/edit/:collectionSlug/:id', { collectionSlug: 'posts', id: 'abc' })).toBe(
-      '/edit/posts/abc',
-    )
+    expect(buildViewPath('/edit/:collectionSlug/:id', { collectionSlug: 'posts', id: 'abc' })).toBe('/edit/posts/abc')
   })
 })
 

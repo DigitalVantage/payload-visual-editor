@@ -314,9 +314,10 @@ test.describe('visual editor', () => {
     await page.mouse.up()
 
     await expect(frame.locator('[data-pve-drop-indicator]')).toBeHidden()
-    await expect(
-      frame.locator('[data-pve-container="layout"] [data-pve-row]').first(),
-    ).toHaveAttribute('data-pve-block-type', 'cta')
+    await expect(frame.locator('[data-pve-container="layout"] [data-pve-row]').first()).toHaveAttribute(
+      'data-pve-block-type',
+      'cta',
+    )
   })
 
   test('SSR mode shows a pending shimmer until the refreshed page lands', async ({ page }) => {

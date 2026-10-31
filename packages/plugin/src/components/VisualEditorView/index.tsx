@@ -23,15 +23,13 @@ export const VisualEditorView = ({ initPageResult, params, searchParams }: Admin
     redirect(formatAdminURL({ adminRoute, path: `/login?redirect=${encodeURIComponent(returnTo)}` }))
   }
 
-  const runtime = req.payload.config.admin?.custom?.[PLUGIN_CONFIG_KEY] as
-    | undefined
-    | VisualEditorRuntimeConfig
+  const runtime = req.payload.config.admin?.custom?.[PLUGIN_CONFIG_KEY] as undefined | VisualEditorRuntimeConfig
   const enabled = Boolean(
     target &&
-      runtime &&
-      ('globalSlug' in target
-        ? runtime.globals.includes(target.globalSlug)
-        : runtime.collections.includes(target.collectionSlug)),
+    runtime &&
+    ('globalSlug' in target
+      ? runtime.globals.includes(target.globalSlug)
+      : runtime.collections.includes(target.collectionSlug)),
   )
 
   if (!target || !enabled) {

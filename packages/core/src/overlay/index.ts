@@ -16,11 +16,7 @@ const labelCss = (background: string): string =>
   'overflow:hidden;text-overflow:ellipsis;'
 
 /** Positions a box + its label around `target`, viewport-relative. */
-const positionBoxLabel = (
-  box: HTMLDivElement,
-  label: HTMLDivElement,
-  target: OverlayHoverTarget,
-): void => {
+const positionBoxLabel = (box: HTMLDivElement, label: HTMLDivElement, target: OverlayHoverTarget): void => {
   const rect = target.element.getBoundingClientRect()
   box.style.display = 'block'
   box.style.left = `${rect.left}px`
@@ -169,10 +165,10 @@ export class OverlayRenderer {
 
     this.flashBox.style.display = 'block'
     if (typeof this.flashBox.animate === 'function') {
-      this.flashBox.animate(
-        [{ opacity: 1 }, { opacity: 1, offset: 0.6 }, { opacity: 0 }],
-        { duration: FLASH_MS, easing: 'ease-out' },
-      )
+      this.flashBox.animate([{ opacity: 1 }, { opacity: 1, offset: 0.6 }, { opacity: 0 }], {
+        duration: FLASH_MS,
+        easing: 'ease-out',
+      })
     }
     this.refresh()
   }

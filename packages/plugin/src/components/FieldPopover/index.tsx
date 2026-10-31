@@ -158,10 +158,7 @@ export const FieldPopover = ({
       </div>
       <div className="pve-popover__body">
         {serverRendered ? (
-          <ServerRenderedField
-            path={target.path}
-            schemaPath={`${entitySchemaPrefix}.${target.fieldSchemaPath}`}
-          />
+          <ServerRenderedField path={target.path} schemaPath={`${entitySchemaPrefix}.${target.fieldSchemaPath}`} />
         ) : (
           <RenderFields
             fields={target.fields as unknown as ClientField[]}

@@ -34,12 +34,7 @@ export type VisualEditorScreenProps = {
  * detects the shell via PveShellContext and turns the controls bar into the
  * editor toolbar.
  */
-export const VisualEditorScreen = ({
-  collectionSlug,
-  docID,
-  globalSlug,
-  visibleEntities,
-}: VisualEditorScreenProps) => {
+export const VisualEditorScreen = ({ collectionSlug, docID, globalSlug, visibleEntities }: VisualEditorScreenProps) => {
   const { renderDocument } = useServerFunctions()
   const { config } = useConfig()
   const locale = useLocale()
@@ -73,9 +68,7 @@ export const VisualEditorScreen = ({
         overrideEntityVisibility: true,
         redirectAfterDelete: false,
         redirectAfterDuplicate: false,
-        ...(globalSlug
-          ? { paramsOverride: { segments: ['globals', globalSlug] } }
-          : { docID: docID! }),
+        ...(globalSlug ? { paramsOverride: { segments: ['globals', globalSlug] } } : { docID: docID! }),
       } as Parameters<typeof renderDocument>[0])
       if (cancelled) {
         return

@@ -7,10 +7,7 @@ import type { PvePermissionSummary } from './protocol.js'
  * nothing). `getBlockType` resolves a row's block slug from its data path —
  * on the site this comes from the scanned row regions' `data-pve-block-type`.
  */
-export const permissionKeyForPath = (
-  path: string,
-  getBlockType?: (rowPath: string) => string | undefined,
-): string => {
+export const permissionKeyForPath = (path: string, getBlockType?: (rowPath: string) => string | undefined): string => {
   const out: string[] = []
   let prefix = ''
   for (const segment of path.split('.')) {

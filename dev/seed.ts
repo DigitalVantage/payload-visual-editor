@@ -599,7 +599,10 @@ export const seed = async (payload: Payload): Promise<void> => {
               content: [
                 {
                   blockType: 'content',
-                  body: richText(h('h3', 'SSR mode'), p('Route refreshes on save, with pending states while ops land.')),
+                  body: richText(
+                    h('h3', 'SSR mode'),
+                    p('Route refreshes on save, with pending states while ops land.'),
+                  ),
                 },
                 { blockType: 'cta', label: 'Open SSR mode', url: '/ssr-mode/ssr-showcase' },
               ],

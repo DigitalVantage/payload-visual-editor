@@ -27,11 +27,7 @@ export const normalizeBlockOps = (options: BlockOpsOptions | false | undefined):
   }
 }
 
-export const resolveRowIndexById = (
-  fields: FormRowsLike,
-  containerPath: string,
-  rowId: string,
-): null | number => {
+export const resolveRowIndexById = (fields: FormRowsLike, containerPath: string, rowId: string): null | number => {
   const index = fields[containerPath]?.rows?.findIndex((row) => row.id === rowId) ?? -1
   return index >= 0 ? index : null
 }
@@ -46,11 +42,7 @@ const boundedInt = (value: number | undefined, max: number): null | number =>
  * transmitted index only when no id was sent; unknown ids error out → the
  * controller acks `{ ok: false }`.
  */
-export const planBlockOp = (args: {
-  enabledOps: PveBlockOps
-  fields: FormRowsLike
-  op: PveOp
-}): BlockOpPlan => {
+export const planBlockOp = (args: { enabledOps: PveBlockOps; fields: FormRowsLike; op: PveOp }): BlockOpPlan => {
   const { enabledOps, fields, op } = args
   if (!enabledOps[op.op]) {
     return { error: 'disabled', type: 'error' }
@@ -83,9 +75,7 @@ export const planBlockOp = (args: {
       if (moveToIndex === null) {
         return { error: 'invalid-move', type: 'error' }
       }
-      return moveToIndex === rowIndex
-        ? { type: 'noop' }
-        : { moveFromIndex: rowIndex, moveToIndex, type: 'move' }
+      return moveToIndex === rowIndex ? { type: 'noop' } : { moveFromIndex: rowIndex, moveToIndex, type: 'move' }
     }
     case 'remove':
       return { rowIndex, type: 'remove' }

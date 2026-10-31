@@ -50,9 +50,10 @@ describe('resolveRowIndexById', () => {
 
 describe('planBlockOp', () => {
   it('rejects ops disabled by plugin config', () => {
-    expect(
-      planBlockOp({ enabledOps: normalizeBlockOps({ add: false }), fields, op: op({ op: 'add' }) }),
-    ).toEqual({ error: 'disabled', type: 'error' })
+    expect(planBlockOp({ enabledOps: normalizeBlockOps({ add: false }), fields, op: op({ op: 'add' }) })).toEqual({
+      error: 'disabled',
+      type: 'error',
+    })
   })
 
   it('rejects malformed container paths before they reach form state', () => {
@@ -62,9 +63,10 @@ describe('planBlockOp', () => {
   })
 
   it('rejects unknown containers', () => {
-    expect(
-      planBlockOp({ enabledOps: ALL_BLOCK_OPS, fields, op: op({ containerPath: 'other', op: 'add' }) }),
-    ).toEqual({ error: 'unknown-container', type: 'error' })
+    expect(planBlockOp({ enabledOps: ALL_BLOCK_OPS, fields, op: op({ containerPath: 'other', op: 'add' }) })).toEqual({
+      error: 'unknown-container',
+      type: 'error',
+    })
   })
 
   it('clamps add indexes to the row count and defaults to append', () => {
@@ -103,12 +105,14 @@ describe('planBlockOp', () => {
   })
 
   it('falls back to the transmitted index when no row id was sent', () => {
-    expect(
-      planBlockOp({ enabledOps: ALL_BLOCK_OPS, fields, op: op({ op: 'remove', rowIndex: 1 }) }),
-    ).toEqual({ rowIndex: 1, type: 'remove' })
-    expect(
-      planBlockOp({ enabledOps: ALL_BLOCK_OPS, fields, op: op({ op: 'remove', rowIndex: 9 }) }),
-    ).toEqual({ error: 'unknown-row', type: 'error' })
+    expect(planBlockOp({ enabledOps: ALL_BLOCK_OPS, fields, op: op({ op: 'remove', rowIndex: 1 }) })).toEqual({
+      rowIndex: 1,
+      type: 'remove',
+    })
+    expect(planBlockOp({ enabledOps: ALL_BLOCK_OPS, fields, op: op({ op: 'remove', rowIndex: 9 }) })).toEqual({
+      error: 'unknown-row',
+      type: 'error',
+    })
   })
 
   it('plans moves with clamped target and reports no-ops', () => {

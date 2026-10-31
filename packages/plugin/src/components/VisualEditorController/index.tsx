@@ -470,13 +470,7 @@ export const VisualEditorController = ({ blockOps, debug }: VisualEditorControll
   }, [shell, runtime?.view, config.routes.admin, collectionSlug, globalSlug, id])
 
   const openViewLink = viewHref ? (
-    <Button
-      buttonStyle="secondary"
-      el="link"
-      size="small"
-      to={viewHref}
-      tooltip="Open the full-screen visual editor"
-    >
+    <Button buttonStyle="secondary" el="link" size="small" to={viewHref} tooltip="Open the full-screen visual editor">
       Open visual editor
     </Button>
   ) : null
@@ -552,11 +546,7 @@ export const VisualEditorController = ({ blockOps, debug }: VisualEditorControll
       {shell ? (
         <div className="pve-toolbar-items">
           {shell.toolbar.locale ? <LocaleSwitcher /> : null}
-          <Button
-            buttonStyle="secondary"
-            onClick={() => shell.setPanelCollapsed(!shell.panelCollapsed)}
-            size="small"
-          >
+          <Button buttonStyle="secondary" onClick={() => shell.setPanelCollapsed(!shell.panelCollapsed)} size="small">
             {shell.panelCollapsed ? 'Show layout' : 'Hide layout'}
           </Button>
           {shell.toolbar.exit ? (

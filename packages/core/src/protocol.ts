@@ -122,5 +122,4 @@ export const isPveMessage = (data: unknown): data is PveMessage => {
   )
 }
 
-export const hasCompatibleVersion = (message: PveMessage): boolean =>
-  message.version === PROTOCOL_VERSION
+export const hasCompatibleVersion = (message: PveMessage): boolean => message.version === PROTOCOL_VERSION

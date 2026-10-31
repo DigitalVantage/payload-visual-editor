@@ -3,10 +3,7 @@ export type MediaDoc = {
   caption?: null | string
   height?: null | number
   id: number | string
-  sizes?: null | Record<
-    string,
-    { height?: null | number; url?: null | string; width?: null | number } | null
-  >
+  sizes?: null | Record<string, { height?: null | number; url?: null | string; width?: null | number } | null>
   url?: null | string
   width?: null | number
 }
@@ -83,14 +80,7 @@ export type SectionBlock = {
 }
 
 export type LayoutBlock =
-  | ContentBlock
-  | CtaBlock
-  | GalleryBlock
-  | HeroBlock
-  | MediaBlock
-  | QuoteBlock
-  | RelatedPostsBlock
-  | SectionBlock
+  ContentBlock | CtaBlock | GalleryBlock | HeroBlock | MediaBlock | QuoteBlock | RelatedPostsBlock | SectionBlock
 
 export type CategoryDoc = {
   id: number | string

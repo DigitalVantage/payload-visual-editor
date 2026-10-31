@@ -76,10 +76,7 @@ export class AdminBridge {
     if (!this.sessionId) {
       return
     }
-    this.getTargetWindow()?.postMessage(
-      createPveMessage(type, this.sessionId, payload),
-      this.targetOrigin,
-    )
+    this.getTargetWindow()?.postMessage(createPveMessage(type, this.sessionId, payload), this.targetOrigin)
   }
 
   /** Begin a fresh session (call on every iframe load) and handshake until acked. */
@@ -101,11 +98,7 @@ export class AdminBridge {
   }
 
   private handleEvent(event: MessageEvent): void {
-    if (
-      event.origin !== this.targetOrigin ||
-      event.source !== this.getTargetWindow() ||
-      !isPveMessage(event.data)
-    ) {
+    if (event.origin !== this.targetOrigin || event.source !== this.getTargetWindow() || !isPveMessage(event.data)) {
       return
     }
     const message = event.data

@@ -34,9 +34,7 @@ export const resolveMedia = (ref: MediaRef): null | { alt: string; url: string }
 }
 
 export const formatDate = (value?: null | string): string =>
-  value
-    ? new Date(value).toLocaleDateString('en-US', { day: 'numeric', month: 'long', year: 'numeric' })
-    : ''
+  value ? new Date(value).toLocaleDateString('en-US', { day: 'numeric', month: 'long', year: 'numeric' }) : ''
 
 const Hero: React.FC<{ block: HeroBlock; path: string }> = ({ block, path }) => {
   const image = resolveMedia(block.image ?? null)
@@ -167,11 +165,7 @@ const Gallery: React.FC<{ block: GalleryBlock; path: string }> = ({ block, path 
         const itemPath = `${path}.items.${index}`
         const image = resolveMedia(item.image ?? null)
         return (
-          <figure
-            key={item.id ?? index}
-            {...payloadEditable(itemPath, { row: { id: item.id } })}
-            style={{ margin: 0 }}
-          >
+          <figure key={item.id ?? index} {...payloadEditable(itemPath, { row: { id: item.id } })} style={{ margin: 0 }}>
             {image ? (
               <img
                 alt={image.alt}

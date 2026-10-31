@@ -65,9 +65,7 @@ describe('resolvePopoverTarget', () => {
   })
 
   it('resolves a deeply nested leaf (blocks → array → blocks)', () => {
-    expect(
-      resolvePopoverTarget({ fields, getBlockType, path: 'layout.1.columns.0.content.0.body' }),
-    ).toMatchObject({
+    expect(resolvePopoverTarget({ fields, getBlockType, path: 'layout.1.columns.0.content.0.body' })).toMatchObject({
       fieldSchemaPath: 'layout.section.columns.content.content.body',
       fieldType: 'richText',
       kind: 'field',
@@ -163,17 +161,15 @@ describe('resolvePopoverPermissions', () => {
       resolvePopoverPermissions({ fields: docFields, getBlockType, kind: 'field', path: 'meta.description' }),
     ).toMatchObject({ description: { update: false } })
     // `title: true` at the root — leaf parent is the root map itself
-    expect(
-      resolvePopoverPermissions({ fields: docFields, getBlockType, kind: 'field', path: 'title' }),
-    ).toBe(docFields)
+    expect(resolvePopoverPermissions({ fields: docFields, getBlockType, kind: 'field', path: 'title' })).toBe(docFields)
   })
 
   it('defaults to permissive when entries are missing', () => {
     expect(
       resolvePopoverPermissions({ fields: undefined, getBlockType, kind: 'field', path: 'layout.0.heading' }),
     ).toBe(true)
-    expect(
-      resolvePopoverPermissions({ fields: docFields, getBlockType, kind: 'field', path: 'unknown.0.leaf' }),
-    ).toBe(true)
+    expect(resolvePopoverPermissions({ fields: docFields, getBlockType, kind: 'field', path: 'unknown.0.leaf' })).toBe(
+      true,
+    )
   })
 })

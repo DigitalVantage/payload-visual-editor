@@ -41,8 +41,7 @@ type AnyEntity = {
 
 const controlsOf = (entity: AnyEntity, kind: 'edit' | 'elements') =>
   entity.admin?.components?.[kind]?.beforeDocumentControls as
-    | { clientProps?: Record<string, unknown>; path: string }[]
-    | undefined
+    { clientProps?: Record<string, unknown>; path: string }[] | undefined
 
 describe('visualEditor config mutation', () => {
   it('injects the controller for entities with a Live Preview URL (inferred mode)', () => {
@@ -70,9 +69,7 @@ describe('visualEditor config mutation', () => {
   })
 
   it('throws an actionable error when an enabled entity has no Live Preview URL', () => {
-    expect(() => visualEditor({ collections: { posts: true } })(baseConfig())).toThrow(
-      /posts.*Live Preview URL/s,
-    )
+    expect(() => visualEditor({ collections: { posts: true } })(baseConfig())).toThrow(/posts.*Live Preview URL/s)
   })
 
   it('injects a plugin-provided URL into the entity Live Preview config', () => {
@@ -143,9 +140,7 @@ describe('visualEditor config mutation', () => {
   })
 
   it('rejects a view path without the required params', () => {
-    expect(() => visualEditor({ view: { path: '/editor' } })(baseConfig())).toThrow(
-      /:collectionSlug and :id/,
-    )
+    expect(() => visualEditor({ view: { path: '/editor' } })(baseConfig())).toThrow(/:collectionSlug and :id/)
   })
 
   it('preserves pre-existing custom views and admin.custom entries', () => {

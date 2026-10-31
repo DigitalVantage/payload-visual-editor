@@ -54,10 +54,7 @@ describe('initVisualEditing (site SDK end-to-end)', () => {
 
     expect(document.querySelector('[data-pve-overlay]')).not.toBeNull()
     const messages = outgoing(post)
-    expect(messages.map((m) => m.type)).toEqual([
-      'payload-visual-editor:hello-ack',
-      'payload-visual-editor:regions',
-    ])
+    expect(messages.map((m) => m.type)).toEqual(['payload-visual-editor:hello-ack', 'payload-visual-editor:regions'])
     const regions = (messages[1]!.payload as { regions: unknown[] }).regions
     expect(regions).toHaveLength(3)
   })

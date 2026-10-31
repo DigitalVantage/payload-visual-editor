@@ -155,7 +155,14 @@ const resolveInFields = (
           ? tab.name === remaining[0]
             ? resolveTab(tab, remaining.slice(1), joinPath(dataPath, tab.name), `${schemaPath}.${tab.name}`, ctx)
             : null
-          : resolveInFields(tab.fields, remaining, dataPath, `${schemaPath}-${tabIndex}`, `${indexPath}-${tabIndex}`, ctx)
+          : resolveInFields(
+              tab.fields,
+              remaining,
+              dataPath,
+              `${schemaPath}-${tabIndex}`,
+              `${indexPath}-${tabIndex}`,
+              ctx,
+            )
         if (resolved) {
           return resolved
         }

@@ -26,11 +26,7 @@ export { buildDocRef, buildPermissionSummary, collectBlockLabels } from './utils
 export { placePopover, translateIframePoint } from './utils/popoverPosition.js'
 export type { IframeRectLike, PopoverPoint, PopoverSize } from './utils/popoverPosition.js'
 export { popoverLabel, resolvePopoverPermissions, resolvePopoverTarget } from './utils/popoverTarget.js'
-export type {
-  PopoverTarget,
-  ResolvePopoverPermissionsArgs,
-  ResolvePopoverTargetArgs,
-} from './utils/popoverTarget.js'
+export type { PopoverTarget, ResolvePopoverPermissionsArgs, ResolvePopoverTargetArgs } from './utils/popoverTarget.js'
 export { buildViewPath, parseViewSegments } from './utils/viewPath.js'
 export type { ViewTarget } from './utils/viewPath.js'
 
