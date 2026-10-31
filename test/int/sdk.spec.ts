@@ -1,5 +1,7 @@
 // @vitest-environment jsdom
-import { createPveMessage, initVisualEditing, PROTOCOL_VERSION } from '@digitalvantage/payload-visual-editor-core'
+import type { createPveMessage } from '@digitalvantage/payload-visual-editor-core'
+import { initVisualEditing, PROTOCOL_VERSION } from '@digitalvantage/payload-visual-editor-core'
+import type { MockInstance } from 'vitest'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 const ADMIN_ORIGIN = 'http://admin.example.com'
@@ -20,12 +22,12 @@ const helloPayload = {
   permissions: { canPublish: true, canSave: true, fields: {} },
 }
 
-const outgoing = (post: ReturnType<typeof vi.spyOn>) =>
+const outgoing = (post: MockInstance<typeof window.postMessage>) =>
   post.mock.calls.map(([message]) => message as ReturnType<typeof createPveMessage>)
 
 describe('initVisualEditing (site SDK end-to-end)', () => {
   let teardown: (() => void) | undefined
-  let post: ReturnType<typeof vi.spyOn>
+  let post: MockInstance<typeof window.postMessage>
 
   beforeEach(() => {
     document.body.innerHTML = `
