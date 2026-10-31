@@ -1,6 +1,6 @@
 import type { FrameLocator, Page } from '@playwright/test'
 
-import { expect, test } from '@playwright/test'
+import { expect, test } from '../fixtures'
 
 const login = async (page: Page, email: string): Promise<void> => {
   await page.goto('/admin/login')

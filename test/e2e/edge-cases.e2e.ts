@@ -7,7 +7,7 @@
  */
 import type { Page } from '@playwright/test'
 
-import { expect, test } from '@playwright/test'
+import { expect, test } from '../fixtures'
 
 const login = async (page: Page): Promise<void> => {
   await page.goto('/admin/login')

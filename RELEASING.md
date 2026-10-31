@@ -40,7 +40,7 @@ These need a human looking at the screen. Run them on the release candidate in t
 - [ ] **Cross-document**: double-click the header global, edit it in the drawer, save; the page reflects it.
 - [ ] **Cross-origin**: serve the site from a second origin (e.g. `next start -p 3001` with `NEXT_PUBLIC_SERVER_URL` pointing at the admin) and repeat one edit. The handshake must still connect, and nothing should be logged about a wrong `targetOrigin`.
 - [ ] **Browsers by hand**: one edit plus one drag-reorder in Firefox and Safari (WebKit e2e does not cover real Safari quirks).
-- [ ] **Console**: no errors or warnings from `@digitalvantage/payload-visual-editor` in either frame during the above.
+- [ ] **Console**: automated: every e2e and smoke test fails on a plugin warning/error or an uncaught exception (`test/fixtures.ts`). Still glance at both frames while clicking through.
 
 ## 4. Release candidate
 
