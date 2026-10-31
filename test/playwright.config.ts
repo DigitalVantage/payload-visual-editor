@@ -39,4 +39,7 @@ export default defineConfig({
     timeout: 240_000,
     url: baseURL,
   },
+  // One playground, one SQLite file, shared users and preferences: test files
+  // running in parallel would race on writes and on each other's fixtures
+  workers: 1,
 })
