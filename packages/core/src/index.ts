@@ -9,13 +9,13 @@ export * from './protocol.js'
 export * from './scanner.js'
 
 import type { RowChipAction } from './overlay/chips.js'
-import type { PveBlockOps, PveOp } from './protocol.js'
 import type { ScannedRegion } from './scanner.js'
 
 import { PVE_ATTR } from './attrs.js'
 import { SiteBridge } from './bridge.js'
+import { createBlockOps } from './editor/blockOps.js'
 import { createDocAccess } from './editor/docAccess.js'
-import { containerPathOf, isRowPath, rowIndexOf } from './editor/paths.js'
+import { containerPathOf, rowIndexOf } from './editor/paths.js'
 import { createTimers } from './editor/timers.js'
 import { RowChip } from './overlay/chips.js'
 import {
@@ -40,20 +40,6 @@ export type VisualEditingOptions = {
   serverURL: string
 }
 
-// Shimmer starts only if the page hasn't re-rendered shortly after an op-ack
-// (client mode re-renders in ~100ms; SSR takes 1–3s) and self-clears
-// as a safety net if no re-render ever lands.
-const SHIMMER_DELAY_MS = 300
-const SHIMMER_TIMEOUT_MS = 8000
-const PENDING_OP_TTL_MS = 60_000
-
-const randomOpId = (): string => {
-  if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
-    return crypto.randomUUID()
-  }
-  return Math.random().toString(36).slice(2)
-}
-
 /**
  * Entry point for the site SDK. Wires bridge + scanner + overlay; stays fully
  * inert until the admin sends a valid `hello`. Returns a teardown function.
@@ -69,120 +55,33 @@ export const initVisualEditing = (options: VisualEditingOptions): (() => void) =
 
   let chipRegion: null | ScannedRegion = null
   let dragCleanup: (() => void) | null = null
-  let regionsVersion = 0
-  const pendingOps = new Map<string, { containerPath: string; scope: string }>()
   const timers = createTimers()
-  const { later } = timers
 
   const dropIndicator = new DropIndicator()
   const pending = new PendingOverlay()
   const emptyAffordances = new EmptyContainerAffordances()
 
-  /** Chip ops for a row: plugin config ∧ container updatable ∧ stable row id. */
-  const opsForRow = (row: ScannedRegion): null | PveBlockOps => {
-    if (row.kind !== 'row' || !row.rowId || !isRowPath(row.path)) {
-      return null
-    }
-    if (!access.canUpdateContainer(containerPathOf(row.path), row.scope)) {
-      return null
-    }
-    const ops: PveBlockOps = {
-      add: access.blockOps.add,
-      duplicate: access.blockOps.duplicate,
-      move: access.blockOps.move && siblingRows(row).length > 1,
-      remove: access.blockOps.remove,
-    }
-    return ops.add || ops.duplicate || ops.move || ops.remove ? ops : null
-  }
-
-  const siblingRows = (row: ScannedRegion): ScannedRegion[] => {
-    const containerPath = containerPathOf(row.path)
-    return registry.regions
-      .filter(
-        (candidate) =>
-          candidate.kind === 'row' &&
-          candidate.scope === row.scope &&
-          isRowPath(candidate.path) &&
-          containerPathOf(candidate.path) === containerPath &&
-          candidate.element.isConnected,
-      )
-      .sort((a, b) => rowIndexOf(a.path) - rowIndexOf(b.path))
-  }
-
-  const containerElementFor = (containerPath: string, scope: string): Element | null => {
-    const container = registry.regions.find(
-      (region) => region.kind === 'container' && region.path === containerPath && region.scope === scope,
-    )
-    if (container?.element.isConnected) {
-      return container.element
-    }
-    const row = registry.regions.find(
-      (region) => region.kind === 'row' && region.scope === scope && containerPathOf(region.path) === containerPath,
-    )
-    return row?.element.parentElement ?? null
-  }
-
-  const sendOp = (op: Omit<PveOp, 'opId'>): void => {
-    if (bridge.readOnly) {
-      return
-    }
-    const opId = randomOpId()
-    pendingOps.set(opId, { containerPath: op.containerPath, scope: op.scope })
-    later(() => pendingOps.delete(opId), PENDING_OP_TTL_MS)
-    bridge.send('op', { ...op, opId })
-  }
-
-  const startShimmer = (containerPath: string, scope: string): void => {
-    const version = regionsVersion
-    later(() => {
-      if (!editMode || regionsVersion !== version) {
-        return
-      }
-      const element = containerElementFor(containerPath, scope)
-      if (!element) {
-        return
-      }
-      pending.add(element)
-      later(() => pending.clear(), SHIMMER_TIMEOUT_MS)
-    }, SHIMMER_DELAY_MS)
-  }
-
-  const updateEmptyContainers = (regions: ScannedRegion[]): void => {
-    if (!editMode || !access.blockOps.add || bridge.readOnly) {
-      emptyAffordances.set([])
-      return
-    }
-    const rowContainers = new Set(
-      regions
-        .filter((region) => region.kind === 'row' && isRowPath(region.path))
-        .map((region) => `${region.scope}|${containerPathOf(region.path)}`),
-    )
-    const items = regions
-      .filter(
-        (region) =>
-          region.kind === 'container' &&
-          !rowContainers.has(`${region.scope}|${region.path}`) &&
-          access.canUpdateContainer(region.path, region.scope),
-      )
-      .map((region) => ({
-        element: region.element,
-        key: region.regionId,
-        onAdd: () => sendOp({ containerPath: region.path, op: 'add', rowIndex: 0, scope: region.scope }),
-      }))
-    emptyAffordances.set(items)
-  }
+  const blockOps = createBlockOps({
+    access,
+    bridge,
+    emptyAffordances,
+    getRegions: () => registry.regions,
+    isEditMode: () => editMode,
+    pending,
+    timers,
+  })
 
   const registry = new RegionRegistry({
     onChange: (regions) => {
-      regionsVersion += 1
+      blockOps.regionsChanged()
       pending.clear()
       access.indexRows(regions)
-      updateEmptyContainers(regions)
+      blockOps.updateEmptyContainers(regions)
       bridge.send('regions', { regions: toProtocolRegions(regions) })
     },
     onRescan: (regions) => {
       access.indexRows(regions)
-      updateEmptyContainers(regions)
+      blockOps.updateEmptyContainers(regions)
       // Nodes may be replaced (live-preview re-render) or removed (block op);
       // re-resolve the hover and lock highlights by identity.
       if (locked && !locked.element.isConnected) {
@@ -227,32 +126,14 @@ export const initVisualEditing = (options: VisualEditingOptions): (() => void) =
         bridge.send('reveal', { path: row.path, regionId: row.regionId, scope: row.scope })
         return
       }
-      if (!row.rowId) {
-        return
-      }
-      const containerPath = containerPathOf(row.path)
-      const rowIndex = rowIndexOf(row.path)
-      switch (action) {
-        case 'add-above':
-          sendOp({ containerPath, op: 'add', rowIndex, scope: row.scope })
-          break
-        case 'add-below':
-          sendOp({ containerPath, op: 'add', rowIndex: rowIndex + 1, scope: row.scope })
-          break
-        case 'duplicate':
-          sendOp({ containerPath, op: 'duplicate', rowId: row.rowId, rowIndex, scope: row.scope })
-          break
-        case 'remove':
-          sendOp({ containerPath, op: 'remove', rowId: row.rowId, rowIndex, scope: row.scope })
-          break
-      }
+      blockOps.rowAction(row, action)
     },
     onDragStart: (event: PointerEvent) => {
       const row = chipRegion
       if (!row || !row.rowId || dragCleanup) {
         return
       }
-      const rows = siblingRows(row)
+      const rows = blockOps.siblingRows(row)
       if (rows.length < 2) {
         return
       }
@@ -285,7 +166,7 @@ export const initVisualEditing = (options: VisualEditingOptions): (() => void) =
           if (moveToIndex === null) {
             return
           }
-          sendOp({
+          blockOps.sendOp({
             containerPath: containerPathOf(row.path),
             moveFromIndex: fromIndex,
             moveToIndex,
@@ -317,7 +198,7 @@ export const initVisualEditing = (options: VisualEditingOptions): (() => void) =
     const active = locked ?? hovered
     const switching = active ? access.isSwitchRegion(active) : false
     const chipRow = active && !switching ? rowRegionFor(active) : null
-    const ops = chipRow && !bridge.readOnly ? opsForRow(chipRow) : null
+    const ops = chipRow && !bridge.readOnly ? blockOps.opsForRow(chipRow) : null
     const editable = chipRow !== null && !bridge.readOnly && access.isEditable(chipRow)
     if (chipRow && (ops || editable)) {
       chipRegion = chipRow
@@ -504,7 +385,7 @@ export const initVisualEditing = (options: VisualEditingOptions): (() => void) =
       dragCleanup?.()
       dragCleanup = null
       timers.clear()
-      pendingOps.clear()
+      blockOps.clearPending()
       setLocked(null, { notify: false })
       setHovered(null)
       registry.stop()
@@ -561,27 +442,15 @@ export const initVisualEditing = (options: VisualEditingOptions): (() => void) =
           // session and recompute affordances (docs/permissions may differ)
           setLocked(null, { notify: false })
           setHovered(null)
-          updateEmptyContainers(registry.regions)
+          blockOps.updateEmptyContainers(registry.regions)
           bridge.send('regions', { regions: toProtocolRegions(registry.regions) })
         } else {
           setEditMode(message.payload.editMode)
         }
         break
-      case 'payload-visual-editor:op-ack': {
-        const entry = pendingOps.get(message.payload.opId)
-        if (!entry) {
-          break
-        }
-        pendingOps.delete(message.payload.opId)
-        if (message.payload.ok) {
-          startShimmer(entry.containerPath, entry.scope)
-        } else if (message.payload.error !== 'cancelled') {
-          console.warn(
-            `[@digitalvantage/payload-visual-editor] Block operation failed: ${message.payload.error ?? 'unknown error'}`,
-          )
-        }
+      case 'payload-visual-editor:op-ack':
+        blockOps.handleAck(message.payload)
         break
-      }
     }
   })
   const disconnect = bridge.connect()
