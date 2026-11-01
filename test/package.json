@@ -7,7 +7,8 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "e2e": "playwright test --project=chromium",
-    "e2e:browsers": "playwright test"
+    "e2e:browsers": "playwright test",
+    "docs:media": "playwright test -c playwright.docs.config.ts"
   },
   "devDependencies": {
     "@digitalvantage/payload-visual-editor": "workspace:*",
