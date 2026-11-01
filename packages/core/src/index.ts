@@ -15,16 +15,9 @@ import { PVE_ATTR } from './attrs.js'
 import { SiteBridge } from './bridge.js'
 import { createBlockOps } from './editor/blockOps.js'
 import { createDocAccess } from './editor/docAccess.js'
-import { containerPathOf, rowIndexOf } from './editor/paths.js'
+import { createRowDrag } from './editor/rowDrag.js'
 import { createTimers } from './editor/timers.js'
 import { RowChip } from './overlay/chips.js'
-import {
-  computeDropGap,
-  detectOrientation,
-  dropIndicatorLine,
-  gapToMoveToIndex,
-  startDragSession,
-} from './overlay/dnd.js'
 import { OverlayRenderer } from './overlay/index.js'
 import { DropIndicator, EmptyContainerAffordances, PendingOverlay } from './overlay/indicators.js'
 import { RegionRegistry, toProtocolRegions } from './scanner.js'
@@ -54,7 +47,6 @@ export const initVisualEditing = (options: VisualEditingOptions): (() => void) =
   const access = createDocAccess({ isReadOnly: () => bridge.readOnly })
 
   let chipRegion: null | ScannedRegion = null
-  let dragCleanup: (() => void) | null = null
   const timers = createTimers()
 
   const dropIndicator = new DropIndicator()
@@ -70,6 +62,7 @@ export const initVisualEditing = (options: VisualEditingOptions): (() => void) =
     pending,
     timers,
   })
+  const rowDrag = createRowDrag({ blockOps, dropIndicator })
 
   const registry = new RegionRegistry({
     onChange: (regions) => {
@@ -129,54 +122,9 @@ export const initVisualEditing = (options: VisualEditingOptions): (() => void) =
       blockOps.rowAction(row, action)
     },
     onDragStart: (event: PointerEvent) => {
-      const row = chipRegion
-      if (!row || !row.rowId || dragCleanup) {
-        return
+      if (chipRegion) {
+        rowDrag.start(chipRegion, event)
       }
-      const rows = blockOps.siblingRows(row)
-      if (rows.length < 2) {
-        return
-      }
-      const fromIndex = rowIndexOf(row.path)
-      const orientation = detectOrientation(rows.map((sibling) => sibling.element.getBoundingClientRect()))
-      let lastGap: null | number = null
-
-      const endDrag = (): void => {
-        dragCleanup = null
-        dropIndicator.hide()
-      }
-
-      dragCleanup = startDragSession({
-        onCancel: endDrag,
-        onDrag: (point) => {
-          const rects = rows.map((sibling) => sibling.element.getBoundingClientRect())
-          lastGap = computeDropGap(rects, point, orientation)
-          const line = dropIndicatorLine(rects, lastGap, orientation)
-          if (line) {
-            dropIndicator.show(line)
-          }
-        },
-        onDrop: () => {
-          const gap = lastGap
-          endDrag()
-          if (gap === null) {
-            return
-          }
-          const moveToIndex = gapToMoveToIndex(gap, fromIndex)
-          if (moveToIndex === null) {
-            return
-          }
-          blockOps.sendOp({
-            containerPath: containerPathOf(row.path),
-            moveFromIndex: fromIndex,
-            moveToIndex,
-            op: 'move',
-            rowId: row.rowId,
-            scope: row.scope,
-          })
-        },
-        startEvent: event,
-      })
     },
   })
 
@@ -289,7 +237,7 @@ export const initVisualEditing = (options: VisualEditingOptions): (() => void) =
   }
 
   const onPointerMove = (event: PointerEvent): void => {
-    if (dragCleanup) {
+    if (rowDrag.active) {
       return
     }
     // Pointer over the overlay's own UI (chip, add buttons): keep the current hover
@@ -300,7 +248,7 @@ export const initVisualEditing = (options: VisualEditingOptions): (() => void) =
   }
 
   const onPointerLeave = (): void => {
-    if (!dragCleanup) {
+    if (!rowDrag.active) {
       setHovered(null)
     }
   }
@@ -382,8 +330,7 @@ export const initVisualEditing = (options: VisualEditingOptions): (() => void) =
       document.removeEventListener('click', onClick, { capture: true })
       document.removeEventListener('dblclick', onDblClick, { capture: true })
       document.removeEventListener('keydown', onKeyDown)
-      dragCleanup?.()
-      dragCleanup = null
+      rowDrag.cancel()
       timers.clear()
       blockOps.clearPending()
       setLocked(null, { notify: false })
