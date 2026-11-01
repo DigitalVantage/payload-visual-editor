@@ -14,6 +14,7 @@ import { usePveTranslation } from '../../hooks/usePveTranslation.js'
 import { visualEditorRuntime } from '../../index.js'
 import {
   Button,
+  toast,
   useConfig,
   useDocumentDrawerContext,
   useDocumentInfo,
@@ -32,6 +33,7 @@ import { LocaleSwitcher } from '../LocaleSwitcher/index.js'
 import { usePveDocDrawer, usePveShell } from '../VisualEditorScreen/shellContext.js'
 import { useAdminBridgeSession } from './useAdminBridgeSession.js'
 import { useBlockOpHandler } from './useBlockOpHandler.js'
+import { useBlockOpHistory } from './useBlockOpHistory.js'
 import { useFieldPopover } from './useFieldPopover.js'
 import { useReverseFocusSync } from './useReverseFocusSync.js'
 
@@ -80,6 +82,7 @@ export const VisualEditorController = ({ blockOps, debug }: VisualEditorControll
 
   // Without drafts, the published document is what gets edited — nothing to warn about
   const hasDrafts = Boolean(docConfig?.versions && docConfig.versions.drafts)
+  const schemaFields = (docConfig?.fields ?? []) as unknown as FieldSchemaLike[]
 
   const enabledOps = useMemo(() => normalizeBlockOps(blockOps), [blockOps])
 
@@ -88,7 +91,7 @@ export const VisualEditorController = ({ blockOps, debug }: VisualEditorControll
     breakpoint,
     docs: [buildDocRef({ collectionSlug, globalSlug, id })],
     editMode,
-    labels: collectBlockLabels((docConfig?.fields ?? []) as unknown as FieldSchemaLike[], blocksMap),
+    labels: collectBlockLabels(schemaFields, blocksMap),
     locale: locale?.code,
     permissions: buildPermissionSummary({
       canPublish: Boolean(hasPublishPermission),
@@ -107,11 +110,13 @@ export const VisualEditorController = ({ blockOps, debug }: VisualEditorControll
     },
   })
 
+  const history = useBlockOpHistory({ blocksMap, schemaFields })
   const { dialogs, handleOp } = useBlockOpHandler({
     blocksMap,
     canSave: Boolean(hasSavePermission),
     enabledOps,
-    schemaFields: (docConfig?.fields ?? []) as unknown as FieldSchemaLike[],
+    history,
+    schemaFields,
     sendAck: (ack) => send('op-ack', ack),
   })
 
@@ -121,7 +126,7 @@ export const VisualEditorController = ({ blockOps, debug }: VisualEditorControll
     getFields,
     getRegion: (regionId) => regionsRef.current.get(regionId),
     iframeRef,
-    schemaFields: (docConfig?.fields ?? []) as unknown as FieldSchemaLike[],
+    schemaFields,
   })
 
   // Scroll/focus a field in the fields panel — opening the shell's panel first
@@ -274,6 +279,12 @@ export const VisualEditorController = ({ blockOps, debug }: VisualEditorControll
     send('edit-mode', { enabled })
   }
 
+  const runHistoryStep = (step: () => boolean): void => {
+    if (!step()) {
+      toast.error(t('pluginVisualEditor:historyStepFailed'))
+    }
+  }
+
   const closePopover = (): void => {
     clearPopover()
     // Clear the page-side selection highlight too
@@ -291,6 +302,26 @@ export const VisualEditorController = ({ blockOps, debug }: VisualEditorControll
       >
         {t(editMode ? 'pluginVisualEditor:editingOnPage' : 'pluginVisualEditor:editOnPage')}
       </Button>
+      {editMode && hasSavePermission ? (
+        <>
+          <Button
+            buttonStyle="secondary"
+            disabled={!history.canUndo}
+            onClick={() => runHistoryStep(history.undo)}
+            size="small"
+          >
+            {t('pluginVisualEditor:undo')}
+          </Button>
+          <Button
+            buttonStyle="secondary"
+            disabled={!history.canRedo}
+            onClick={() => runHistoryStep(history.redo)}
+            size="small"
+          >
+            {t('pluginVisualEditor:redo')}
+          </Button>
+        </>
+      ) : null}
       {previewIsPublished && hasDrafts ? <DraftWarning /> : null}
       {shell ? (
         <div className="pve-toolbar-items">

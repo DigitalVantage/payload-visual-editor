@@ -340,6 +340,66 @@ test.describe('visual editor', () => {
     await expect(frame.locator('[data-pve-block-type="cta"]')).toHaveCount(1)
   })
 
+  test('undo restores a removed row with its content; redo removes it again', async ({ page }) => {
+    await login(page, 'dev@payloadcms.com')
+    const { frame, id } = await openTestPage(page)
+    const undo = page.getByRole('button', { exact: true, name: 'Undo' })
+    const redo = page.getByRole('button', { exact: true, name: 'Redo' })
+    await expect(undo).toBeDisabled()
+
+    const chip = await hoverRowChip(frame, '[data-pve-block-type="cta"]')
+    await chip.locator('[data-pve-chip-action="remove"]').click()
+    await page.locator('.confirmation-modal').getByRole('button', { name: 'Remove' }).click()
+    const cta = frame.locator('[data-pve-block-type="cta"]')
+    await expect(cta).toHaveCount(0)
+
+    await undo.click()
+    await expect(cta).toHaveCount(1)
+    await expect(cta).toContainText('E2E button')
+    await expect(frame.locator('[data-pve-container="layout"] [data-pve-row]').nth(1)).toHaveAttribute(
+      'data-pve-block-type',
+      'cta',
+    )
+    // The restored row is real form data: autosave writes it back to the draft
+    await expect
+      .poll(async () => {
+        const response = await page.request.get(`/api/pages/${id}?draft=true&depth=0`)
+        const { layout } = (await response.json()) as { layout: { blockType: string; label?: string }[] }
+        return layout.map((block) => block.label ?? block.blockType)
+      })
+      .toEqual(['hero', 'E2E button'])
+
+    await redo.click()
+    await expect(cta).toHaveCount(0)
+    await expect(redo).toBeDisabled()
+  })
+
+  test('undo reverts a drag-reorder and a duplicate, newest first', async ({ page }) => {
+    await login(page, 'dev@payloadcms.com')
+    const { frame } = await openTestPage(page)
+    const rows = frame.locator('[data-pve-container="layout"] [data-pve-row]')
+
+    let chip = await hoverRowChip(frame, '[data-pve-block-type="hero"]')
+    const handleBox = (await chip.locator('[data-pve-chip-action="drag"]').boundingBox())!
+    const ctaBox = (await frame.locator('[data-pve-block-type="cta"]').boundingBox())!
+    await page.mouse.move(handleBox.x + handleBox.width / 2, handleBox.y + handleBox.height / 2)
+    await page.mouse.down()
+    await page.mouse.move(ctaBox.x + 20, ctaBox.y + ctaBox.height - 2, { steps: 8 })
+    await page.mouse.up()
+    await expect(rows.first()).toHaveAttribute('data-pve-block-type', 'cta')
+
+    chip = await hoverRowChip(frame, '[data-pve-block-type="cta"]')
+    await chip.locator('[data-pve-chip-action="duplicate"]').click()
+    await expect(rows).toHaveCount(3)
+
+    const undo = page.getByRole('button', { exact: true, name: 'Undo' })
+    await undo.click()
+    await expect(rows).toHaveCount(2)
+    await undo.click()
+    await expect(rows.first()).toHaveAttribute('data-pve-block-type', 'hero')
+    await expect(undo).toBeDisabled()
+  })
+
   test('drag handle reorders rows with a drop indicator', async ({ page }) => {
     await login(page, 'dev@payloadcms.com')
     const { frame } = await openTestPage(page)

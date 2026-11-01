@@ -5,6 +5,7 @@ import type { ReactNode } from 'react'
 import { useEffect, useId, useRef, useState } from 'react'
 
 import type { BlocksMapLike, FieldSchemaLike } from '../../utils/fieldPaths.js'
+import type { BlockOpHistory } from './useBlockOpHistory.js'
 
 import { useLatestCallback } from '../../hooks/useLatestCallback.js'
 import { usePveTranslation } from '../../hooks/usePveTranslation.js'
@@ -12,6 +13,7 @@ import { BlocksDrawer, ConfirmationModal, toast, useForm, useModal } from '../..
 import { blockOpErrorKey, planBlockOp, resolveRowIndexById } from '../../utils/blockOps.js'
 import { resolveDataPath } from '../../utils/fieldPaths.js'
 import { collectBlockLabels } from '../../utils/helloPayload.js'
+import { rowIds, snapshotRow } from '../../utils/rowSnapshot.js'
 
 type PendingAdd = {
   blocks: (ClientBlock | string)[]
@@ -41,6 +43,7 @@ export type BlockOpHandlerOptions = {
   blocksMap: BlocksMapLike
   canSave: boolean
   enabledOps: PveBlockOps
+  history: Pick<BlockOpHistory, 'recordInsert' | 'recordMove' | 'recordRemove'>
   schemaFields: FieldSchemaLike[]
   sendAck: (ack: PveMessagePayloads['op-ack']) => void
 }
@@ -54,6 +57,7 @@ export const useBlockOpHandler = ({
   blocksMap,
   canSave,
   enabledOps,
+  history,
   schemaFields,
   sendAck,
 }: BlockOpHandlerOptions): { dialogs: ReactNode; handleOp: (op: PveOp) => void } => {
@@ -95,7 +99,9 @@ export const useBlockOpHandler = ({
           return
         }
         if (container.type === 'array') {
+          const idsBefore = rowIds(fields, op.containerPath)
           addFieldRow({ path: op.containerPath, rowIndex: plan.rowIndex, schemaPath: resolved!.schemaPath })
+          history.recordInsert(op.containerPath, idsBefore)
           ack(op.opId, true)
           return
         }
@@ -115,18 +121,26 @@ export const useBlockOpHandler = ({
         })
         return
       }
-      case 'duplicate':
+      case 'duplicate': {
+        const idsBefore = rowIds(fields, op.containerPath)
         dispatchFields({ path: op.containerPath, rowIndex: plan.rowIndex, type: 'DUPLICATE_ROW' })
         setModified(true)
+        history.recordInsert(op.containerPath, idsBefore)
         ack(op.opId, true)
         return
+      }
       case 'error':
         ack(op.opId, false, plan.error)
         return
-      case 'move':
+      case 'move': {
+        const rowId = fields[op.containerPath]?.rows?.[plan.moveFromIndex]?.id
         moveFieldRow({ moveFromIndex: plan.moveFromIndex, moveToIndex: plan.moveToIndex, path: op.containerPath })
+        if (rowId) {
+          history.recordMove(op.containerPath, rowId, plan.moveFromIndex)
+        }
         ack(op.opId, true)
         return
+      }
       case 'noop':
         ack(op.opId, true)
         return
@@ -185,7 +199,11 @@ export const useBlockOpHandler = ({
     if (rowIndex === null) {
       ack(pendingRemove.opId, false, 'unknown-row')
     } else {
+      const snapshot = snapshotRow(getFields(), pendingRemove.path, rowIndex)
       removeFieldRow({ path: pendingRemove.path, rowIndex })
+      if (snapshot) {
+        history.recordRemove(pendingRemove.path, rowIndex, snapshot)
+      }
       ack(pendingRemove.opId, true)
     }
     setPendingRemove(null)
@@ -202,7 +220,9 @@ export const useBlockOpHandler = ({
     if (!pendingAdd) {
       return
     }
+    const idsBefore = rowIds(getFields(), pendingAdd.path)
     addFieldRow({ blockType, path: pendingAdd.path, rowIndex, schemaPath: pendingAdd.schemaPath })
+    history.recordInsert(pendingAdd.path, idsBefore)
     ack(pendingAdd.opId, true)
     setPendingAdd(null)
   }

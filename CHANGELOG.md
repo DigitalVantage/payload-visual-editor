@@ -10,6 +10,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 - Admin strings are translatable through Payload's i18n under the `pluginVisualEditor` namespace. English ships built in and fills every admin language without its own translation; projects can override any string via `i18n.translations`. Close, Locale and Remove reuse Payload's own translated labels.
 - The overlay on the page (chip button titles, the empty-container "Add block" button) follows the admin language too: the admin sends translated text in `hello` (new optional `strings` field). An SDK talking to an older admin keeps English.
+- Undo / Redo buttons next to "Edit on page" revert and reapply block changes made on the page: add, duplicate, remove (the row returns with its content) and drag-reorder. Steps are tracked by row id, so edits in between do not misdirect them; a step whose block is gone is skipped with a toast. Field edits are not part of this history.
 - Polish translation (`pl`).
 
 ### Changed

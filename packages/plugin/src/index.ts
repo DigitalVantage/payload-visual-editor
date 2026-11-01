@@ -6,6 +6,8 @@ export { AdminBridge } from './utils/adminBridge.js'
 export type { AdminBridgeOptions, AdminMessageHandler } from './utils/adminBridge.js'
 export { blockOpErrorKey, normalizeBlockOps, planBlockOp, resolveRowIndexById } from './utils/blockOps.js'
 export type { BlockOpPlan, FormRowsLike } from './utils/blockOps.js'
+export { rowIds, snapshotRow } from './utils/rowSnapshot.js'
+export type { RowSnapshot } from './utils/rowSnapshot.js'
 export { resolveDataPath } from './utils/fieldPaths.js'
 export type {
   BlockSchemaLike,
