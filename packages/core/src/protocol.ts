@@ -87,6 +87,8 @@ export type PveMessagePayloads = {
   'doc-switch-request': { scope: string }
   'edit-mode': { enabled: boolean }
   focus: { path: string }
+  /** Undo/redo shortcut pressed on the page — the history lives in the admin. */
+  history: { action: 'redo' | 'undo' }
   hello: {
     /** Ops enabled by plugin config; omitted = all enabled. */
     blockOps?: PveBlockOps

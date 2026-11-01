@@ -7,6 +7,7 @@ import type { DocAccess } from './docAccess.js'
 import type { RowDrag } from './rowDrag.js'
 
 import { PVE_ATTR } from '../attrs.js'
+import { historyShortcut, isTypingTarget } from '../keys.js'
 
 export type Selection = {
   /** Adds the document listeners for hover, click-to-lock and dblclick-to-edit. */
@@ -53,11 +54,6 @@ const relocate = (region: ScannedRegion, regions: ScannedRegion[]): null | Scann
       )
     : undefined) ??
   null
-
-const isTypingTarget = (target: EventTarget | null): boolean =>
-  target instanceof Element &&
-  (target.closest('input, textarea, select, [contenteditable=""], [contenteditable="true"]') !== null ||
-    (target instanceof HTMLElement && target.isContentEditable))
 
 /**
  * Pointer- and keyboard-driven selection on the page: hover highlight, click-to-lock with
@@ -289,7 +285,17 @@ export const createSelection = ({
       setLocked(null)
       return
     }
-    if (event.defaultPrevented || isTypingTarget(event.target) || event.ctrlKey || event.metaKey) {
+    if (event.defaultPrevented || isTypingTarget(event.target)) {
+      return
+    }
+    // Undo/redo live in the admin; the shortcut works from the page too
+    const history = historyShortcut(event)
+    if (history && !bridge.readOnly) {
+      event.preventDefault()
+      bridge.send('history', { action: history })
+      return
+    }
+    if (event.ctrlKey || event.metaKey) {
       return
     }
     if (event.altKey && !event.shiftKey && (event.key === 'ArrowDown' || event.key === 'ArrowUp')) {

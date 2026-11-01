@@ -35,6 +35,7 @@ import { useAdminBridgeSession } from './useAdminBridgeSession.js'
 import { useBlockOpHandler } from './useBlockOpHandler.js'
 import { useBlockOpHistory } from './useBlockOpHistory.js'
 import { useFieldPopover } from './useFieldPopover.js'
+import { useHistoryShortcuts } from './useHistoryShortcuts.js'
 import { useReverseFocusSync } from './useReverseFocusSync.js'
 
 export type VisualEditorControllerProps = {
@@ -204,6 +205,11 @@ export const VisualEditorController = ({ blockOps, debug }: VisualEditorControll
         case 'payload-visual-editor:doc-switch-request':
           handleDocSwitch(message.payload.scope)
           break
+        case 'payload-visual-editor:history':
+          if (editMode && hasSavePermission) {
+            runHistoryStep(message.payload.action === 'undo' ? history.undo : history.redo)
+          }
+          break
         case 'payload-visual-editor:op':
           handleOp(message.payload)
           break
@@ -224,6 +230,18 @@ export const VisualEditorController = ({ blockOps, debug }: VisualEditorControll
       regionsRef.current = new Map()
       clearPopover()
     },
+  })
+
+  const runHistoryStep = (step: () => boolean): void => {
+    if (!step()) {
+      toast.error(t('pluginVisualEditor:historyStepFailed'))
+    }
+  }
+
+  useHistoryShortcuts({
+    enabled: editMode && Boolean(hasSavePermission),
+    onRedo: () => runHistoryStep(history.redo),
+    onUndo: () => runHistoryStep(history.undo),
   })
 
   useReverseFocusSync({
@@ -277,12 +295,6 @@ export const VisualEditorController = ({ blockOps, debug }: VisualEditorControll
       clearPopover()
     }
     send('edit-mode', { enabled })
-  }
-
-  const runHistoryStep = (step: () => boolean): void => {
-    if (!step()) {
-      toast.error(t('pluginVisualEditor:historyStepFailed'))
-    }
   }
 
   const closePopover = (): void => {

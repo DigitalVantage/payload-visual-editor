@@ -16,9 +16,9 @@ Single source of truth for project tasks. Context for each item: the project ana
 
 - [x] Surface failed block ops in the admin UI (toast) instead of only `console.warn` in the iframe
 - [x] Show the "preview is not rendering drafts" warning in the UI (toolbar banner), not just the console
-- [x] Undo/redo for block operations (add↔remove, move↔move) — toolbar buttons; keyboard shortcuts pending
+- [x] Undo/redo for block operations (add↔remove, move↔move) — toolbar buttons + Ctrl/⌘+Z shortcuts (page and admin)
 - [x] i18n: admin strings via Payload `useTranslation` / `i18n.translations`; SDK overlay strings delivered in `hello`
-- [ ] Keyboard a11y for the overlay: navigate regions, Enter to edit, keyboard alternative to drag-reorder (e.g. Alt+↑/↓)
+- [x] Keyboard a11y for the overlay: navigate regions, Enter to edit, keyboard alternative to drag-reorder (e.g. Alt+↑/↓)
 
 ## Refactoring
 

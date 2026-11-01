@@ -112,6 +112,7 @@ Keyboard, while edit mode is on and focus is not in one of the page's own form c
 | <kbd>Enter</kbd> | Edit the selected region, like a double-click |
 | <kbd>Alt</kbd>+<kbd>↓</kbd> / <kbd>Alt</kbd>+<kbd>↑</kbd> | Move the selected row down / up (keyboard alternative to drag) |
 | <kbd>Esc</kbd> | Clear the selection |
+| <kbd>Ctrl</kbd>/<kbd>⌘</kbd>+<kbd>Z</kbd>, <kbd>Ctrl</kbd>/<kbd>⌘</kbd>+<kbd>Shift</kbd>+<kbd>Z</kbd> or <kbd>Ctrl</kbd>+<kbd>Y</kbd> | Undo / redo block changes — on the page and in the admin (outside text fields) |
 
 ## Choosing a preview mode
 

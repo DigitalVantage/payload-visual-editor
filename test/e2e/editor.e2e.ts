@@ -437,6 +437,28 @@ test.describe('visual editor', () => {
     await expect(undo).toBeDisabled()
   })
 
+  test('undo/redo shortcuts work from the page and from the admin', async ({ page }) => {
+    await login(page, 'dev@payloadcms.com')
+    const { frame } = await openTestPage(page)
+    const rows = frame.locator('[data-pve-container="layout"] [data-pve-row]')
+
+    const chip = await hoverRowChip(frame, '[data-pve-block-type="cta"]')
+    await chip.locator('[data-pve-chip-action="duplicate"]').click()
+    await expect(rows).toHaveCount(3)
+
+    // Focus is in the iframe after the chip click: the SDK forwards the chord
+    await page.keyboard.press('ControlOrMeta+z')
+    await expect(rows).toHaveCount(2)
+
+    // Back in the admin, outside any text field
+    await page
+      .locator('.doc-header, .document-fields')
+      .first()
+      .click({ position: { x: 4, y: 4 } })
+    await page.keyboard.press('ControlOrMeta+Shift+z')
+    await expect(rows).toHaveCount(3)
+  })
+
   test('drag handle reorders rows with a drop indicator', async ({ page }) => {
     await login(page, 'dev@payloadcms.com')
     const { frame } = await openTestPage(page)

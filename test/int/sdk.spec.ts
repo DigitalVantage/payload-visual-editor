@@ -490,6 +490,24 @@ describe('initVisualEditing (site SDK end-to-end)', () => {
     })
   })
 
+  it('forwards undo/redo shortcuts to the admin, except while typing in the page', () => {
+    document.querySelector('main')!.insertAdjacentHTML('beforeend', '<input id="site-search" />')
+    teardown = initVisualEditing({ serverURL: ADMIN_ORIGIN })
+    sendFromAdmin('hello', helloPayload)
+    post.mockClear()
+
+    const chord = (init: KeyboardEventInit, target: EventTarget = document.body) =>
+      target.dispatchEvent(new KeyboardEvent('keydown', { bubbles: true, cancelable: true, ...init }))
+    chord({ ctrlKey: true, key: 'z' })
+    chord({ key: 'z', metaKey: true, shiftKey: true })
+    chord({ ctrlKey: true, key: 'z' }, document.getElementById('site-search')!)
+
+    expect(outgoing(post).map((m) => [m.type, m.payload])).toEqual([
+      ['payload-visual-editor:history', { action: 'undo' }],
+      ['payload-visual-editor:history', { action: 'redo' }],
+    ])
+  })
+
   it('posts select for the row from the chip edit button and locks it', () => {
     teardown = initVisualEditing({ serverURL: ADMIN_ORIGIN })
     sendFromAdmin('hello', helloPayload)
