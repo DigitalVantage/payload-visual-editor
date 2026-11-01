@@ -46,3 +46,38 @@ Release confidence — tests that touch the real thing (real Payload config, rea
 ## Docs / ecosystem
 
 - [ ] Non-React integration example (vanilla HTML or Astro) in `dev/` or as a README recipe
+
+## Roadmap — Now (Nov–Dec 2026)
+
+From the 2026-11-01 market research (competing plugins, Payload 4, user demand). Order is priority.
+
+- [ ] Stable 1.1.0: finish the rc dogfood in the DV project + manual checklist, then publish to `latest`
+- [ ] Payload 4 beta line (`2.0.0-beta`, peer `^4.0.0-beta`): `v4-beta` entry in the `release:verify` matrix; adapt `payload-internals.ts` (edit-view slot `elements` → `edit`, globals' `beforeDocumentControls`, `useDocumentTitle`, `useField` without `readOnly`, `useLocale` → `Locale | null`, `RouterAdapter`, Next ≥16.4); check `RenderFields`/`useForm` in the unread part of the v4 migration guide; review styles against the redesigned admin. 1.x stays for Payload 3
+- [ ] Isolate the overlay from host-site CSS (Shadow DOM or the top layer) + a "hostile CSS" test; never write to the host `<html>`
+- [ ] README recipe for the official website template (SSR `RefreshRouteOnSave`, `/next/preview` redirect + `PREVIEW_SECRET`, `RenderBlocks` markup, mount `<VisualEditing/>` under the same `draftMode()` gate; confirm the handshake survives the redirect), for Payload 3 and 4
+- [ ] Migration guide from `payload-inline-visual-editor` (package names, attribute compatibility, option differences, what changed)
+- [ ] Docs: why explicit attributes instead of stega (string comparisons, SEO/meta, copy-paste) + cross-origin troubleshooting (CSRF, `SameSite=None; Secure`, `frame-ancestors`, HTTPS on localhost)
+- [ ] Distribution: "Show and tell" in payloadcms/payload Discussions; useful answers in #7916, #18166, #16561; listing on payload.market
+
+## Roadmap — Next (Jan–Mar 2027)
+
+- [ ] Setup diagnostics: dev panel "why is the overlay not showing" (origin, `hello`, draft mode, package versions) + dev warnings for `data-pve-*` paths that do not resolve in form state
+- [ ] Orientation layer: "highlight all editable" toggle, hold Alt to hide the overlay, brief outline flash on entering edit mode, breadcrumb of the selected region
+- [ ] Surface the stock `livePreview.breakpoints` viewports clearly in the dedicated view (no own viewport system)
+- [ ] Large-page performance: measure on ~100 blocks, observer-based rects, debounce; publish the numbers
+- [ ] Block picker thumbnails from blocks' `imageURL`
+- [ ] In-place editing for `text`/`textarea` only (contenteditable, commit on Enter/blur, through form state); popover stays for every other field type
+- [ ] Ask Payload (#13979) for stable extension points for visual editors (document controls, edit-view slots)
+- [ ] Internal quality items above: React component tests, permissions contract test, React Compiler rules, non-React example
+
+## Roadmap — Later (validate demand first)
+
+- [ ] Saved sections / presets — integrate with `@focus-reactive/payload-plugin-presets` rather than build our own
+- [ ] Version / draft switcher in the editor, on Payload's native `versions`
+- [ ] "Send element to AI/MCP" extension point (not an own assistant)
+- [ ] Comments / annotations — only candidate for a paid hosted tier, no evidence of willingness to pay yet
+- [ ] "Interact" mode that passes clicks through to the page (links, forms)
+
+## Not doing (decided 2026-11-01)
+
+Own data model / free-form builder (Puck-style); stega or text matching; editing on the live site outside the admin; full Lexical editing in place; own publish workflows (scheduling, share links, diff); live collaboration (presence, cursors); runtime settings global; mobile admin layout; touch drag and drop; a paid tier now.
