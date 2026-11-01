@@ -62,6 +62,10 @@ export type VisualEditorViewOptions = {
 }
 
 export type VisualEditorOptions = {
+  /**
+   * @deprecated Has no effect and will be removed in 2.0. The preview's
+   * breakpoints come from Payload's own `admin.livePreview.breakpoints`.
+   */
   breakpoints?: 'inherit' | LivePreviewConfig['breakpoints']
   collections?: Record<string, true | VisualEditorEntityOptions>
   debug?: boolean
