@@ -3,22 +3,20 @@
 [![npm version](https://img.shields.io/npm/v/@digitalvantage/payload-visual-editor.svg)](https://www.npmjs.com/package/@digitalvantage/payload-visual-editor)
 [![license](https://img.shields.io/npm/l/@digitalvantage/payload-visual-editor.svg)](./LICENSE)
 
-Inline visual editing for [Payload CMS](https://payloadcms.com) 3.x — browse your site in Live Preview, toggle edit mode, hover-highlight editable regions, double-click to edit any field with native Payload field UI, and add / duplicate / remove / drag-reorder blocks directly on the page. A dedicated full-screen editor view, cross-document editing drawers, and a toolbar with save / publish / locale round it out.
+Inline visual editing for [Payload CMS](https://payloadcms.com) 3.x — browse your site in Live Preview, toggle edit mode, hover-highlight editable regions, double-click to edit any field with native Payload field UI, and add / duplicate / remove / reorder blocks directly on the page, with undo, keyboard control and a translated UI. A dedicated full-screen editor view, cross-document editing drawers, and a toolbar with save / publish / locale round it out.
 
-![Double-clicking a heading opens a popover with the native Payload text field, then a rich text body opens the full Lexical editor with its formatting toolbar — the page updates as you type](docs/media/inline-editing.gif)
+![Double-clicking the hero heading opens a popover with the native Payload text field and the page follows every keystroke; then a block is duplicated from its row chip and the change is undone from the toolbar](docs/media/inline-editing.gif)
 
 The editor is layered on top of core Live Preview: the standard save / publish / autosave / versions / locales flow keeps working unchanged, document data flows through the stock Live Preview pipeline, and every field type (Lexical, uploads, relationships, custom plugin fields) gets native editing for free.
 
-> **Status: 1.0.** The public API is stable; changes follow semver.
->
-> This is Digital Vantage's fork of [what-digital/payload-inline-visual-editor](https://github.com/what-digital/payload-inline-visual-editor) (MIT), published under the `@digitalvantage` scope and developed for our own sites first. Import paths change scope only: `payload-inline-visual-editor` → `@digitalvantage/payload-visual-editor`, `@payload-inline-visual-editor/core` → `@digitalvantage/payload-visual-editor-core`, `@payload-inline-visual-editor/react` → `@digitalvantage/payload-visual-editor-react`.
+> **Status: 1.x.** The public API is stable; changes follow semver. Built and maintained by [Digital Vantage](https://www.digitalvantage.pl), used on our own production sites first.
 
 ## A look around
 
 |  |  |
 |---|---|
 | **Hover to find a block.** Every marked region outlines on hover, labelled with its block name, with row chips for edit · add above / below · duplicate · remove · reorder · show in layout.<br><br>![Hovering a block shows its outline, label and row chips](docs/media/hover-and-chips.png) | **Double-click a block to edit it.** The popover renders the block's own subfields — including uploads and rich text — bound to the same document form the sidebar uses.<br><br>![Double-clicking a hero block opens a popover with its heading, subheading and image fields](docs/media/block-popover.png) |
-| **Or edit a single field.** Double-click any individual marked field to get just that one, anchored next to what you clicked.<br><br>![Double-clicking a button label opens a popover with only that field](docs/media/field-popover.png) | **The full form is still there.** Toggle the layout panel for the stock Payload blocks UI beside the page — the two stay in sync, and "show in layout" jumps from a block to its row.<br><br>![The docked layout panel showing the stock Payload blocks field next to the live page](docs/media/layout-panel.png) |
+| **Or edit a single field.** Double-click any individual marked field to get just that one, anchored next to what you clicked.<br><br>![Double-clicking the hero heading opens a popover with only that field](docs/media/field-popover.png) | **The full form is still there.** Toggle the layout panel for the stock Payload blocks UI beside the page — the two stay in sync, and "show in layout" jumps from a block to its row.<br><br>![The docked layout panel showing the stock Payload blocks field next to the live page, the hero heading field focused](docs/media/layout-panel.png) |
 
 ## Packages
 
@@ -253,6 +251,12 @@ if (window.self !== window.top) {
 }
 ```
 
+## How it works
+
+![The Payload admin holds the visual editor plugin, the document form and the stock Live Preview. Document data reaches your pages only through the stock Live Preview messages; a separate editor channel carries intent between the plugin and the site SDK](docs/media/architecture.svg)
+
+The plugin never moves document data itself. Edits land in the regular Payload document form — the same one the sidebar shows — and reach the page through the stock Live Preview pipeline. The editor channel between the admin and the site SDK carries only intent and metadata: which region was clicked, which block operation was requested, whether edit mode is on. That is why save, publish, autosave, versions, locales and every field type keep working unchanged.
+
 ## Security model
 
 - The SDK is inert until a valid `hello` from the configured admin origin; every message is checked against origin, `event.source`, and a per-load session id. No `'*'` postMessage targets.
@@ -268,6 +272,8 @@ pnpm test         # vitest int tests (run build first)
 pnpm check        # build + lint + package lint + format check + typecheck + int tests
 pnpm dev          # playground at http://localhost:3000
 pnpm e2e          # Playwright e2e (starts the playground itself)
+pnpm release:verify  # packed tarballs in blank Payload apps (lowest supported + latest), browser smoke test
+pnpm docs:media   # regenerate the README screenshots, GIF and diagram
 ```
 
 Playground admin: `http://localhost:3000/admin` — `dev@payloadcms.com` / `test` (seeded on first run; `viewer@payloadcms.com` / `test` is a read-only account for permission testing). Open the seeded **Home** page and switch to Live Preview.
@@ -275,6 +281,12 @@ Playground admin: `http://localhost:3000/admin` — `dev@payloadcms.com` / `test
 ## Changelog
 
 Release notes live in [CHANGELOG.md](./CHANGELOG.md).
+
+## Credits
+
+The project started from [what-digital/payload-inline-visual-editor](https://github.com/what-digital/payload-inline-visual-editor) (MIT) and has since been developed independently — see the [changelog](./CHANGELOG.md) for what changed. Thanks to its contributors for the foundation.
+
+Coming from `payload-inline-visual-editor`? Import paths change scope only: `payload-inline-visual-editor` → `@digitalvantage/payload-visual-editor`, `@payload-inline-visual-editor/core` → `@digitalvantage/payload-visual-editor-core`, `@payload-inline-visual-editor/react` → `@digitalvantage/payload-visual-editor-react`.
 
 ## License
 

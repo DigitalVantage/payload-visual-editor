@@ -14,6 +14,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - Undo/redo shortcuts (Ctrl/⌘+Z, Ctrl/⌘+Shift+Z, Ctrl+Y) on the page and in the admin, outside text fields. The page forwards them over a new `history` message.
 - Keyboard navigation on the page in edit mode: ↓ / ↑ step the selection through editable regions in page order (scrolling them into view), Enter opens the selected one for editing, Alt+↓ / Alt+↑ move the selected row (keyboard alternative to drag).
 - Polish translation (`pl`).
+- README: new screenshots and demo recording, an architecture diagram, and credits for the project the code started from; `pnpm docs:media` regenerates the media.
 
 ### Changed
 
@@ -22,6 +23,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Fixed
 
+- `LICENSE` keeps the original `payload-inline-visual-editor contributors` copyright line again, alongside ours, as MIT requires; the scope move had replaced it.
 - The page selection now follows its row when the row moves (drag or keyboard). It used to keep the row's old path, so Enter, the chip's edit and add-above/below could act on whichever row took that index.
 - The plugin's `next` peer range no longer promises Next versions Payload itself rejects (15.5+, 16.0–16.2.5). It now mirrors the range of `payload@3.85`, the lowest supported release.
 - The admin controller no longer calls `useDocumentDrawerContext` conditionally (it sat behind a `||` short-circuit), which violated the Rules of Hooks and could break hook order if the drawer context changed between renders.

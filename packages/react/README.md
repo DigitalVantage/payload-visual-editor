@@ -2,7 +2,7 @@
 
 React/Next adapter for [@digitalvantage/payload-visual-editor](https://github.com/DigitalVantage/payload-visual-editor) — inline visual editing for Payload CMS 3.x.
 
-![Double-clicking a heading opens a popover with the native Payload text field, then a rich text body opens the full Lexical editor with its formatting toolbar — the page updates as you type](https://raw.githubusercontent.com/DigitalVantage/payload-visual-editor/main/docs/media/inline-editing.gif)
+![Double-clicking the hero heading opens a popover with the native Payload text field and the page follows every keystroke; then a block is duplicated from its row chip and the change is undone from the toolbar](https://raw.githubusercontent.com/DigitalVantage/payload-visual-editor/main/docs/media/inline-editing.gif)
 
 ## Usage
 
