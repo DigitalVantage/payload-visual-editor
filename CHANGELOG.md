@@ -11,7 +11,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - Admin strings are translatable through Payload's i18n under the `pluginVisualEditor` namespace. English ships built in and fills every admin language without its own translation; projects can override any string via `i18n.translations`. Close, Locale and Remove reuse Payload's own translated labels.
 - The overlay on the page (chip button titles, the empty-container "Add block" button) follows the admin language too: the admin sends translated text in `hello` (new optional `strings` field). An SDK talking to an older admin keeps English.
 - Undo / Redo buttons next to "Edit on page" revert and reapply block changes made on the page: add, duplicate, remove (the row returns with its content) and drag-reorder. Steps are tracked by row id, so edits in between do not misdirect them; a step whose block is gone is skipped with a toast. Field edits are not part of this history.
-- Keyboard navigation on the page in edit mode: ↓ / ↑ step the selection through editable regions in page order (scrolling them into view), Enter opens the selected one for editing.
+- Keyboard navigation on the page in edit mode: ↓ / ↑ step the selection through editable regions in page order (scrolling them into view), Enter opens the selected one for editing, Alt+↓ / Alt+↑ move the selected row (keyboard alternative to drag).
 - Polish translation (`pl`).
 
 ### Changed
@@ -21,6 +21,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Fixed
 
+- The page selection now follows its row when the row moves (drag or keyboard). It used to keep the row's old path, so Enter, the chip's edit and add-above/below could act on whichever row took that index.
 - The plugin's `next` peer range no longer promises Next versions Payload itself rejects (15.5+, 16.0–16.2.5). It now mirrors the range of `payload@3.85`, the lowest supported release.
 - The admin controller no longer calls `useDocumentDrawerContext` conditionally (it sat behind a `||` short-circuit), which violated the Rules of Hooks and could break hook order if the drawer context changed between renders.
 - Global blocks referenced through `blockReferences` now work beyond the row itself: double-clicking a field inside a referenced block opens its popover (it previously fell back to the panel), adding to an array/blocks container nested in a referenced block no longer fails with `unknown-container`, and the overlay labels referenced blocks with their `labels.singular` instead of the slug. `resolveDataPath` and `collectBlockLabels` accept an optional `blocksMap`.

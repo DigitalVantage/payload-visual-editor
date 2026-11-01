@@ -26,7 +26,7 @@ export type Selection = {
 
 export type SelectionDeps = {
   access: DocAccess
-  blockOps: Pick<BlockOps, 'opsForRow' | 'rowAction'>
+  blockOps: Pick<BlockOps, 'moveRow' | 'opsForRow' | 'rowAction'>
   bridge: Pick<SiteBridge, 'readOnly' | 'send'>
   chip: Pick<RowChip, 'hide' | 'show'>
   overlay: Pick<OverlayRenderer, 'flash' | 'layerContains' | 'setHover' | 'setLocked'>
@@ -43,6 +43,17 @@ const anchorNear = (element: Element): { x: number; y: number } => {
   }
 }
 
+/** A region's counterpart in a fresh scan: same element, same identity, or — for a row — same row id. */
+const relocate = (region: ScannedRegion, regions: ScannedRegion[]): null | ScannedRegion =>
+  regions.find((candidate) => candidate.element === region.element && candidate.kind === region.kind) ??
+  regions.find((candidate) => candidate.regionId === region.regionId) ??
+  (region.rowId
+    ? regions.find(
+        (candidate) => candidate.kind === 'row' && candidate.rowId === region.rowId && candidate.scope === region.scope,
+      )
+    : undefined) ??
+  null
+
 const isTypingTarget = (target: EventTarget | null): boolean =>
   target instanceof Element &&
   (target.closest('input, textarea, select, [contenteditable=""], [contenteditable="true"]') !== null ||
@@ -52,7 +63,8 @@ const isTypingTarget = (target: EventTarget | null): boolean =>
  * Pointer- and keyboard-driven selection on the page: hover highlight, click-to-lock with
  * the row chip, dblclick-to-edit and doc-switch requests, and the admin's
  * hover/select/deselect notifications that go with them. Arrow keys step the
- * lock through editable regions in document order; Enter edits the locked one.
+ * lock through editable regions in document order; Enter edits the locked one;
+ * Alt+arrows move the locked row.
  */
 export const createSelection = ({
   access,
@@ -280,6 +292,14 @@ export const createSelection = ({
     if (event.defaultPrevented || isTypingTarget(event.target) || event.ctrlKey || event.metaKey) {
       return
     }
+    if (event.altKey && !event.shiftKey && (event.key === 'ArrowDown' || event.key === 'ArrowUp')) {
+      const row = locked ? rowRegionFor(locked) : null
+      if (row) {
+        event.preventDefault()
+        blockOps.moveRow(row, event.key === 'ArrowDown' ? 1 : -1)
+      }
+      return
+    }
     if (event.altKey || event.shiftKey) {
       return
     }
@@ -358,8 +378,14 @@ export const createSelection = ({
       setHovered(null)
     },
     resolveAfterRescan: (regions) => {
-      if (locked && !locked.element.isConnected) {
-        setLocked(regions.find((region) => region.regionId === locked?.regionId) ?? null)
+      if (locked) {
+        // The same region under a new path (its row moved) is still the selection
+        const relocated = relocate(locked, regions)
+        if (relocated) {
+          setLocked(relocated, { notify: false })
+        } else {
+          setLocked(null)
+        }
       }
       if (hovered && !hovered.element.isConnected) {
         setHovered(regions.find((region) => region.regionId === hovered?.regionId) ?? null)

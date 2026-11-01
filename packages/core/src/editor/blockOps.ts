@@ -5,6 +5,7 @@ import type { ScannedRegion } from '../scanner.js'
 import type { DocAccess } from './docAccess.js'
 import type { Timers } from './timers.js'
 
+import { PVE_ATTR } from '../attrs.js'
 import { containerPathOf, isRowPath, rowIndexOf } from './paths.js'
 
 // Shimmer starts only if the page hasn't re-rendered shortly after an op-ack
@@ -27,6 +28,8 @@ export type BlockOps = {
   /** Drops ops still waiting for an ack (edit mode off). */
   clearPending: () => void
   handleAck: (ack: PveMessagePayloads['op-ack']) => void
+  /** Keyboard alternative to drag: one step up (-1) or down (1) among its siblings. */
+  moveRow: (row: ScannedRegion, delta: -1 | 1) => void
   /** Chip ops for a row: plugin config ∧ container updatable ∧ stable row id. */
   opsForRow: (row: ScannedRegion) => null | PveBlockOps
   /** A fresh region set landed — the page has re-rendered since any op. */
@@ -93,6 +96,22 @@ export const createBlockOps = ({
     return row?.element.parentElement ?? null
   }
 
+  const opsForRow = (row: ScannedRegion): null | PveBlockOps => {
+    if (row.kind !== 'row' || !row.rowId || !isRowPath(row.path)) {
+      return null
+    }
+    if (!access.canUpdateContainer(containerPathOf(row.path), row.scope)) {
+      return null
+    }
+    const ops: PveBlockOps = {
+      add: access.blockOps.add,
+      duplicate: access.blockOps.duplicate,
+      move: access.blockOps.move && siblingRows(row).length > 1,
+      remove: access.blockOps.remove,
+    }
+    return ops.add || ops.duplicate || ops.move || ops.remove ? ops : null
+  }
+
   const sendOp = (op: Omit<PveOp, 'opId'>): void => {
     if (bridge.readOnly) {
       return
@@ -132,21 +151,28 @@ export const createBlockOps = ({
         console.warn(`[@digitalvantage/payload-visual-editor] Block operation failed: ${ack.error ?? 'unknown error'}`)
       }
     },
-    opsForRow: (row) => {
-      if (row.kind !== 'row' || !row.rowId || !isRowPath(row.path)) {
-        return null
+    moveRow: (row, delta) => {
+      if (!row.rowId || !opsForRow(row)?.move) {
+        return
       }
-      if (!access.canUpdateContainer(containerPathOf(row.path), row.scope)) {
-        return null
+      // Read the live path: repeated presses can outrun the debounced rescan,
+      // and the scanned path still names the row's previous index
+      const path = row.element.getAttribute(PVE_ATTR.field) ?? row.path
+      const fromIndex = rowIndexOf(path)
+      const moveToIndex = fromIndex + delta
+      if (moveToIndex < 0 || moveToIndex >= siblingRows(row).length) {
+        return
       }
-      const ops: PveBlockOps = {
-        add: access.blockOps.add,
-        duplicate: access.blockOps.duplicate,
-        move: access.blockOps.move && siblingRows(row).length > 1,
-        remove: access.blockOps.remove,
-      }
-      return ops.add || ops.duplicate || ops.move || ops.remove ? ops : null
+      sendOp({
+        containerPath: containerPathOf(path),
+        moveFromIndex: fromIndex,
+        moveToIndex,
+        op: 'move',
+        rowId: row.rowId,
+        scope: row.scope,
+      })
     },
+    opsForRow,
     regionsChanged: () => {
       regionsVersion += 1
     },

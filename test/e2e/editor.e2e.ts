@@ -244,6 +244,29 @@ test.describe('visual editor', () => {
     await expect(page.locator('#field-layout__0__heading')).toBeFocused()
   })
 
+  test('Alt+arrows move the selected row, and the selection follows it', async ({ page }) => {
+    await login(page, 'dev@payloadcms.com')
+    const { frame } = await openTestPage(page)
+    const rows = frame.locator('[data-pve-container="layout"] [data-pve-row]')
+
+    await frame.locator('[data-pve-block-type="hero"]').click({ position: { x: 8, y: 8 } })
+    await page.keyboard.press('Alt+ArrowDown')
+    await expect(rows.first()).toHaveAttribute('data-pve-block-type', 'cta')
+    // Once the page settles, the selection highlight sits on the moved row
+    const hero = frame.locator('[data-pve-block-type="hero"]')
+    await expect
+      .poll(async () => {
+        const [box, target] = await Promise.all([
+          frame.locator('[data-pve-locked-box]').boundingBox(),
+          hero.boundingBox(),
+        ])
+        return box && target ? Math.abs(box.y - target.y) < 4 : false
+      })
+      .toBe(true)
+    await page.keyboard.press('Alt+ArrowUp')
+    await expect(rows.first()).toHaveAttribute('data-pve-block-type', 'hero')
+  })
+
   test('a preview rendering published content shows a draft warning', async ({ page }) => {
     await openHomePageInLivePreview(page, 'dev@payloadcms.com')
     await expect(page.getByRole('button', { name: 'Edit on page' })).toBeEnabled({ timeout: 15_000 })

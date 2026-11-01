@@ -446,6 +446,50 @@ describe('initVisualEditing (site SDK end-to-end)', () => {
     expect(selectedPath()).toBe('layout.0')
   })
 
+  it('moves the locked row with Alt+arrows, within its container', () => {
+    document
+      .querySelector('[data-pve-container="layout"]')!
+      .insertAdjacentHTML('beforeend', '<section data-pve-field="layout.1" data-pve-row="row2"></section>')
+    teardown = initVisualEditing({ serverURL: ADMIN_ORIGIN })
+    sendFromAdmin('hello', helloPayload)
+    const press = (key: string) =>
+      document.body.dispatchEvent(new KeyboardEvent('keydown', { altKey: true, bubbles: true, cancelable: true, key }))
+
+    document.querySelector('[data-pve-row="row1"]')!.dispatchEvent(new MouseEvent('click', { bubbles: true }))
+    post.mockClear()
+    press('ArrowUp')
+    expect(outgoing(post)).toEqual([])
+
+    press('ArrowDown')
+    const ops = outgoing(post).filter((m) => m.type === 'payload-visual-editor:op')
+    expect(ops.map((m) => m.payload)).toEqual([
+      expect.objectContaining({ moveFromIndex: 0, moveToIndex: 1, op: 'move', rowId: 'row1' }),
+    ])
+  })
+
+  it('keeps the lock on a row whose path changed under it (reordered in place)', async () => {
+    document
+      .querySelector('[data-pve-container="layout"]')!
+      .insertAdjacentHTML('beforeend', '<section data-pve-field="layout.1" data-pve-row="row2"></section>')
+    teardown = initVisualEditing({ serverURL: ADMIN_ORIGIN })
+    sendFromAdmin('hello', helloPayload)
+    const row1 = document.querySelector('[data-pve-row="row1"]')!
+    row1.dispatchEvent(new MouseEvent('click', { bubbles: true }))
+
+    // A keyed re-render moves the same node to index 1
+    row1.setAttribute('data-pve-field', 'layout.1')
+    document.querySelector('[data-pve-row="row2"]')!.setAttribute('data-pve-field', 'layout.0')
+    await new Promise((resolve) => setTimeout(resolve, 150))
+
+    post.mockClear()
+    document.body.dispatchEvent(new KeyboardEvent('keydown', { bubbles: true, cancelable: true, key: 'Enter' }))
+    const types = outgoing(post).map((m) => m.type)
+    expect(types).not.toContain('payload-visual-editor:deselect')
+    expect(outgoing(post).find((m) => m.type === 'payload-visual-editor:select')?.payload).toMatchObject({
+      path: 'layout.1',
+    })
+  })
+
   it('posts select for the row from the chip edit button and locks it', () => {
     teardown = initVisualEditing({ serverURL: ADMIN_ORIGIN })
     sendFromAdmin('hello', helloPayload)

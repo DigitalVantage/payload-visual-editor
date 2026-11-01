@@ -110,6 +110,7 @@ Keyboard, while edit mode is on and focus is not in one of the page's own form c
 |---|---|
 | <kbd>↓</kbd> / <kbd>↑</kbd> | Select the next / previous editable region (rows and fields, in page order) |
 | <kbd>Enter</kbd> | Edit the selected region, like a double-click |
+| <kbd>Alt</kbd>+<kbd>↓</kbd> / <kbd>Alt</kbd>+<kbd>↑</kbd> | Move the selected row down / up (keyboard alternative to drag) |
 | <kbd>Esc</kbd> | Clear the selection |
 
 ## Choosing a preview mode
