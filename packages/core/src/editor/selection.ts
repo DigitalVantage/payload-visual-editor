@@ -34,10 +34,25 @@ export type SelectionDeps = {
   rowDrag: Pick<RowDrag, 'active' | 'start'>
 }
 
+/** Popover anchor near an element's top-right corner, where the chip sits — clamped to the viewport. */
+const anchorNear = (element: Element): { x: number; y: number } => {
+  const rect = element.getBoundingClientRect()
+  return {
+    x: Math.max(8, Math.min(rect.right - 12, window.innerWidth - 8)),
+    y: Math.max(8, Math.min(rect.top + 12, window.innerHeight - 8)),
+  }
+}
+
+const isTypingTarget = (target: EventTarget | null): boolean =>
+  target instanceof Element &&
+  (target.closest('input, textarea, select, [contenteditable=""], [contenteditable="true"]') !== null ||
+    (target instanceof HTMLElement && target.isContentEditable))
+
 /**
- * Pointer-driven selection on the page: hover highlight, click-to-lock with
+ * Pointer- and keyboard-driven selection on the page: hover highlight, click-to-lock with
  * the row chip, dblclick-to-edit and doc-switch requests, and the admin's
- * hover/select/deselect notifications that go with them.
+ * hover/select/deselect notifications that go with them. Arrow keys step the
+ * lock through editable regions in document order; Enter edits the locked one.
  */
 export const createSelection = ({
   access,
@@ -227,9 +242,55 @@ export const createSelection = ({
     }
   }
 
+  /** Editable leaves and rows in document order — what arrow keys step through. */
+  const navigableRegions = (): ScannedRegion[] =>
+    registry.regions.filter(
+      (region) => region.kind !== 'container' && region.element.isConnected && access.isEditable(region),
+    )
+
+  const lockAndReveal = (region: ScannedRegion): void => {
+    setLocked(region)
+    const rect = region.element.getBoundingClientRect()
+    if ((rect.top < 0 || rect.bottom > window.innerHeight) && typeof region.element.scrollIntoView === 'function') {
+      region.element.scrollIntoView({ block: 'nearest' })
+    }
+  }
+
+  const stepLock = (direction: -1 | 1): void => {
+    const regions = navigableRegions()
+    if (regions.length === 0) {
+      return
+    }
+    const current = locked ? regions.findIndex((region) => region.regionId === locked?.regionId) : -1
+    const next =
+      current === -1
+        ? direction === 1
+          ? 0
+          : regions.length - 1
+        : Math.max(0, Math.min(regions.length - 1, current + direction))
+    lockAndReveal(regions[next]!)
+  }
+
+  // Keys only act on the editing canvas — never while the page's own controls have focus
   const onKeyDown = (event: KeyboardEvent): void => {
     if (event.key === 'Escape' && locked) {
       setLocked(null)
+      return
+    }
+    if (event.defaultPrevented || isTypingTarget(event.target) || event.ctrlKey || event.metaKey) {
+      return
+    }
+    if (event.altKey || event.shiftKey) {
+      return
+    }
+    if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+      event.preventDefault()
+      stepLock(event.key === 'ArrowDown' ? 1 : -1)
+      return
+    }
+    if (event.key === 'Enter' && locked) {
+      event.preventDefault()
+      sendSelect(locked, anchorNear(locked.element))
     }
   }
 
@@ -248,12 +309,7 @@ export const createSelection = ({
         return
       }
       if (action === 'edit') {
-        // Anchor the popover near the chip (top-right of the row)
-        const rect = row.element.getBoundingClientRect()
-        sendSelect(row, {
-          x: Math.max(8, Math.min(rect.right - 12, window.innerWidth - 8)),
-          y: Math.max(8, Math.min(rect.top + 12, window.innerHeight - 8)),
-        })
+        sendSelect(row, anchorNear(row.element))
         return
       }
       if (action === 'show-in-layout') {

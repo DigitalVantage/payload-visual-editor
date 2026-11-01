@@ -104,6 +104,14 @@ import { VisualEditing } from '@digitalvantage/payload-visual-editor-react'
 
 Open a document in the admin panel, enter Live Preview, and click **Edit on page**. Hover highlights editable regions; a click selects a region, and a double-click expands, scrolls to, and focuses the corresponding form field in the admin panel. Rows show a chip with edit / add / duplicate / remove / show-in-layout / drag-to-reorder. **Undo** / **Redo** next to the toggle revert block changes made on the page (not edits typed into fields).
 
+Keyboard, while edit mode is on and focus is not in one of the page's own form controls:
+
+| Key | Action |
+|---|---|
+| <kbd>↓</kbd> / <kbd>↑</kbd> | Select the next / previous editable region (rows and fields, in page order) |
+| <kbd>Enter</kbd> | Edit the selected region, like a double-click |
+| <kbd>Esc</kbd> | Clear the selection |
+
 ## Choosing a preview mode
 
 Both stock Live Preview modes work; they differ in how fast block operations reflect on the page:

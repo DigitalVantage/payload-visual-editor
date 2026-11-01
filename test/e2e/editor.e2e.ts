@@ -230,6 +230,20 @@ test.describe('visual editor', () => {
     await expect(page.locator('#field-layout__0__heading')).not.toBeFocused()
   })
 
+  test('arrow keys step through regions on the page and Enter edits one', async ({ page }) => {
+    await login(page, 'dev@payloadcms.com')
+    const { frame } = await openTestPage(page)
+    await ensureHeroRowExpanded(page)
+
+    // Give the iframe keyboard focus without selecting anything
+    await frame.locator('body').click({ position: { x: 2, y: 2 } })
+    await page.keyboard.press('ArrowDown')
+    await expect(frame.locator('[data-pve-locked-box]')).toBeVisible()
+    await page.keyboard.press('ArrowDown')
+    await page.keyboard.press('Enter')
+    await expect(page.locator('#field-layout__0__heading')).toBeFocused()
+  })
+
   test('a preview rendering published content shows a draft warning', async ({ page }) => {
     await openHomePageInLivePreview(page, 'dev@payloadcms.com')
     await expect(page.getByRole('button', { name: 'Edit on page' })).toBeEnabled({ timeout: 15_000 })

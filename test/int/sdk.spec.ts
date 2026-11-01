@@ -414,6 +414,38 @@ describe('initVisualEditing (site SDK end-to-end)', () => {
     expect(document.querySelector('[data-pve-empty-add]')!.textContent).toBe('+ Dodaj blok')
   })
 
+  it('steps the lock through editable regions with arrow keys and edits it on Enter', () => {
+    document.querySelector('main')!.insertAdjacentHTML('beforeend', '<input id="site-search" />')
+    teardown = initVisualEditing({ serverURL: ADMIN_ORIGIN })
+    sendFromAdmin('hello', helloPayload)
+    const press = (key: string, target: EventTarget = document.body) =>
+      target.dispatchEvent(new KeyboardEvent('keydown', { bubbles: true, cancelable: true, key }))
+    const selectedPath = () => {
+      post.mockClear()
+      press('Enter')
+      return (outgoing(post).find((m) => m.type === 'payload-visual-editor:select')?.payload as { path: string })?.path
+    }
+    const lockedBox = document.querySelector('[data-pve-locked-box]') as HTMLElement
+
+    // Nothing locked: Enter does nothing, the first arrow press starts at the top
+    expect(selectedPath()).toBeUndefined()
+    press('ArrowDown')
+    expect(lockedBox.style.display).toBe('block')
+    expect(selectedPath()).toBe('layout.0')
+
+    press('ArrowDown')
+    expect(selectedPath()).toBe('layout.0.heading')
+    // Clamped at the last region
+    press('ArrowDown')
+    expect(selectedPath()).toBe('layout.0.heading')
+    press('ArrowUp')
+    expect(selectedPath()).toBe('layout.0')
+
+    // The page's own controls keep their keys
+    press('ArrowDown', document.getElementById('site-search')!)
+    expect(selectedPath()).toBe('layout.0')
+  })
+
   it('posts select for the row from the chip edit button and locks it', () => {
     teardown = initVisualEditing({ serverURL: ADMIN_ORIGIN })
     sendFromAdmin('hello', helloPayload)
