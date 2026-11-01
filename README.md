@@ -282,11 +282,37 @@ Playground admin: `http://localhost:3000/admin` — `dev@payloadcms.com` / `test
 
 Release notes live in [CHANGELOG.md](./CHANGELOG.md).
 
+## Migrating from payload-inline-visual-editor
+
+This project started as a fork of `payload-inline-visual-editor`, so the attributes, the message protocol, the plugin options and every export name are the same — only the package scope differs. Migrate all three packages together:
+
+1. Swap the packages:
+
+   ```sh
+   pnpm remove payload-inline-visual-editor @payload-inline-visual-editor/core @payload-inline-visual-editor/react
+   pnpm add @digitalvantage/payload-visual-editor @digitalvantage/payload-visual-editor-react
+   # add @digitalvantage/payload-visual-editor-core only if you import the vanilla SDK directly
+   ```
+
+2. Update the imports:
+
+   | Before | After |
+   |---|---|
+   | `payload-inline-visual-editor` | `@digitalvantage/payload-visual-editor` |
+   | `@payload-inline-visual-editor/react` | `@digitalvantage/payload-visual-editor-react` |
+   | `@payload-inline-visual-editor/core` | `@digitalvantage/payload-visual-editor-core` |
+
+3. Regenerate the import map — the admin component paths changed with the scope:
+
+   ```sh
+   payload generate:importmap
+   ```
+
+Your `data-pve-*` markup and `visualEditor({ … })` options stay as they are. What you get on top: undo / redo of block changes, keyboard control, a translated admin UI (English and Polish built in), error toasts and a draft-mode warning in the toolbar, plus fixes for global blocks (`blockReferences`), cancelled block-picker adds and a selection that follows moved rows — see the [changelog](./CHANGELOG.md).
+
 ## Credits
 
 The project started from [what-digital/payload-inline-visual-editor](https://github.com/what-digital/payload-inline-visual-editor) (MIT) and has since been developed independently — see the [changelog](./CHANGELOG.md) for what changed. Thanks to its contributors for the foundation.
-
-Coming from `payload-inline-visual-editor`? Import paths change scope only: `payload-inline-visual-editor` → `@digitalvantage/payload-visual-editor`, `@payload-inline-visual-editor/core` → `@digitalvantage/payload-visual-editor-core`, `@payload-inline-visual-editor/react` → `@digitalvantage/payload-visual-editor-react`.
 
 ## License
 
