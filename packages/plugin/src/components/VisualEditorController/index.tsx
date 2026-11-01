@@ -1,7 +1,7 @@
 'use client'
 
 import type { PveMessagePayloads, PveOp, PveRegion, PveScopeRef } from '@digitalvantage/payload-visual-editor-core'
-import type { ClientBlock, Labels, SanitizedFieldsPermissions } from 'payload'
+import type { ClientBlock, Labels } from 'payload'
 
 import { parseScope } from '@digitalvantage/payload-visual-editor-core'
 import { formatAdminURL } from 'payload/shared'
@@ -9,8 +9,6 @@ import { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react'
 
 import type { BlockOpsOptions } from '../../index.js'
 import type { BlocksMapLike, FieldSchemaLike } from '../../utils/fieldPaths.js'
-import type { PopoverPoint } from '../../utils/popoverPosition.js'
-import type { PopoverTarget } from '../../utils/popoverTarget.js'
 
 import { useLatestCallback } from '../../hooks/useLatestCallback.js'
 import { visualEditorRuntime } from '../../index.js'
@@ -32,14 +30,13 @@ import { blockOpErrorMessage, normalizeBlockOps, planBlockOp, resolveRowIndexByI
 import { resolveDataPath } from '../../utils/fieldPaths.js'
 import { collectRowExpansions, collectRowIsolation, focusFormField, isValidDataPath } from '../../utils/formFocus.js'
 import { buildDocRef, buildPermissionSummary, collectBlockLabels } from '../../utils/helloPayload.js'
-import { translateIframePoint } from '../../utils/popoverPosition.js'
-import { popoverLabel, resolvePopoverPermissions, resolvePopoverTarget } from '../../utils/popoverTarget.js'
 import { buildViewPath } from '../../utils/viewPath.js'
 import { CollectionDocDrawer, GlobalDocDrawer } from '../DocSwitchDrawer/index.js'
 import { DraftWarning } from '../DraftWarning/index.js'
 import { FieldPopover } from '../FieldPopover/index.js'
 import { LocaleSwitcher } from '../LocaleSwitcher/index.js'
 import { usePveDocDrawer, usePveShell } from '../VisualEditorScreen/shellContext.js'
+import { useFieldPopover } from './useFieldPopover.js'
 import { useReverseFocusSync } from './useReverseFocusSync.js'
 
 export type VisualEditorControllerProps = {
@@ -69,14 +66,6 @@ type PendingRemove = {
 type ContainerFieldLike = FieldSchemaLike & {
   blockReferences?: (ClientBlock | string)[]
   labels?: Labels
-}
-
-type PopoverState = {
-  anchor: PopoverPoint
-  key: string
-  label: string
-  permissions: SanitizedFieldsPermissions
-  target: PopoverTarget
 }
 
 /**
@@ -113,12 +102,10 @@ export const VisualEditorController = ({ blockOps, debug }: VisualEditorControll
   pendingAddRef.current = pendingAdd
   const [pendingRemove, setPendingRemove] = useState<null | PendingRemove>(null)
   const [docSwitch, setDocSwitch] = useState<null | PveScopeRef>(null)
-  const [popover, setPopover] = useState<null | PopoverState>(null)
   const bridgeRef = useRef<AdminBridge | null>(null)
   const regionPathsRef = useRef<Set<string>>(new Set())
   const regionsRef = useRef<Map<string, PveRegion>>(new Map())
   const selectSeqRef = useRef(0)
-  const popoverSeqRef = useRef(0)
 
   // The dedicated view has no reason to exist without the preview iframe —
   // force it on (the shell hides the stock toggler)
@@ -160,54 +147,13 @@ export const VisualEditorController = ({ blockOps, debug }: VisualEditorControll
     }),
   }))
 
-  // Popover: resolve the selected path against the client schema and anchor
-  // near the click, translated through the iframe transform. All inputs are
-  // untrusted — unresolvable targets fall back to the panel focus flow.
-  const openPopover = useLatestCallback((payload: PveMessagePayloads['select']): boolean => {
-    const schemaFields = (docConfig?.fields ?? []) as unknown as FieldSchemaLike[]
-    const region = regionsRef.current.get(payload.regionId)
-    const getBlockType = (containerPath: string, rowIndex: number): string | undefined =>
-      getFields()[containerPath]?.rows?.[rowIndex]?.blockType ??
-      (region?.path === `${containerPath}.${rowIndex}` ? region.blockType : undefined)
-
-    const target = resolvePopoverTarget({
-      blocksMap,
-      fields: schemaFields,
-      getBlockType,
-      path: payload.path,
-    })
-    if (!target) {
-      return false
-    }
-    const permissions = resolvePopoverPermissions({
-      fields: docPermissions?.fields,
-      getBlockType,
-      kind: target.kind,
-      path: target.path,
-    })
-
-    const iframe = iframeRef.current
-    const rect = iframe?.getBoundingClientRect()
-    const anchor =
-      iframe && rect && payload.point
-        ? translateIframePoint({
-            contentSize: { height: iframe.offsetHeight || rect.height, width: iframe.offsetWidth || rect.width },
-            iframeRect: rect,
-            point: payload.point,
-          })
-        : {
-            x: (rect?.left ?? 0) + (rect?.width ?? window.innerWidth) / 2,
-            y: (rect?.top ?? 0) + 120,
-          }
-
-    setPopover({
-      anchor,
-      key: `${payload.regionId}:${++popoverSeqRef.current}`,
-      label: popoverLabel(target, collectBlockLabels(schemaFields, blocksMap)),
-      permissions,
-      target,
-    })
-    return true
+  const { clearPopover, openPopover, popover } = useFieldPopover({
+    blocksMap,
+    fieldPermissions: docPermissions?.fields,
+    getFields,
+    getRegion: (regionId) => regionsRef.current.get(regionId),
+    iframeRef,
+    schemaFields: (docConfig?.fields ?? []) as unknown as FieldSchemaLike[],
   })
 
   // Scroll/focus a field in the fields panel — opening the shell's panel first
@@ -247,7 +193,7 @@ export const VisualEditorController = ({ blockOps, debug }: VisualEditorControll
     if (!isValidDataPath(path)) {
       return
     }
-    setPopover(null)
+    clearPopover()
     for (const isolation of collectRowIsolation(getFields(), path)) {
       dispatchFields({ path: isolation.path, type: 'SET_ROW_COLLAPSED', updatedRows: isolation.updatedRows })
     }
@@ -367,7 +313,7 @@ export const VisualEditorController = ({ blockOps, debug }: VisualEditorControll
       switch (message.type) {
         case 'payload-visual-editor:deselect':
           // The SDK cleared its selection (Escape / click-away / region gone)
-          setPopover(null)
+          clearPopover()
           break
         case 'payload-visual-editor:doc-switch-request':
           handleDocSwitch(message.payload.scope)
@@ -397,7 +343,7 @@ export const VisualEditorController = ({ blockOps, debug }: VisualEditorControll
       setPreviewIsPublished(false)
       regionPathsRef.current = new Set()
       regionsRef.current = new Map()
-      setPopover(null)
+      clearPopover()
       bridge.startSession(buildHello())
     }
     startSession()
@@ -412,6 +358,7 @@ export const VisualEditorController = ({ blockOps, debug }: VisualEditorControll
     }
   }, [
     buildHello,
+    clearPopover,
     debug,
     handleDocSwitch,
     handleOp,
@@ -495,13 +442,13 @@ export const VisualEditorController = ({ blockOps, debug }: VisualEditorControll
     const enabled = !editMode
     setEditMode(enabled)
     if (!enabled) {
-      setPopover(null)
+      clearPopover()
     }
     bridgeRef.current?.send('edit-mode', { enabled })
   }
 
   const closePopover = (): void => {
-    setPopover(null)
+    clearPopover()
     // Clear the page-side selection highlight too
     bridgeRef.current?.send('deselect', null)
   }
