@@ -12,6 +12,7 @@ import type { BlocksMapLike, FieldSchemaLike } from '../../utils/fieldPaths.js'
 import type { PopoverPoint } from '../../utils/popoverPosition.js'
 import type { PopoverTarget } from '../../utils/popoverTarget.js'
 
+import { useLatestCallback } from '../../hooks/useLatestCallback.js'
 import { visualEditorRuntime } from '../../index.js'
 import {
   BlocksDrawer,
@@ -150,8 +151,7 @@ export const VisualEditorController = ({ blockOps, debug }: VisualEditorControll
     }
   }, [loadedURL])
 
-  const buildHelloRef = useRef<() => PveMessagePayloads['hello']>(null!)
-  buildHelloRef.current = () => ({
+  const buildHello = useLatestCallback((): PveMessagePayloads['hello'] => ({
     blockOps: enabledOps,
     breakpoint,
     docs: [buildDocRef({ collectionSlug, globalSlug, id })],
@@ -163,13 +163,12 @@ export const VisualEditorController = ({ blockOps, debug }: VisualEditorControll
       canSave: Boolean(hasSavePermission),
       docPermissions,
     }),
-  })
+  }))
 
   // Popover: resolve the selected path against the client schema and anchor
   // near the click, translated through the iframe transform. All inputs are
   // untrusted — unresolvable targets fall back to the panel focus flow.
-  const openPopoverRef = useRef<(payload: PveMessagePayloads['select']) => boolean>(null!)
-  openPopoverRef.current = (payload) => {
+  const openPopover = useLatestCallback((payload: PveMessagePayloads['select']): boolean => {
     const schemaFields = (docConfig?.fields ?? []) as unknown as FieldSchemaLike[]
     const region = regionsRef.current.get(payload.regionId)
     const getBlockType = (containerPath: string, rowIndex: number): string | undefined =>
@@ -214,12 +213,11 @@ export const VisualEditorController = ({ blockOps, debug }: VisualEditorControll
       target,
     })
     return true
-  }
+  })
 
   // Scroll/focus a field in the fields panel — opening the shell's panel first
   // if it is hidden, with a beat for React to commit before measuring.
-  const focusPanelFieldRef = useRef<(path: string) => void>(null!)
-  focusPanelFieldRef.current = (path) => {
+  const focusPanelField = useLatestCallback((path: string): void => {
     const wasHidden = Boolean(shell?.panelCollapsed)
     shell?.setPanelCollapsed(false)
     const seq = ++selectSeqRef.current
@@ -231,10 +229,9 @@ export const VisualEditorController = ({ blockOps, debug }: VisualEditorControll
     } else {
       run()
     }
-  }
+  })
 
-  const handleSelectRef = useRef<(payload: PveMessagePayloads['select']) => void>(null!)
-  handleSelectRef.current = (payload) => {
+  const handleSelect = useLatestCallback((payload: PveMessagePayloads['select']): void => {
     const { path } = payload
     if (!isValidDataPath(path)) {
       return
@@ -242,16 +239,15 @@ export const VisualEditorController = ({ blockOps, debug }: VisualEditorControll
     for (const expansion of collectRowExpansions(getFields(), path)) {
       dispatchFields({ path: expansion.path, type: 'SET_ROW_COLLAPSED', updatedRows: expansion.updatedRows })
     }
-    if (shell && !inDrawer && openPopoverRef.current(payload)) {
+    if (shell && !inDrawer && openPopover(payload)) {
       return
     }
-    focusPanelFieldRef.current(path)
-  }
+    focusPanelField(path)
+  })
 
   // Chip "show in layout": open the fields panel scoped to the
   // region — its row expanded, every sibling row along the path collapsed.
-  const handleRevealRef = useRef<(payload: PveMessagePayloads['reveal']) => void>(null!)
-  handleRevealRef.current = (payload) => {
+  const handleReveal = useLatestCallback((payload: PveMessagePayloads['reveal']): void => {
     const { path } = payload
     if (!isValidDataPath(path)) {
       return
@@ -260,13 +256,12 @@ export const VisualEditorController = ({ blockOps, debug }: VisualEditorControll
     for (const isolation of collectRowIsolation(getFields(), path)) {
       dispatchFields({ path: isolation.path, type: 'SET_ROW_COLLAPSED', updatedRows: isolation.updatedRows })
     }
-    focusPanelFieldRef.current(path)
-  }
+    focusPanelField(path)
+  })
 
   // Only entities the admin actually knows can be drawer targets — the scope
   // string comes from the untrusted iframe
-  const handleDocSwitchRef = useRef<(scope: string) => void>(null!)
-  handleDocSwitchRef.current = (scope) => {
+  const handleDocSwitch = useLatestCallback((scope: string): void => {
     const parsed = parseScope(scope)
     if (!parsed) {
       return
@@ -278,20 +273,17 @@ export const VisualEditorController = ({ blockOps, debug }: VisualEditorControll
     } else if (parsed.id != null && config.collections.some((collection) => collection.slug === parsed.collection)) {
       setDocSwitch(parsed)
     }
-  }
+  })
 
-  const ackRef = useRef<(opId: string, ok: boolean, error?: string) => void>(null!)
-  ackRef.current = (opId, ok, error) => {
+  const ack = useLatestCallback((opId: string, ok: boolean, error?: string): void => {
     bridgeRef.current?.send('op-ack', { error, ok, opId })
     const message = ok ? undefined : blockOpErrorMessage(error)
     if (message) {
       toast.error(message)
     }
-  }
+  })
 
-  const handleOpRef = useRef<(op: PveOp) => void>(null!)
-  handleOpRef.current = (op) => {
-    const ack = ackRef.current
+  const handleOp = useLatestCallback((op: PveOp): void => {
     if (!hasSavePermission) {
       ack(op.opId, false, 'not-allowed')
       return
@@ -360,7 +352,7 @@ export const VisualEditorController = ({ blockOps, debug }: VisualEditorControll
         return
       }
     }
-  }
+  })
 
   useEffect(() => {
     if (!isLivePreviewing || !targetOrigin || inDrawer) {
@@ -383,24 +375,24 @@ export const VisualEditorController = ({ blockOps, debug }: VisualEditorControll
           setPopover(null)
           break
         case 'payload-visual-editor:doc-switch-request':
-          handleDocSwitchRef.current(message.payload.scope)
+          handleDocSwitch(message.payload.scope)
           break
         case 'payload-visual-editor:hello-ack':
           setConnected(true)
           setPreviewIsPublished(message.payload.draft === false)
           break
         case 'payload-visual-editor:op':
-          handleOpRef.current(message.payload)
+          handleOp(message.payload)
           break
         case 'payload-visual-editor:regions':
           regionPathsRef.current = new Set(message.payload.regions.map((region) => region.path))
           regionsRef.current = new Map(message.payload.regions.map((region) => [region.regionId, region]))
           break
         case 'payload-visual-editor:reveal':
-          handleRevealRef.current(message.payload)
+          handleReveal(message.payload)
           break
         case 'payload-visual-editor:select':
-          handleSelectRef.current(message.payload)
+          handleSelect(message.payload)
           break
       }
     })
@@ -411,7 +403,7 @@ export const VisualEditorController = ({ blockOps, debug }: VisualEditorControll
       regionPathsRef.current = new Set()
       regionsRef.current = new Map()
       setPopover(null)
-      bridge.startSession(buildHelloRef.current())
+      bridge.startSession(buildHello())
     }
     startSession()
     iframe?.addEventListener('load', startSession)
@@ -423,7 +415,19 @@ export const VisualEditorController = ({ blockOps, debug }: VisualEditorControll
       bridgeRef.current = null
       setConnected(false)
     }
-  }, [debug, iframeRef, inDrawer, isLivePreviewing, loadedURL, targetOrigin])
+  }, [
+    buildHello,
+    debug,
+    handleDocSwitch,
+    handleOp,
+    handleReveal,
+    handleSelect,
+    iframeRef,
+    inDrawer,
+    isLivePreviewing,
+    loadedURL,
+    targetOrigin,
+  ])
 
   useEffect(() => {
     if (pendingAdd) {
@@ -442,11 +446,11 @@ export const VisualEditorController = ({ blockOps, debug }: VisualEditorControll
       return
     }
     if (blocksDrawerWasOpenRef.current && pendingAdd) {
-      ackRef.current(pendingAdd.opId, false, 'cancelled')
+      ack(pendingAdd.opId, false, 'cancelled')
       setPendingAdd(null)
     }
     blocksDrawerWasOpenRef.current = false
-  }, [blocksDrawerOpen, pendingAdd])
+  }, [ack, blocksDrawerOpen, pendingAdd])
 
   useEffect(() => {
     if (pendingRemove) {
@@ -544,17 +548,17 @@ export const VisualEditorController = ({ blockOps, debug }: VisualEditorControll
       ? resolveRowIndexById(getFields(), pendingRemove.path, pendingRemove.rowId)
       : pendingRemove.rowIndex
     if (rowIndex === null) {
-      ackRef.current(pendingRemove.opId, false, 'unknown-row')
+      ack(pendingRemove.opId, false, 'unknown-row')
     } else {
       removeFieldRow({ path: pendingRemove.path, rowIndex })
-      ackRef.current(pendingRemove.opId, true)
+      ack(pendingRemove.opId, true)
     }
     setPendingRemove(null)
   }
 
   const cancelRemove = (): void => {
     if (pendingRemove) {
-      ackRef.current(pendingRemove.opId, false, 'cancelled')
+      ack(pendingRemove.opId, false, 'cancelled')
       setPendingRemove(null)
     }
   }
@@ -564,7 +568,7 @@ export const VisualEditorController = ({ blockOps, debug }: VisualEditorControll
       return
     }
     addFieldRow({ blockType, path: pendingAdd.path, rowIndex, schemaPath: pendingAdd.schemaPath })
-    ackRef.current(pendingAdd.opId, true)
+    ack(pendingAdd.opId, true)
     setPendingAdd(null)
   }
 
