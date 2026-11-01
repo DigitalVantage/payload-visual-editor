@@ -95,6 +95,16 @@ export const VisualEditorController = ({ blockOps, debug }: VisualEditorControll
       canSave: Boolean(hasSavePermission),
       docPermissions,
     }),
+    strings: {
+      addBlock: t('pluginVisualEditor:addBlock'),
+      addBlockAbove: t('pluginVisualEditor:addBlockAbove'),
+      addBlockBelow: t('pluginVisualEditor:addBlockBelow'),
+      dragToReorder: t('pluginVisualEditor:dragToReorder'),
+      duplicateBlock: t('pluginVisualEditor:duplicateBlock'),
+      editBlock: t('pluginVisualEditor:editBlock'),
+      removeBlock: t('pluginVisualEditor:removeBlock'),
+      showInLayout: t('pluginVisualEditor:showInLayout'),
+    },
   })
 
   const { dialogs, handleOp } = useBlockOpHandler({

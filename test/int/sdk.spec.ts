@@ -400,6 +400,20 @@ describe('initVisualEditing (site SDK end-to-end)', () => {
     expect(actions).toEqual(['edit', 'remove', 'show-in-layout'])
   })
 
+  it('renders overlay text from hello strings, English for anything missing', () => {
+    document.querySelector('main')!.insertAdjacentHTML('beforeend', '<div data-pve-container="sidebar"></div>')
+    teardown = initVisualEditing({ serverURL: ADMIN_ORIGIN })
+    sendFromAdmin('hello', { ...helloPayload, strings: { addBlock: 'Dodaj blok', duplicateBlock: 'Duplikuj blok' } })
+
+    document.querySelector('[data-pve-row]')!.dispatchEvent(new Event('pointermove', { bubbles: true }))
+    const chip = document.querySelector('[data-pve-chip]') as HTMLElement
+    const titleOf = (action: string) =>
+      chip.querySelector(`[data-pve-chip-action="${action}"]`)!.getAttribute('aria-label')
+    expect(titleOf('duplicate')).toBe('Duplikuj blok')
+    expect(titleOf('remove')).toBe('Remove block')
+    expect(document.querySelector('[data-pve-empty-add]')!.textContent).toBe('+ Dodaj blok')
+  })
+
   it('posts select for the row from the chip edit button and locks it', () => {
     teardown = initVisualEditing({ serverURL: ADMIN_ORIGIN })
     sendFromAdmin('hello', helloPayload)

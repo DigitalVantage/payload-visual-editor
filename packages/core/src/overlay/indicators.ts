@@ -1,5 +1,7 @@
+import type { PveOverlayStrings } from '../protocol.js'
 import type { dropIndicatorLine } from './dnd.js'
 
+import { DEFAULT_OVERLAY_STRINGS } from '../protocol.js'
 import { ACCENT, ACCENT_FILL_MED, ACCENT_FILL_SOFT } from './theme.js'
 
 const LINE_THICKNESS = 3
@@ -131,6 +133,7 @@ const MIN_EMPTY_HEIGHT = 40
 export class EmptyContainerAffordances {
   private items = new Map<string, { button: HTMLButtonElement; element: Element }>()
   private layer: HTMLElement | null = null
+  private strings: PveOverlayStrings = DEFAULT_OVERLAY_STRINGS
 
   contains(node: unknown): boolean {
     if (!(node instanceof Node)) {
@@ -164,6 +167,13 @@ export class EmptyContainerAffordances {
     }
   }
 
+  setStrings(strings: PveOverlayStrings): void {
+    this.strings = strings
+    for (const { button } of this.items.values()) {
+      button.textContent = `+ ${strings.addBlock}`
+    }
+  }
+
   set(items: EmptyContainerItem[]): void {
     if (!this.layer) {
       return
@@ -188,7 +198,7 @@ export class EmptyContainerAffordances {
       const button = this.layer.ownerDocument.createElement('button')
       button.type = 'button'
       button.setAttribute('data-pve-empty-add', item.key)
-      button.textContent = '+ Add block'
+      button.textContent = `+ ${this.strings.addBlock}`
       button.style.cssText =
         'position:fixed;display:flex;align-items:center;justify-content:center;box-sizing:border-box;' +
         `border:2px dashed ${ACCENT};border-radius:4px;background:${ACCENT_FILL_SOFT};color:${ACCENT};` +

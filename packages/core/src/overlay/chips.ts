@@ -1,5 +1,6 @@
-import type { PveBlockOps } from '../protocol.js'
+import type { PveBlockOps, PveOverlayStrings } from '../protocol.js'
 
+import { DEFAULT_OVERLAY_STRINGS } from '../protocol.js'
 import { ACCENT } from './theme.js'
 
 export type RowChipAction = 'add-above' | 'add-below' | 'duplicate' | 'edit' | 'remove' | 'show-in-layout'
@@ -46,14 +47,14 @@ const ICONS: Record<'drag' | RowChipAction, IconShape[]> = {
   ],
 }
 
-const BUTTON_TITLES: Record<'drag' | RowChipAction, string> = {
-  'add-above': 'Add block above',
-  'add-below': 'Add block below',
-  drag: 'Drag to reorder',
-  duplicate: 'Duplicate block',
-  edit: 'Edit block',
-  remove: 'Remove block',
-  'show-in-layout': 'Show in layout',
+const BUTTON_TITLE_KEYS: Record<'drag' | RowChipAction, keyof PveOverlayStrings> = {
+  'add-above': 'addBlockAbove',
+  'add-below': 'addBlockBelow',
+  drag: 'dragToReorder',
+  duplicate: 'duplicateBlock',
+  edit: 'editBlock',
+  remove: 'removeBlock',
+  'show-in-layout': 'showInLayout',
 }
 
 const SVG_NS = 'http://www.w3.org/2000/svg'
@@ -90,6 +91,7 @@ const icon = (doc: Document, name: 'drag' | RowChipAction): SVGSVGElement => {
 export class RowChip {
   private readonly callbacks: RowChipCallbacks
   private chip: HTMLDivElement | null = null
+  private strings: PveOverlayStrings = DEFAULT_OVERLAY_STRINGS
   private target: Element | null = null
 
   constructor(callbacks: RowChipCallbacks) {
@@ -123,6 +125,12 @@ export class RowChip {
     chip.addEventListener('click', (event) => event.stopPropagation())
     layer.appendChild(chip)
     this.chip = chip
+  }
+
+  setStrings(strings: PveOverlayStrings): void {
+    this.strings = strings
+    // Force the next show() to rebuild the buttons with the new titles
+    this.chip?.removeAttribute('data-pve-chip-ops')
   }
 
   show(target: Element, ops: RowChipOptions): void {
@@ -196,8 +204,9 @@ export class RowChip {
       const button = doc.createElement('button')
       button.type = 'button'
       button.setAttribute('data-pve-chip-action', action)
-      button.title = BUTTON_TITLES[action]
-      button.setAttribute('aria-label', BUTTON_TITLES[action])
+      const title = this.strings[BUTTON_TITLE_KEYS[action]]
+      button.title = title
+      button.setAttribute('aria-label', title)
       button.style.cssText =
         'display:flex;align-items:center;justify-content:center;width:20px;height:20px;padding:0;' +
         `border:0;border-radius:3px;background:transparent;color:#fff;cursor:${action === 'drag' ? 'grab' : 'pointer'};`

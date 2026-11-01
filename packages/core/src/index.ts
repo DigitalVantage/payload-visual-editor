@@ -8,6 +8,8 @@ export * from './permissions.js'
 export * from './protocol.js'
 export * from './scanner.js'
 
+import type { PveOverlayStrings } from './protocol.js'
+
 import { SiteBridge } from './bridge.js'
 import { createBlockOps } from './editor/blockOps.js'
 import { createDocAccess } from './editor/docAccess.js'
@@ -17,6 +19,7 @@ import { createTimers } from './editor/timers.js'
 import { RowChip } from './overlay/chips.js'
 import { OverlayRenderer } from './overlay/index.js'
 import { DropIndicator, EmptyContainerAffordances, PendingOverlay } from './overlay/indicators.js'
+import { DEFAULT_OVERLAY_STRINGS } from './protocol.js'
 import { RegionRegistry, toProtocolRegions } from './scanner.js'
 
 export type VisualEditingOptions = {
@@ -87,6 +90,12 @@ export const initVisualEditing = (options: VisualEditingOptions): (() => void) =
 
   const selection = createSelection({ access, blockOps, bridge, chip, overlay, registry, rowDrag })
 
+  const applyStrings = (strings: Partial<PveOverlayStrings> | undefined): void => {
+    const resolved = { ...DEFAULT_OVERLAY_STRINGS, ...strings }
+    chip.setStrings(resolved)
+    emptyAffordances.setStrings(resolved)
+  }
+
   const setEditMode = (enabled: boolean): void => {
     if (enabled === editMode) {
       return
@@ -134,6 +143,7 @@ export const initVisualEditing = (options: VisualEditingOptions): (() => void) =
         break
       case 'payload-visual-editor:hello':
         access.applyHello(message.payload)
+        applyStrings(message.payload.strings)
         if (message.payload.editMode && editMode) {
           // New admin session while already editing: re-report to the new
           // session and recompute affordances (docs/permissions may differ)

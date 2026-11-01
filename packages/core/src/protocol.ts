@@ -32,6 +32,29 @@ export type PveRegion = {
   scope: string
 }
 
+/** Text the overlay renders on the page; the admin sends it translated in `hello`. */
+export type PveOverlayStrings = {
+  addBlock: string
+  addBlockAbove: string
+  addBlockBelow: string
+  dragToReorder: string
+  duplicateBlock: string
+  editBlock: string
+  removeBlock: string
+  showInLayout: string
+}
+
+export const DEFAULT_OVERLAY_STRINGS: PveOverlayStrings = {
+  addBlock: 'Add block',
+  addBlockAbove: 'Add block above',
+  addBlockBelow: 'Add block below',
+  dragToReorder: 'Drag to reorder',
+  duplicateBlock: 'Duplicate block',
+  editBlock: 'Edit block',
+  removeBlock: 'Remove block',
+  showInLayout: 'Show in layout',
+}
+
 export type PveOpKind = 'add' | 'duplicate' | 'move' | 'remove'
 
 export type PveBlockOps = Record<PveOpKind, boolean>
@@ -73,6 +96,8 @@ export type PveMessagePayloads = {
     labels: Record<string, string>
     locale?: string
     permissions: PvePermissionSummary
+    /** Translated overlay text; missing entries fall back to English. */
+    strings?: Partial<PveOverlayStrings>
   }
   'hello-ack': { draft?: boolean; sdkVersion: string }
   hover: { path: string; regionId: string; scope: string } | null

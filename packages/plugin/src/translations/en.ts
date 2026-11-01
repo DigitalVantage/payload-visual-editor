@@ -1,6 +1,12 @@
 export const en = {
   pluginVisualEditor: {
+    addBlock: 'Add block',
+    addBlockAbove: 'Add block above',
+    addBlockBelow: 'Add block below',
     blockActionFailed: 'Block action failed: {{reason}}',
+    dragToReorder: 'Drag to reorder',
+    duplicateBlock: 'Duplicate block',
+    editBlock: 'Edit block',
     editingOnPage: 'Editing on page',
     editModeTooltip: 'Highlight and edit marked regions on the page',
     editOnPage: 'Edit on page',
@@ -19,6 +25,7 @@ export const en = {
     previewIsPublished: 'Preview shows published content — edits appear after publishing',
     removeBlock: 'Remove block',
     removeBlockConfirm: 'Are you sure you want to remove this {{label}}?',
+    showInLayout: 'Show in layout',
     showLayout: 'Show layout',
     waitingForPage: 'Waiting for the page to connect…',
   },
