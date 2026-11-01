@@ -1,11 +1,29 @@
 import type { PveRegion } from './protocol.js'
 
 import { PVE_ATTR, PVE_OVERLAY_ATTR } from './attrs.js'
+import { devWarn } from './dev.js'
 
 export type ScannedRegion = PveRegion & { element: Element }
 
 const regionId = (scope: string, kind: PveRegion['kind'], path: string, rowId?: null | string): string =>
   `${scope}|${kind}|${path}|${rowId ?? ''}`
+
+// Once per marked path per page load: the scanner reruns on every DOM change
+const warnedUnscoped = new Set<string>()
+
+const warnUnscoped = (element: Element): void => {
+  const marked = element.hasAttribute(PVE_ATTR.field)
+    ? `${PVE_ATTR.field}="${element.getAttribute(PVE_ATTR.field)}"`
+    : `${PVE_ATTR.container}="${element.getAttribute(PVE_ATTR.container)}"`
+  if (warnedUnscoped.has(marked)) {
+    return
+  }
+  warnedUnscoped.add(marked)
+  devWarn(
+    `${marked} has no ${PVE_ATTR.scope} ancestor, so the editor ignores it. ` +
+      'Wrap the markup of the document it belongs to in payloadEditable.scope({ collection, id }) or ({ global }).',
+  )
+}
 
 export const scanRegions = (root: ParentNode = document): ScannedRegion[] => {
   const regions: ScannedRegion[] = []
@@ -15,6 +33,7 @@ export const scanRegions = (root: ParentNode = document): ScannedRegion[] => {
     const scopeElement = element.closest(`[${PVE_ATTR.scope}]`)
     const scope = scopeElement?.getAttribute(PVE_ATTR.scope)
     if (!scope) {
+      warnUnscoped(element)
       continue
     }
 

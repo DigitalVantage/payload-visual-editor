@@ -48,6 +48,20 @@ describe('scanRegions', () => {
     expect(scanRegions().some((r) => r.path === 'orphan.path')).toBe(false)
   })
 
+  it('warns once per unscoped path, however often it rescans', () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+    document.body.insertAdjacentHTML('beforeend', '<ul data-pve-container="orphan.list"></ul>')
+    scanRegions()
+    scanRegions()
+    const messages = warn.mock.calls.map(([message]) => String(message)).filter((m) => m.includes('orphan.list'))
+    expect(messages).toEqual([
+      '[@digitalvantage/payload-visual-editor] data-pve-container="orphan.list" has no data-pve-scope ancestor, ' +
+        'so the editor ignores it. Wrap the markup of the document it belongs to in ' +
+        'payloadEditable.scope({ collection, id }) or ({ global }).',
+    ])
+    warn.mockRestore()
+  })
+
   it('produces stable region ids and serializable protocol regions', () => {
     const first = scanRegions()
     const second = scanRegions()

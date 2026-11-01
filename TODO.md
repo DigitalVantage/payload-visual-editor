@@ -62,7 +62,8 @@ From the 2026-11-01 market research (competing plugins, Payload 4, user demand).
 
 ## Roadmap — Next (Jan–Mar 2027)
 
-- [ ] Setup diagnostics: dev panel "why is the overlay not showing" (origin, `hello`, draft mode, package versions) + dev warnings for `data-pve-*` paths that do not resolve in form state
+- [x] Dev warnings for `data-pve-*` markup that cannot work: paths, row/container kinds and block types checked against the schema (admin console), elements outside any scope (page console)
+- [ ] Setup diagnostics panel: "why is the overlay not showing" (origin, `hello`, draft mode, package versions). Note: the SDK ignores messages from a wrong origin silently, so the panel has to infer that from a missing `hello-ack`
 - [ ] Orientation layer: "highlight all editable" toggle, hold Alt to hide the overlay, brief outline flash on entering edit mode, breadcrumb of the selected region
 - [ ] Surface the stock `livePreview.breakpoints` viewports clearly in the dedicated view (no own viewport system)
 - [ ] Large-page performance: measure on ~100 blocks, observer-based rects, debounce; publish the numbers

@@ -282,6 +282,7 @@ Turn on `debug` on both sides (`visualEditor({ debug: true })` and `<VisualEditi
 | Symptom | Usual cause |
 |---|---|
 | **Edit on page** stays disabled ("Waiting for the page to connect…") | The SDK never answered the handshake. `<VisualEditing/>` is not rendered on the page in the iframe (outside the draft branch, a different route), or `serverURL` is not the admin's origin as the browser sees it: `localhost` vs `127.0.0.1`, `http` vs `https`, another port. The SDK ignores messages from any other origin, silently |
+| A region highlights, but clicking it opens nothing | Its path matches no field. In development, with edit mode on, the admin console names each broken path, and the page console names marked elements that sit outside any `data-pve-scope` |
 | The preview pane is blank or "refused to connect" | `X-Frame-Options` / `frame-ancestors` blocks the admin origin, or an `https` admin frames an `http` site (mixed content) |
 | The toolbar shows "Preview shows published content" | The preview route did not enable draft mode, or its cookie is not kept inside the iframe (cross-site without `SameSite=None; Secure`) |
 | Client mode: CORS errors or 401/403 from `/api` in the iframe console | The site origin is missing from `cors` / `csrf`, the fetch lacks `credentials: 'include'`, or the auth cookie is not sent cross-site |
