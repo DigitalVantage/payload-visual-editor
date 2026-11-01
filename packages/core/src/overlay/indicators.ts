@@ -135,18 +135,6 @@ export class EmptyContainerAffordances {
   private layer: HTMLElement | null = null
   private strings: PveOverlayStrings = DEFAULT_OVERLAY_STRINGS
 
-  contains(node: unknown): boolean {
-    if (!(node instanceof Node)) {
-      return false
-    }
-    for (const item of this.items.values()) {
-      if (item.button.contains(node)) {
-        return true
-      }
-    }
-    return false
-  }
-
   mount(layer: HTMLElement): void {
     this.layer = layer
   }

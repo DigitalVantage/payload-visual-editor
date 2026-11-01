@@ -106,10 +106,6 @@ export class RowChip {
     return this.target
   }
 
-  contains(node: unknown): boolean {
-    return node instanceof Node && this.chip !== null && this.chip.contains(node)
-  }
-
   mount(layer: HTMLElement): void {
     if (this.chip) {
       return
