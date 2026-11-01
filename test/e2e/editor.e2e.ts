@@ -230,6 +230,20 @@ test.describe('visual editor', () => {
     await expect(page.locator('#field-layout__0__heading')).not.toBeFocused()
   })
 
+  test('a preview rendering published content shows a draft warning', async ({ page }) => {
+    await openHomePageInLivePreview(page, 'dev@payloadcms.com')
+    await expect(page.getByRole('button', { name: 'Edit on page' })).toBeEnabled({ timeout: 15_000 })
+    const warning = page.locator('.pve-draft-warning')
+    await expect(warning).toBeHidden()
+
+    // Reload the iframe on the published-content variant; the admin re-handshakes
+    const siteFrame = (await (await page.locator('iframe#live-preview-iframe').elementHandle())!.contentFrame())!
+    const url = new URL(siteFrame.url())
+    url.searchParams.set('preview', 'published')
+    await siteFrame.goto(url.toString())
+    await expect(warning).toHaveText('Preview shows published content — edits appear after publishing')
+  })
+
   // Row chips, BlocksDrawer add flow, duplicate/remove, drag-reorder + drop
   // indicators, SSR pending states
   test('chip add opens the native BlocksDrawer and inserts the picked block', async ({ page }) => {

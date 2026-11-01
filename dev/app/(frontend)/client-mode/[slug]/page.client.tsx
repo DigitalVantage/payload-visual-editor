@@ -10,13 +10,17 @@ import { RenderPage } from '@/components/RenderPage'
 
 const serverURL = process.env.NEXT_PUBLIC_SERVER_URL ?? 'http://localhost:3000'
 
-export const PageClient: React.FC<{ header: HeaderData; initialPage: PageDoc }> = ({ header, initialPage }) => {
+export const PageClient: React.FC<{ draft: boolean; header: HeaderData; initialPage: PageDoc }> = ({
+  draft,
+  header,
+  initialPage,
+}) => {
   const { data } = useLivePreview<PageDoc>({ depth: 2, initialData: initialPage, serverURL })
 
   return (
     <>
       <RenderPage header={header} page={data} />
-      <VisualEditing serverURL={serverURL} />
+      <VisualEditing draft={draft} serverURL={serverURL} />
     </>
   )
 }

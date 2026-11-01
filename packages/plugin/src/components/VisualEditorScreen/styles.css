@@ -75,6 +75,16 @@
   margin: 0;
 }
 
+/* Imported by DraftWarning too, so it also styles the stock edit view */
+.pve-draft-warning {
+  background: var(--theme-warning-100);
+  border: 1px solid var(--theme-warning-150);
+  border-radius: 4px;
+  color: var(--theme-warning-800);
+  font-size: 0.8125rem;
+  padding: 0.25rem 0.5rem;
+}
+
 .pve-locale-switcher {
   background: var(--theme-elevation-0);
   border: 1px solid var(--theme-elevation-150);

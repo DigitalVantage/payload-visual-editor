@@ -128,7 +128,7 @@ The view and its toolbar are configurable (see plugin options below): `view: { e
 
 ## Draft mode & production stripping
 
-**Point Live Preview at a draft-content route.** Edits happen on the working draft, so the previewed page must render draft content — the standard Payload + Next pattern is a preview route gated by [`draftMode()`](https://payloadcms.com/docs/live-preview/server) and a preview secret (see the official `templates/website`). Tell the SDK what it is looking at via the `draft` prop — the admin logs a warning when the preview renders published-only content (edits would not appear until published):
+**Point Live Preview at a draft-content route.** Edits happen on the working draft, so the previewed page must render draft content — the standard Payload + Next pattern is a preview route gated by [`draftMode()`](https://payloadcms.com/docs/live-preview/server) and a preview secret (see the official `templates/website`). Tell the SDK what it is looking at via the `draft` prop — the admin toolbar shows a warning when the preview of a drafts-enabled document renders published-only content (edits would not appear until published):
 
 ```tsx
 <VisualEditing serverURL={serverURL} draft={(await draftMode()).isEnabled} />

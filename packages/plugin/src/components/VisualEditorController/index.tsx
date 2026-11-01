@@ -41,6 +41,7 @@ import { translateIframePoint } from '../../utils/popoverPosition.js'
 import { popoverLabel, resolvePopoverPermissions, resolvePopoverTarget } from '../../utils/popoverTarget.js'
 import { buildViewPath } from '../../utils/viewPath.js'
 import { CollectionDocDrawer, GlobalDocDrawer } from '../DocSwitchDrawer/index.js'
+import { DraftWarning } from '../DraftWarning/index.js'
 import { FieldPopover } from '../FieldPopover/index.js'
 import { LocaleSwitcher } from '../LocaleSwitcher/index.js'
 import { usePveDocDrawer, usePveShell } from '../VisualEditorScreen/shellContext.js'
@@ -109,6 +110,7 @@ export const VisualEditorController = ({ blockOps, debug }: VisualEditorControll
 
   const [editMode, setEditMode] = useState(Boolean(shell))
   const [connected, setConnected] = useState(false)
+  const [previewIsPublished, setPreviewIsPublished] = useState(false)
   const [pendingAdd, setPendingAdd] = useState<null | PendingAdd>(null)
   // Read by handleOpRef, which runs from a message listener between renders
   const pendingAddRef = useRef(pendingAdd)
@@ -129,6 +131,9 @@ export const VisualEditorController = ({ blockOps, debug }: VisualEditorControll
       setIsLivePreviewing(true)
     }
   }, [shell, inDrawer, isLivePreviewing, setIsLivePreviewing])
+
+  // Without drafts, the published document is what gets edited — nothing to warn about
+  const hasDrafts = Boolean(docConfig?.versions && docConfig.versions.drafts)
 
   const blocksDrawerSlug = `pve-blocks-drawer-${uid}`
   const removeConfirmSlug = `pve-remove-row-${uid}`
@@ -382,11 +387,7 @@ export const VisualEditorController = ({ blockOps, debug }: VisualEditorControll
           break
         case 'payload-visual-editor:hello-ack':
           setConnected(true)
-          if (message.payload.draft === false) {
-            console.warn(
-              '[@digitalvantage/payload-visual-editor] The preview is not rendering draft content — edits will not appear until published.',
-            )
-          }
+          setPreviewIsPublished(message.payload.draft === false)
           break
         case 'payload-visual-editor:op':
           handleOpRef.current(message.payload)
@@ -406,6 +407,7 @@ export const VisualEditorController = ({ blockOps, debug }: VisualEditorControll
 
     const startSession = (): void => {
       setConnected(false)
+      setPreviewIsPublished(false)
       regionPathsRef.current = new Set()
       regionsRef.current = new Map()
       setPopover(null)
@@ -577,6 +579,7 @@ export const VisualEditorController = ({ blockOps, debug }: VisualEditorControll
       >
         {editMode ? 'Editing on page' : 'Edit on page'}
       </Button>
+      {previewIsPublished && hasDrafts ? <DraftWarning /> : null}
       {shell ? (
         <div className="pve-toolbar-items">
           {shell.toolbar.locale ? <LocaleSwitcher /> : null}

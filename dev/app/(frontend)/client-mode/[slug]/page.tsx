@@ -9,8 +9,17 @@ import { PageClient } from './page.client'
 
 export const dynamic = 'force-dynamic'
 
-export default async function ClientModePage({ params }: { params: Promise<{ slug: string }> }) {
+// `?preview=published` makes the page claim it renders published content —
+// e2e uses it to exercise the admin's draft warning
+export default async function ClientModePage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ slug: string }>
+  searchParams: Promise<{ preview?: string }>
+}) {
   const { slug } = await params
+  const { preview } = await searchParams
   const payload = await getPayload({ config })
 
   const [pages, header] = await Promise.all([
@@ -23,5 +32,5 @@ export default async function ClientModePage({ params }: { params: Promise<{ slu
     notFound()
   }
 
-  return <PageClient header={header as HeaderData} initialPage={page} />
+  return <PageClient draft={preview !== 'published'} header={header as HeaderData} initialPage={page} />
 }

@@ -9,6 +9,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 ### Changed
 
 - Failed block actions (missing permission, a row that no longer exists, a disabled action, …) now show an error toast in the admin. Before, the only trace was a `console.warn` in the site iframe. Cancelling the block picker or the remove confirmation stays silent.
+- A preview that reports `draft={false}` now shows a warning next to the "Edit on page" toggle instead of logging to the console. Documents without drafts no longer get the warning at all, since there the published document is the one being edited.
 
 ### Fixed
 
