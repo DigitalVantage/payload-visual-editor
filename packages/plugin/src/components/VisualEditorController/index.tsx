@@ -39,6 +39,10 @@ import { useHistoryShortcuts } from './useHistoryShortcuts.js'
 import { useRegionWarnings } from './useRegionWarnings.js'
 import { useReverseFocusSync } from './useReverseFocusSync.js'
 
+// Document controls are a tight flex row: a wrapped label turns a button into a
+// two- or three-line block. Inline style, since this component ships no stylesheet.
+const ButtonLabel = ({ children }: { children: string }) => <span style={{ whiteSpace: 'nowrap' }}>{children}</span>
+
 export type VisualEditorControllerProps = {
   blockOps?: BlockOpsOptions | false
   debug?: boolean
@@ -280,7 +284,7 @@ export const VisualEditorController = ({ blockOps, debug }: VisualEditorControll
       to={viewHref}
       tooltip={t('pluginVisualEditor:openVisualEditorTooltip')}
     >
-      {t('pluginVisualEditor:openVisualEditor')}
+      <ButtonLabel>{t('pluginVisualEditor:openVisualEditor')}</ButtonLabel>
     </Button>
   ) : null
 
@@ -323,7 +327,7 @@ export const VisualEditorController = ({ blockOps, debug }: VisualEditorControll
         size="small"
         tooltip={t(connected ? 'pluginVisualEditor:editModeTooltip' : 'pluginVisualEditor:waitingForPage')}
       >
-        {t(editMode ? 'pluginVisualEditor:editingOnPage' : 'pluginVisualEditor:editOnPage')}
+        <ButtonLabel>{t(editMode ? 'pluginVisualEditor:editingOnPage' : 'pluginVisualEditor:editOnPage')}</ButtonLabel>
       </Button>
       {editMode && hasSavePermission ? (
         <>
@@ -353,7 +357,7 @@ export const VisualEditorController = ({ blockOps, debug }: VisualEditorControll
           size="small"
           tooltip={t('pluginVisualEditor:outlineAllTooltip')}
         >
-          {t('pluginVisualEditor:outlineAll')}
+          <ButtonLabel>{t('pluginVisualEditor:outlineAll')}</ButtonLabel>
         </Button>
       ) : null}
       {previewIsPublished && hasDrafts ? <DraftWarning /> : null}

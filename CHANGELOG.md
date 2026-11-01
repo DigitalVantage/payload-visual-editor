@@ -27,6 +27,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Fixed
 
+- Toolbar button labels ("Open visual editor" and others) no longer wrap onto several lines when Live Preview narrows the document controls.
 - `LICENSE` keeps the original `payload-inline-visual-editor contributors` copyright line again, alongside ours, as MIT requires; the scope move had replaced it.
 - The page selection now follows its row when the row moves (drag or keyboard). It used to keep the row's old path, so Enter, the chip's edit and add-above/below could act on whichever row took that index.
 - The plugin's `next` peer range no longer promises Next versions Payload itself rejects (15.5+, 16.0–16.2.5). It now mirrors the range of `payload@3.85`, the lowest supported release.

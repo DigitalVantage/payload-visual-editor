@@ -4,6 +4,7 @@ Single source of truth for project tasks. Context for each item: the project ana
 
 ## Tooling
 
+- [ ] Update dev dependencies flagged by Dependabot (67 alerts on 2026-11-01: undici, dompurify, vite/vitest, brace-expansion, sharp, happy-dom, …). All are in the dev lockfile (playground, tests); the published packages have no third-party runtime deps
 - [x] ESLint + Prettier + `pnpm check` (lint + format + types + tests) — replaces CI locally
 - [x] Pre-push hook running `pnpm check`
 
@@ -19,7 +20,7 @@ Single source of truth for project tasks. Context for each item: the project ana
 - [x] Undo/redo for block operations (add↔remove, move↔move) — toolbar buttons + Ctrl/⌘+Z shortcuts (page and admin)
 - [x] i18n: admin strings via Payload `useTranslation` / `i18n.translations`; SDK overlay strings delivered in `hello`
 - [x] Keyboard a11y for the overlay: navigate regions, Enter to edit, keyboard alternative to drag-reorder (e.g. Alt+↑/↓)
-- [ ] The "Open visual editor" button label wraps onto two lines in the document controls when Live Preview is open (seen on the website template at 1440 px); the controller has no stylesheet of its own (attw), so the fix needs a class from an existing stylesheet or a small wrapper component
+- [x] Toolbar button labels ("Open visual editor", "Outline all", …) wrap onto two or three lines in the document controls when Live Preview is open — labels are now `white-space: nowrap`
 
 ## Refactoring
 
