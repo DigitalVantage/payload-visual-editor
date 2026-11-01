@@ -155,4 +155,24 @@ describe('visualEditor config mutation', () => {
     expect(result.admin?.custom?.other).toBe(true)
     expect(result.admin?.custom?.[PLUGIN_CONFIG_KEY]).toBeDefined()
   })
+
+  it('adds the plugin strings to every admin language, English as the fallback', () => {
+    const config = visualEditor()({
+      ...baseConfig(),
+      i18n: { supportedLanguages: { de: {}, en: {} } },
+    } as unknown as Config)
+    const translations = config.i18n?.translations as Record<string, { pluginVisualEditor?: Record<string, string> }>
+    expect(translations.en?.pluginVisualEditor?.editOnPage).toBe('Edit on page')
+    expect(translations.de?.pluginVisualEditor?.editOnPage).toBe('Edit on page')
+  })
+
+  it('lets project translations override plugin strings', () => {
+    const config = visualEditor()({
+      ...baseConfig(),
+      i18n: { translations: { en: { pluginVisualEditor: { editOnPage: 'Edit here' } } } },
+    } as unknown as Config)
+    const translations = config.i18n?.translations as Record<string, { pluginVisualEditor?: Record<string, string> }>
+    expect(translations.en?.pluginVisualEditor?.editOnPage).toBe('Edit here')
+    expect(translations.en?.pluginVisualEditor?.exit).toBe('Exit')
+  })
 })

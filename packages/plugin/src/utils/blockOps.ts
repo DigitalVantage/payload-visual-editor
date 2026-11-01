@@ -1,6 +1,7 @@
 import type { PveBlockOps, PveOp } from '@digitalvantage/payload-visual-editor-core'
 
 import type { BlockOpsOptions } from '../index.js'
+import type { PluginTranslationKey } from '../translations/index.js'
 
 import { isValidDataPath } from './formFocus.js'
 
@@ -82,19 +83,19 @@ export const planBlockOp = (args: { enabledOps: PveBlockOps; fields: FormRowsLik
   }
 }
 
-const BLOCK_OP_ERROR_MESSAGES: Record<string, string> = {
-  disabled: 'This block action is turned off for this document.',
-  'invalid-move': 'The block cannot be moved there.',
-  'invalid-path': 'The page points at a field this document does not have.',
-  'not-allowed': 'You do not have permission to edit this document.',
-  'unknown-container': 'The page points at a field this document does not have.',
-  'unknown-row': 'That block no longer exists — the page may be out of date.',
+const BLOCK_OP_ERROR_KEYS: Record<string, PluginTranslationKey> = {
+  disabled: 'pluginVisualEditor:errorDisabled',
+  'invalid-move': 'pluginVisualEditor:errorInvalidMove',
+  'invalid-path': 'pluginVisualEditor:errorUnknownField',
+  'not-allowed': 'pluginVisualEditor:errorNotAllowed',
+  'unknown-container': 'pluginVisualEditor:errorUnknownField',
+  'unknown-row': 'pluginVisualEditor:errorUnknownRow',
 }
 
-/** Human-readable text for a failed `op-ack`; `undefined` for a user cancel. */
-export const blockOpErrorMessage = (error: string | undefined): string | undefined => {
+/** Translation key explaining a failed `op-ack`; `undefined` for a user cancel. */
+export const blockOpErrorKey = (error: string | undefined): PluginTranslationKey | undefined => {
   if (error === 'cancelled') {
     return undefined
   }
-  return `Block action failed: ${(error && BLOCK_OP_ERROR_MESSAGES[error]) || 'unexpected error.'}`
+  return (error && BLOCK_OP_ERROR_KEYS[error]) || 'pluginVisualEditor:errorUnexpected'
 }

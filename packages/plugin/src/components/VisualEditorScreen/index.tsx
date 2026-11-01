@@ -6,6 +6,7 @@ import type { ReactNode } from 'react'
 import { formatAdminURL } from 'payload/shared'
 import { useEffect, useMemo, useState } from 'react'
 
+import { usePveTranslation } from '../../hooks/usePveTranslation.js'
 import { visualEditorRuntime } from '../../index.js'
 import {
   ActionsProvider,
@@ -37,6 +38,7 @@ export type VisualEditorScreenProps = {
 export const VisualEditorScreen = ({ collectionSlug, docID, globalSlug, visibleEntities }: VisualEditorScreenProps) => {
   const { renderDocument } = useServerFunctions()
   const { config } = useConfig()
+  const { t } = usePveTranslation()
   const locale = useLocale()
 
   const [document, setDocument] = useState<null | ReactNode>(null)
@@ -113,8 +115,8 @@ export const VisualEditorScreen = ({ collectionSlug, docID, globalSlug, visibleE
             <PveShellContext.Provider value={shellValue}>
               {failed ? (
                 <div className="pve-shell__error">
-                  <p>The visual editor could not load this document.</p>
-                  <a href={exitUrl}>Open it in the standard edit view</a>
+                  <p>{t('pluginVisualEditor:loadFailed')}</p>
+                  <a href={exitUrl}>{t('pluginVisualEditor:openStandardView')}</a>
                 </div>
               ) : (
                 (document ?? <LoadingOverlay />)

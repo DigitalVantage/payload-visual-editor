@@ -205,6 +205,23 @@ An explicitly listed entity without a Live Preview URL (and no `url` override) t
 
 Per-entity `blockOps` gates which row operations the overlay offers. Field-level permissions are applied on top: the overlay hides affordances for paths the current user cannot update, and Payload's server-side access control stays authoritative regardless.
 
+## Translations
+
+Admin-side strings follow the admin language through Payload's i18n. The plugin ships English and falls back to it for any language it has no translation for. Override any string, or add a language, under the `pluginVisualEditor` namespace in your config — your entries win over the plugin's:
+
+```ts
+export default buildConfig({
+  i18n: {
+    translations: {
+      en: { pluginVisualEditor: { editOnPage: 'Edit live' } },
+    },
+  },
+  plugins: [visualEditor()],
+})
+```
+
+The full key list is in [`packages/plugin/src/translations/en.ts`](packages/plugin/src/translations/en.ts).
+
 ## Attribute reference
 
 For non-React frontends, `@digitalvantage/payload-visual-editor-core` ships the same helpers as vanilla functions (`pveAttr.scope/field/row/container`), or you can write the attributes by hand:

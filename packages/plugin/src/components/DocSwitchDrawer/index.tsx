@@ -4,6 +4,7 @@ import type { ReactNode } from 'react'
 
 import { useEffect, useId, useRef, useState } from 'react'
 
+import { usePveTranslation } from '../../hooks/usePveTranslation.js'
 import {
   Drawer,
   LoadingOverlay,
@@ -74,6 +75,7 @@ export type GlobalDocDrawerProps = CloseAware & {
 export const GlobalDocDrawer = ({ globalSlug, onClose }: GlobalDocDrawerProps) => {
   const { renderDocument } = useServerFunctions()
   const { closeModal, isModalOpen, openModal } = useModal()
+  const { t } = usePveTranslation()
   const uid = useId()
   const drawerSlug = `pve-doc-switch-${uid}`
 
@@ -117,7 +119,7 @@ export const GlobalDocDrawer = ({ globalSlug, onClose }: GlobalDocDrawerProps) =
     <DrawerScope>
       <Drawer className="pve-doc-drawer" Header={null} slug={drawerSlug}>
         <button
-          aria-label="Close"
+          aria-label={t('general:close')}
           className="pve-doc-drawer__close"
           onClick={() => closeModal(drawerSlug)}
           type="button"

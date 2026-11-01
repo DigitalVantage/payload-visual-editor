@@ -2,6 +2,7 @@
 
 import { useRouter } from 'next/navigation.js'
 
+import { usePveTranslation } from '../../hooks/usePveTranslation.js'
 import { useConfig, useLocale } from '../../internal/payload-internals.js'
 
 const labelOf = (label: Record<string, string> | string, code: string): string =>
@@ -16,6 +17,7 @@ export const LocaleSwitcher = () => {
   const { config } = useConfig()
   const locale = useLocale()
   const router = useRouter()
+  const { t } = usePveTranslation()
 
   const localization = config.localization
   if (!localization) {
@@ -30,7 +32,7 @@ export const LocaleSwitcher = () => {
 
   return (
     <select
-      aria-label="Locale"
+      aria-label={t('general:locale')}
       className="pve-locale-switcher"
       onChange={(event) => switchTo(event.target.value)}
       value={locale?.code}

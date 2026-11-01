@@ -26,6 +26,7 @@ export {
   useLocale,
   useModal,
   useServerFunctions,
+  useTranslation,
   XIcon,
 } from '@payloadcms/ui'
 // NOTE: deep imports like '@payloadcms/ui/elements/*' bundle a second copy of

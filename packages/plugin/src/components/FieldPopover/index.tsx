@@ -8,6 +8,7 @@ import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import type { PopoverPoint } from '../../utils/popoverPosition.js'
 import type { PopoverTarget } from '../../utils/popoverTarget.js'
 
+import { usePveTranslation } from '../../hooks/usePveTranslation.js'
 import {
   FieldPathContext,
   RenderFields,
@@ -77,6 +78,7 @@ export const FieldPopover = ({
   target,
 }: FieldPopoverProps) => {
   const { oneModalIsOpen } = useModal()
+  const { t } = usePveTranslation()
   const ref = useRef<HTMLDivElement>(null)
   const [position, setPosition] = useState<null | { left: number; top: number }>(null)
 
@@ -152,7 +154,7 @@ export const FieldPopover = ({
     >
       <div className="pve-popover__header">
         <span className="pve-popover__title">{label}</span>
-        <button aria-label="Close" className="pve-popover__close" onClick={onClose} type="button">
+        <button aria-label={t('general:close')} className="pve-popover__close" onClick={onClose} type="button">
           <XIcon />
         </button>
       </div>

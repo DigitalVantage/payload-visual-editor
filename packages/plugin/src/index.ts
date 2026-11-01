@@ -1,8 +1,10 @@
 import type { CollectionConfig, Config, GlobalConfig, LivePreviewConfig } from 'payload'
 
+import { withPluginTranslations } from './translations/index.js'
+
 export { AdminBridge } from './utils/adminBridge.js'
 export type { AdminBridgeOptions, AdminMessageHandler } from './utils/adminBridge.js'
-export { blockOpErrorMessage, normalizeBlockOps, planBlockOp, resolveRowIndexById } from './utils/blockOps.js'
+export { blockOpErrorKey, normalizeBlockOps, planBlockOp, resolveRowIndexById } from './utils/blockOps.js'
 export type { BlockOpPlan, FormRowsLike } from './utils/blockOps.js'
 export { resolveDataPath } from './utils/fieldPaths.js'
 export type {
@@ -260,5 +262,6 @@ export const visualEditor =
       },
       collections,
       globals,
+      i18n: withPluginTranslations(config.i18n),
     }
   }

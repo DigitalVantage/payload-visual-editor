@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [1.0.3] — Unreleased (candidate: 1.0.3-rc.0)
 
+### Added
+
+- Admin strings are translatable through Payload's i18n under the `pluginVisualEditor` namespace. English ships built in and fills every admin language without its own translation; projects can override any string via `i18n.translations`. Close, Locale and Remove reuse Payload's own translated labels.
+
 ### Changed
 
 - Failed block actions (missing permission, a row that no longer exists, a disabled action, …) now show an error toast in the admin. Before, the only trace was a `console.warn` in the site iframe. Cancelling the block picker or the remove confirmation stays silent.

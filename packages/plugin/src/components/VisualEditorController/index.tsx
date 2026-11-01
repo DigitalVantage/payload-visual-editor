@@ -10,6 +10,7 @@ import type { BlockOpsOptions } from '../../index.js'
 import type { BlocksMapLike, FieldSchemaLike } from '../../utils/fieldPaths.js'
 
 import { useLatestCallback } from '../../hooks/useLatestCallback.js'
+import { usePveTranslation } from '../../hooks/usePveTranslation.js'
 import { visualEditorRuntime } from '../../index.js'
 import {
   Button,
@@ -55,6 +56,7 @@ export const VisualEditorController = ({ blockOps, debug }: VisualEditorControll
   // Global blocks referenced by slug from `blockReferences`
   const blocksMap = (config.blocksMap ?? {}) as BlocksMapLike
   const locale = useLocale()
+  const { t } = usePveTranslation()
   const shell = usePveShell()
   // Drawer-hosted documents render this controller too (the slot renders in
   // drawers) — there it must stay inert, it has no iframe to talk to
@@ -233,8 +235,14 @@ export const VisualEditorController = ({ blockOps, debug }: VisualEditorControll
   }, [shell, runtime?.view, config.routes.admin, collectionSlug, globalSlug, id])
 
   const openViewLink = viewHref ? (
-    <Button buttonStyle="secondary" el="link" size="small" to={viewHref} tooltip="Open the full-screen visual editor">
-      Open visual editor
+    <Button
+      buttonStyle="secondary"
+      el="link"
+      size="small"
+      to={viewHref}
+      tooltip={t('pluginVisualEditor:openVisualEditorTooltip')}
+    >
+      {t('pluginVisualEditor:openVisualEditor')}
     </Button>
   ) : null
 
@@ -269,20 +277,20 @@ export const VisualEditorController = ({ blockOps, debug }: VisualEditorControll
         disabled={!connected}
         onClick={toggleEditMode}
         size="small"
-        tooltip={connected ? 'Highlight and edit marked regions on the page' : 'Waiting for the page to connect…'}
+        tooltip={t(connected ? 'pluginVisualEditor:editModeTooltip' : 'pluginVisualEditor:waitingForPage')}
       >
-        {editMode ? 'Editing on page' : 'Edit on page'}
+        {t(editMode ? 'pluginVisualEditor:editingOnPage' : 'pluginVisualEditor:editOnPage')}
       </Button>
       {previewIsPublished && hasDrafts ? <DraftWarning /> : null}
       {shell ? (
         <div className="pve-toolbar-items">
           {shell.toolbar.locale ? <LocaleSwitcher /> : null}
           <Button buttonStyle="secondary" onClick={() => shell.setPanelCollapsed(!shell.panelCollapsed)} size="small">
-            {shell.panelCollapsed ? 'Show layout' : 'Hide layout'}
+            {t(shell.panelCollapsed ? 'pluginVisualEditor:showLayout' : 'pluginVisualEditor:hideLayout')}
           </Button>
           {shell.toolbar.exit ? (
             <Button buttonStyle="secondary" el="link" size="small" to={shell.exitUrl}>
-              Exit
+              {t('pluginVisualEditor:exit')}
             </Button>
           ) : null}
         </div>

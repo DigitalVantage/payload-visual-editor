@@ -3,7 +3,7 @@ import type { FormRowsLike } from '@digitalvantage/payload-visual-editor'
 
 import { ALL_BLOCK_OPS } from '@digitalvantage/payload-visual-editor-core'
 import {
-  blockOpErrorMessage,
+  blockOpErrorKey,
   normalizeBlockOps,
   planBlockOp,
   resolveRowIndexById,
@@ -145,20 +145,18 @@ describe('planBlockOp', () => {
   })
 })
 
-describe('blockOpErrorMessage', () => {
+describe('blockOpErrorKey', () => {
   it('stays silent for a user cancel', () => {
-    expect(blockOpErrorMessage('cancelled')).toBeUndefined()
+    expect(blockOpErrorKey('cancelled')).toBeUndefined()
   })
 
-  it('explains known error codes', () => {
-    expect(blockOpErrorMessage('not-allowed')).toBe(
-      'Block action failed: You do not have permission to edit this document.',
-    )
-    expect(blockOpErrorMessage('unknown-row')).toContain('no longer exists')
+  it('maps known error codes to their explanation', () => {
+    expect(blockOpErrorKey('not-allowed')).toBe('pluginVisualEditor:errorNotAllowed')
+    expect(blockOpErrorKey('unknown-container')).toBe('pluginVisualEditor:errorUnknownField')
   })
 
-  it('falls back to a generic message for unknown or missing codes', () => {
-    expect(blockOpErrorMessage('something-new')).toBe('Block action failed: unexpected error.')
-    expect(blockOpErrorMessage(undefined)).toBe('Block action failed: unexpected error.')
+  it('falls back to a generic key for unknown or missing codes', () => {
+    expect(blockOpErrorKey('something-new')).toBe('pluginVisualEditor:errorUnexpected')
+    expect(blockOpErrorKey(undefined)).toBe('pluginVisualEditor:errorUnexpected')
   })
 })

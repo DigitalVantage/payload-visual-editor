@@ -7,8 +7,9 @@ import { useEffect, useId, useRef, useState } from 'react'
 import type { BlocksMapLike, FieldSchemaLike } from '../../utils/fieldPaths.js'
 
 import { useLatestCallback } from '../../hooks/useLatestCallback.js'
+import { usePveTranslation } from '../../hooks/usePveTranslation.js'
 import { BlocksDrawer, ConfirmationModal, toast, useForm, useModal } from '../../internal/payload-internals.js'
-import { blockOpErrorMessage, planBlockOp, resolveRowIndexById } from '../../utils/blockOps.js'
+import { blockOpErrorKey, planBlockOp, resolveRowIndexById } from '../../utils/blockOps.js'
 import { resolveDataPath } from '../../utils/fieldPaths.js'
 import { collectBlockLabels } from '../../utils/helloPayload.js'
 
@@ -59,6 +60,7 @@ export const useBlockOpHandler = ({
   const { addFieldRow, dispatchFields, getFields, moveFieldRow, removeFieldRow, setModified } = useForm()
   const { isModalOpen, openModal } = useModal()
   const uid = useId()
+  const { t } = usePveTranslation()
   const blocksDrawerSlug = `pve-blocks-drawer-${uid}`
   const removeConfirmSlug = `pve-remove-row-${uid}`
 
@@ -70,9 +72,9 @@ export const useBlockOpHandler = ({
 
   const ack = useLatestCallback((opId: string, ok: boolean, error?: string): void => {
     sendAck({ error, ok, opId })
-    const message = ok ? undefined : blockOpErrorMessage(error)
-    if (message) {
-      toast.error(message)
+    const reasonKey = ok ? undefined : blockOpErrorKey(error)
+    if (reasonKey) {
+      toast.error(t('pluginVisualEditor:blockActionFailed', { reason: t(reasonKey) }))
     }
   })
 
@@ -218,9 +220,9 @@ export const useBlockOpHandler = ({
       ) : null}
       {pendingRemove ? (
         <ConfirmationModal
-          body={`Are you sure you want to remove this ${pendingRemove.label}?`}
-          confirmLabel="Remove"
-          heading="Remove block"
+          body={t('pluginVisualEditor:removeBlockConfirm', { label: pendingRemove.label })}
+          confirmLabel={t('general:remove')}
+          heading={t('pluginVisualEditor:removeBlock')}
           modalSlug={removeConfirmSlug}
           onCancel={cancelRemove}
           onConfirm={confirmRemove}
