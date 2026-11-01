@@ -57,7 +57,7 @@ From the 2026-11-01 market research (competing plugins, Payload 4, user demand).
 - [ ] Isolate the overlay from host-site CSS (Shadow DOM or the top layer) + a "hostile CSS" test; never write to the host `<html>`
 - [x] README recipe for the official website template (Payload 3; verified on the template from Payload 3.92 + Next 16.3: handshake through the `/next/preview` redirect, overlay, block ops, undo, popovers). The Payload 4 version goes with the beta line
 - [x] Migration guide from `payload-inline-visual-editor` (package names, attribute compatibility, option differences, what changed)
-- [ ] Docs: why explicit attributes instead of stega (string comparisons, SEO/meta, copy-paste) + cross-origin troubleshooting (CSRF, `SameSite=None; Secure`, `frame-ancestors`, HTTPS on localhost)
+- [x] Docs: why explicit attributes instead of stega (string comparisons, SEO/meta, copy-paste) + cross-origin troubleshooting (CSRF, `SameSite=None; Secure`, `frame-ancestors`, HTTPS on localhost)
 - [ ] Distribution: "Show and tell" in payloadcms/payload Discussions; useful answers in #7916, #18166, #16561; listing on payload.market
 
 ## Roadmap — Next (Jan–Mar 2027)

@@ -255,24 +255,38 @@ Notes for this setup:
 
 ## Cross-origin setups
 
-The default documented path is a single Next app serving both the site and `/admin` (same origin — nothing to configure). If your site and Payload server run on **different origins**, the previewed site (inside the iframe) must be able to call the Payload REST API with the admin's auth cookie:
+The default documented path is a single Next app serving both the site and `/admin` (same origin, nothing to configure). When the site runs on **another origin**, separate what the editor needs from what your data fetching needs.
+
+**The editor itself** needs only two things: `serverURL` on `<VisualEditing/>` set to the origin the admin is opened on, and a site that lets the admin frame it. Its admin↔site channel is `postMessage` with strict origin and session checks: no CORS, no cookies. `pnpm release:verify` runs a server-rendered site on a second origin with no CORS or cookie configuration.
+
+**Your data fetching** needs more when the site's *browser* code calls the Payload API with the editor's session: client mode's `useLivePreview` populating relationships and uploads, or draft fetches from the client. Then:
 
 ```ts
 // payload.config.ts
 export default buildConfig({
   cors: ['https://site.example.com'],
   csrf: ['https://site.example.com'],
-  // The admin cookie must be sendable from the iframe's third-party context:
-  // on your auth-enabled collection —
+  // Only when site and admin are cross-site (see below), on your auth collection:
   // auth: { cookies: { sameSite: 'None', secure: true } }
 })
 ```
 
-- Client mode's live-preview population requests and any draft-content fetches from the site must use `credentials: 'include'`.
-- `sameSite: 'None'` requires `secure: true` (HTTPS on both origins).
-- Make sure the site allows being framed by the admin origin (no blanket `X-Frame-Options: DENY` / restrictive `frame-ancestors` on the preview route).
+- Fetches from the site must use `credentials: 'include'`.
+- **Same-site beats cross-site.** `www.example.com` and `cms.example.com` are different origins but the same site, so the default `SameSite=Lax` cookie works. Different registrable domains (or `localhost` vs `127.0.0.1`) are cross-site: the cookie needs `SameSite=None; Secure`, which needs HTTPS, and browsers with strict third-party cookie protection may drop it anyway. Prefer subdomains of one domain.
+- The site must allow being framed by the admin origin: no blanket `X-Frame-Options: DENY`, and a `frame-ancestors` directive that lists the admin origin, on the preview route at least.
 
-The visual editor's own admin↔site channel is `postMessage` with strict origin + session checks and needs no CORS.
+### Troubleshooting
+
+Turn on `debug` on both sides (`visualEditor({ debug: true })` and `<VisualEditing debug />`) to log every editor message in the browser console.
+
+| Symptom | Usual cause |
+|---|---|
+| **Edit on page** stays disabled ("Waiting for the page to connect…") | The SDK never answered the handshake. `<VisualEditing/>` is not rendered on the page in the iframe (outside the draft branch, a different route), or `serverURL` is not the admin's origin as the browser sees it: `localhost` vs `127.0.0.1`, `http` vs `https`, another port. The SDK ignores messages from any other origin, silently |
+| The preview pane is blank or "refused to connect" | `X-Frame-Options` / `frame-ancestors` blocks the admin origin, or an `https` admin frames an `http` site (mixed content) |
+| The toolbar shows "Preview shows published content" | The preview route did not enable draft mode, or its cookie is not kept inside the iframe (cross-site without `SameSite=None; Secure`) |
+| Client mode: CORS errors or 401/403 from `/api` in the iframe console | The site origin is missing from `cors` / `csrf`, the fetch lacks `credentials: 'include'`, or the auth cookie is not sent cross-site |
+| `Secure` cookies do not stick in development | Browsers treat `http://localhost` as a secure context, but not other hostnames or LAN IPs. Use `localhost`, or HTTPS (`next dev --experimental-https`) |
+| The overlay shows, but block operations do nothing in SSR mode | The collection has no drafts with autosave, so nothing refreshes the page. See [Choosing a preview mode](#choosing-a-preview-mode) |
 
 ## Plugin options
 
@@ -348,6 +362,12 @@ if (window.self !== window.top) {
 ![The Payload admin holds the visual editor plugin, the document form and the stock Live Preview. Document data reaches your pages only through the stock Live Preview messages; a separate editor channel carries intent between the plugin and the site SDK](docs/media/architecture.svg)
 
 The plugin never moves document data itself. Edits land in the regular Payload document form — the same one the sidebar shows — and reach the page through the stock Live Preview pipeline. The editor channel between the admin and the site SDK carries only intent and metadata: which region was clicked, which block operation was requested, whether edit mode is on. That is why save, publish, autosave, versions, locales and every field type keep working unchanged.
+
+### Why explicit attributes, not stega
+
+Some CMSs map the page to content by hiding invisible characters inside every string (stega encoding). It needs no markup, but the encoded strings leak everywhere: `===` comparisons and `switch` on content values fail, string lengths change, slugs, `<meta>` tags and JSON-LD carry the characters unless every one is cleaned, and copy-paste takes them along. It also covers text only: images, numbers, relationships and rows have nowhere to hide the marker.
+
+`data-pve-*` attributes leave the data untouched, point at any field type or row, and survive any formatting your components apply. The cost is one helper call per editable element, and `configurePayloadEditable` removes them from public HTML.
 
 ## Security model
 
