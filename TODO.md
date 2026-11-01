@@ -68,7 +68,7 @@ From the 2026-11-01 market research (competing plugins, Payload 4, user demand).
 - [ ] Orientation layer: "highlight all editable" toggle, hold Alt to hide the overlay, brief outline flash on entering edit mode, breadcrumb of the selected region
 - [ ] Surface the stock `livePreview.breakpoints` viewports clearly in the dedicated view (no own viewport system)
 - [ ] Large-page performance: measure on ~100 blocks, observer-based rects, debounce; publish the numbers
-- [ ] Block picker thumbnails from blocks' `imageURL`
+- [x] Block picker thumbnails from blocks' `imageURL` — works through the native BlocksDrawer; the playground draws SVG sketches, e2e asserts them, README says so
 - [ ] In-place editing for `text`/`textarea` only (contenteditable, commit on Enter/blur, through form state); popover stays for every other field type
 - [ ] Ask Payload (#13979) for stable extension points for visual editors (document controls, edit-view slots)
 - [ ] Internal quality items above: React component tests, permissions contract test, React Compiler rules, non-React example

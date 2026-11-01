@@ -100,7 +100,7 @@ import { VisualEditing } from '@digitalvantage/payload-visual-editor-react'
 
 ### 4. Edit
 
-Open a document in the admin panel, enter Live Preview, and click **Edit on page**. Entering edit mode briefly outlines every editable region, and **Outline all** in the toolbar keeps the outlines on. Hover highlights editable regions; a click selects a region, and a double-click expands, scrolls to, and focuses the corresponding form field in the admin panel. Rows show a chip with edit / add / duplicate / remove / show-in-layout / drag-to-reorder. **Undo** / **Redo** next to the toggle revert block changes made on the page (not edits typed into fields).
+Open a document in the admin panel, enter Live Preview, and click **Edit on page**. Entering edit mode briefly outlines every editable region, and **Outline all** in the toolbar keeps the outlines on. Hover highlights editable regions; a click selects a region, and a double-click expands, scrolls to, and focuses the corresponding form field in the admin panel. Rows show a chip with edit / add / duplicate / remove / show-in-layout / drag-to-reorder. **Add** opens Payload's own block picker, so a block's `imageURL` shows as its thumbnail there. **Undo** / **Redo** next to the toggle revert block changes made on the page (not edits typed into fields).
 
 Keyboard, while edit mode is on and focus is not in one of the page's own form controls:
 

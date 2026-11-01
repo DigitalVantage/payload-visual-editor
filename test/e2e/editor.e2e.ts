@@ -330,6 +330,11 @@ test.describe('visual editor', () => {
     // The native block picker opens in the admin panel
     const contentCard = page.locator('button.thumbnail-card', { hasText: 'Content' })
     await expect(contentCard).toBeVisible()
+    // Blocks' imageURL shows as the card thumbnail (the playground draws SVG sketches)
+    await expect(contentCard.locator('img')).toHaveAttribute('src', /^data:image\/svg\+xml/)
+    if (process.env.PVE_SHOT) {
+      await page.screenshot({ path: process.env.PVE_SHOT })
+    }
     await contentCard.click()
 
     const layoutRows = frame.locator('[data-pve-container="layout"] [data-pve-row]')
