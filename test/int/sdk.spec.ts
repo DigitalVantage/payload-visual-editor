@@ -6,6 +6,10 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 const ADMIN_ORIGIN = 'http://admin.example.com'
 
+/** The overlay renders in an open shadow root under the `[data-pve-overlay]` host. */
+const overlayRoot = (): DocumentFragment =>
+  document.querySelector('[data-pve-overlay]')?.shadowRoot ?? document.createDocumentFragment()
+
 const sendFromAdmin = (type: string, payload: unknown, sessionId = 'session-1'): void => {
   window.dispatchEvent(
     new MessageEvent('message', {
@@ -61,6 +65,18 @@ describe('initVisualEditing (site SDK end-to-end)', () => {
     expect(regions).toHaveLength(3)
   })
 
+  it('renders the overlay UI inside a shadow root, out of reach of site CSS', () => {
+    teardown = initVisualEditing({ serverURL: ADMIN_ORIGIN })
+    sendFromAdmin('hello', helloPayload)
+
+    const host = document.querySelector<HTMLElement>('[data-pve-overlay]')!
+    // The host is the only overlay element site selectors can match; it pins itself with !important
+    expect(host.children).toHaveLength(0)
+    expect(host.style.getPropertyPriority('display')).toBe('important')
+    expect(host.shadowRoot?.querySelector('[data-pve-hover-box]')).not.toBeNull()
+    expect(document.querySelector('[data-pve-hover-box]')).toBeNull()
+  })
+
   it('shows a hover highlight with a label and reports hover + select', () => {
     teardown = initVisualEditing({ serverURL: ADMIN_ORIGIN })
     sendFromAdmin('hello', helloPayload)
@@ -69,8 +85,8 @@ describe('initVisualEditing (site SDK end-to-end)', () => {
     const heading = document.querySelector('[data-pve-field="layout.0.heading"]')!
     heading.dispatchEvent(new Event('pointermove', { bubbles: true }))
 
-    const box = document.querySelector('[data-pve-hover-box]') as HTMLElement
-    const label = document.querySelector('[data-pve-hover-label]') as HTMLElement
+    const box = overlayRoot().querySelector('[data-pve-hover-box]') as HTMLElement
+    const label = overlayRoot().querySelector('[data-pve-hover-label]') as HTMLElement
     expect(box.style.display).toBe('block')
     expect(label.textContent).toBe('Heading')
 
@@ -116,7 +132,7 @@ describe('initVisualEditing (site SDK end-to-end)', () => {
 
     document.body.dispatchEvent(new Event('pointermove', { bubbles: true }))
 
-    const box = document.querySelector('[data-pve-hover-box]') as HTMLElement
+    const box = overlayRoot().querySelector('[data-pve-hover-box]') as HTMLElement
     expect(box.style.display).toBe('none')
     const messages = outgoing(post)
     expect(messages.map((m) => m.type)).toEqual(['payload-visual-editor:hover'])
@@ -144,7 +160,7 @@ describe('initVisualEditing (site SDK end-to-end)', () => {
     sendFromAdmin('hello', helloPayload)
 
     sendFromAdmin('focus', { path: 'layout.0.heading' })
-    const flashBox = document.querySelector('[data-pve-flash-box]') as HTMLElement
+    const flashBox = overlayRoot().querySelector('[data-pve-flash-box]') as HTMLElement
     expect(flashBox.style.display).toBe('block')
   })
 
@@ -163,7 +179,7 @@ describe('initVisualEditing (site SDK end-to-end)', () => {
     // The denied leaf itself gets no highlight...
     const heading = document.querySelector('[data-pve-field="layout.0.heading"]')!
     heading.dispatchEvent(new Event('pointermove', { bubbles: true }))
-    const label = document.querySelector('[data-pve-hover-label]') as HTMLElement
+    const label = overlayRoot().querySelector('[data-pve-hover-label]') as HTMLElement
     // ...but hover/select walk up to the editable row region
     expect(label.textContent).toBe('Hero section')
 
@@ -184,7 +200,7 @@ describe('initVisualEditing (site SDK end-to-end)', () => {
 
     const heading = document.querySelector('[data-pve-field="layout.0.heading"]')!
     heading.dispatchEvent(new Event('pointermove', { bubbles: true }))
-    const box = document.querySelector('[data-pve-hover-box]') as HTMLElement
+    const box = overlayRoot().querySelector('[data-pve-hover-box]') as HTMLElement
     expect(box.style.display).toBe('none')
 
     const click = new MouseEvent('click', { bubbles: true, cancelable: true })
@@ -206,12 +222,12 @@ describe('initVisualEditing (site SDK end-to-end)', () => {
     // Hover names the other document (not the field) and reports no hover/chip
     const nav = document.querySelector('[data-pve-field="navItems.0.label"]')!
     nav.dispatchEvent(new Event('pointermove', { bubbles: true }))
-    const box = document.querySelector('[data-pve-hover-box]') as HTMLElement
-    const label = document.querySelector('[data-pve-hover-label]') as HTMLElement
+    const box = overlayRoot().querySelector('[data-pve-hover-box]') as HTMLElement
+    const label = overlayRoot().querySelector('[data-pve-hover-label]') as HTMLElement
     expect(box.style.display).toBe('block')
     expect(label.textContent).toBe('Header')
     expect(outgoing(post)).toHaveLength(0)
-    expect((document.querySelector('[data-pve-chip]') as HTMLElement).style.display).toBe('none')
+    expect((overlayRoot().querySelector('[data-pve-chip]') as HTMLElement).style.display).toBe('none')
 
     // Single click blocks navigation but the switch itself takes a double-click
     const click = new MouseEvent('click', { bubbles: true, cancelable: true })
@@ -245,7 +261,7 @@ describe('initVisualEditing (site SDK end-to-end)', () => {
     post.mockClear()
 
     document.querySelector('[data-pve-row]')!.dispatchEvent(new Event('pointermove', { bubbles: true }))
-    const chip = document.querySelector('[data-pve-chip]') as HTMLElement
+    const chip = overlayRoot().querySelector('[data-pve-chip]') as HTMLElement
     expect(chip.style.display).toBe('flex')
     // Single row in the container: move is pointless, the rest are offered
     const actions = [...chip.querySelectorAll('[data-pve-chip-action]')].map((el) =>
@@ -277,7 +293,7 @@ describe('initVisualEditing (site SDK end-to-end)', () => {
     document
       .querySelector('[data-pve-field="layout.0.heading"]')!
       .dispatchEvent(new Event('pointermove', { bubbles: true }))
-    expect((document.querySelector('[data-pve-chip]') as HTMLElement).style.display).toBe('flex')
+    expect((overlayRoot().querySelector('[data-pve-chip]') as HTMLElement).style.display).toBe('flex')
   })
 
   it('locks a row on click so its chip survives the pointer leaving it', () => {
@@ -285,9 +301,9 @@ describe('initVisualEditing (site SDK end-to-end)', () => {
     sendFromAdmin('hello', helloPayload)
 
     const row = document.querySelector('[data-pve-row]')!
-    const chip = document.querySelector('[data-pve-chip]') as HTMLElement
-    const hoverBox = document.querySelector('[data-pve-hover-box]') as HTMLElement
-    const lockedBox = document.querySelector('[data-pve-locked-box]') as HTMLElement
+    const chip = overlayRoot().querySelector('[data-pve-chip]') as HTMLElement
+    const hoverBox = overlayRoot().querySelector('[data-pve-hover-box]') as HTMLElement
+    const lockedBox = overlayRoot().querySelector('[data-pve-locked-box]') as HTMLElement
 
     // Hover alone: the transient (translucent) highlight, no lock yet
     row.dispatchEvent(new Event('pointermove', { bubbles: true }))
@@ -311,8 +327,8 @@ describe('initVisualEditing (site SDK end-to-end)', () => {
     sendFromAdmin('hello', helloPayload)
 
     const row = document.querySelector('[data-pve-row]')!
-    const chip = document.querySelector('[data-pve-chip]') as HTMLElement
-    const lockedBox = document.querySelector('[data-pve-locked-box]') as HTMLElement
+    const chip = overlayRoot().querySelector('[data-pve-chip]') as HTMLElement
+    const lockedBox = overlayRoot().querySelector('[data-pve-locked-box]') as HTMLElement
 
     row.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }))
     document.body.dispatchEvent(new Event('pointermove', { bubbles: true }))
@@ -349,7 +365,7 @@ describe('initVisualEditing (site SDK end-to-end)', () => {
     post.mockClear()
     rows[1]!.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }))
     expect(outgoing(post).map((m) => m.type)).toEqual(['payload-visual-editor:deselect'])
-    expect((document.querySelector('[data-pve-locked-box]') as HTMLElement).style.display).toBe('block')
+    expect((overlayRoot().querySelector('[data-pve-locked-box]') as HTMLElement).style.display).toBe('block')
   })
 
   it('clears the lock silently on an admin deselect (popover closed)', () => {
@@ -357,7 +373,7 @@ describe('initVisualEditing (site SDK end-to-end)', () => {
     sendFromAdmin('hello', helloPayload)
 
     const row = document.querySelector('[data-pve-row]')!
-    const lockedBox = document.querySelector('[data-pve-locked-box]') as HTMLElement
+    const lockedBox = overlayRoot().querySelector('[data-pve-locked-box]') as HTMLElement
     row.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }))
     expect(lockedBox.style.display).toBe('block')
 
@@ -381,7 +397,7 @@ describe('initVisualEditing (site SDK end-to-end)', () => {
 
     const types = outgoing(post).map((m) => m.type)
     expect(types).toContain('payload-visual-editor:deselect')
-    expect((document.querySelector('[data-pve-locked-box]') as HTMLElement).style.display).toBe('none')
+    expect((overlayRoot().querySelector('[data-pve-locked-box]') as HTMLElement).style.display).toBe('none')
   })
 
   it('honors blockOps from hello when rendering chip buttons', () => {
@@ -392,7 +408,7 @@ describe('initVisualEditing (site SDK end-to-end)', () => {
     })
 
     document.querySelector('[data-pve-row]')!.dispatchEvent(new Event('pointermove', { bubbles: true }))
-    const chip = document.querySelector('[data-pve-chip]') as HTMLElement
+    const chip = overlayRoot().querySelector('[data-pve-chip]') as HTMLElement
     const actions = [...chip.querySelectorAll('[data-pve-chip-action]')].map((el) =>
       el.getAttribute('data-pve-chip-action'),
     )
@@ -406,12 +422,12 @@ describe('initVisualEditing (site SDK end-to-end)', () => {
     sendFromAdmin('hello', { ...helloPayload, strings: { addBlock: 'Dodaj blok', duplicateBlock: 'Duplikuj blok' } })
 
     document.querySelector('[data-pve-row]')!.dispatchEvent(new Event('pointermove', { bubbles: true }))
-    const chip = document.querySelector('[data-pve-chip]') as HTMLElement
+    const chip = overlayRoot().querySelector('[data-pve-chip]') as HTMLElement
     const titleOf = (action: string) =>
       chip.querySelector(`[data-pve-chip-action="${action}"]`)!.getAttribute('aria-label')
     expect(titleOf('duplicate')).toBe('Duplikuj blok')
     expect(titleOf('remove')).toBe('Remove block')
-    expect(document.querySelector('[data-pve-empty-add]')!.textContent).toBe('+ Dodaj blok')
+    expect(overlayRoot().querySelector('[data-pve-empty-add]')!.textContent).toBe('+ Dodaj blok')
   })
 
   it('steps the lock through editable regions with arrow keys and edits it on Enter', () => {
@@ -425,7 +441,7 @@ describe('initVisualEditing (site SDK end-to-end)', () => {
       press('Enter')
       return (outgoing(post).find((m) => m.type === 'payload-visual-editor:select')?.payload as { path: string })?.path
     }
-    const lockedBox = document.querySelector('[data-pve-locked-box]') as HTMLElement
+    const lockedBox = overlayRoot().querySelector('[data-pve-locked-box]') as HTMLElement
 
     // Nothing locked: Enter does nothing, the first arrow press starts at the top
     expect(selectedPath()).toBeUndefined()
@@ -514,13 +530,13 @@ describe('initVisualEditing (site SDK end-to-end)', () => {
 
     document.querySelector('[data-pve-row]')!.dispatchEvent(new Event('pointermove', { bubbles: true }))
     post.mockClear()
-    const chip = document.querySelector('[data-pve-chip]') as HTMLElement
+    const chip = overlayRoot().querySelector('[data-pve-chip]') as HTMLElement
     ;(chip.querySelector('[data-pve-chip-action="edit"]') as HTMLElement).click()
 
     const messages = outgoing(post)
     expect(messages.map((m) => m.type)).toEqual(['payload-visual-editor:select'])
     expect(messages[0]!.payload).toMatchObject({ path: 'layout.0', scope: 'collection:pages;id:abc' })
-    expect((document.querySelector('[data-pve-locked-box]') as HTMLElement).style.display).toBe('block')
+    expect((overlayRoot().querySelector('[data-pve-locked-box]') as HTMLElement).style.display).toBe('block')
   })
 
   it('posts reveal from the chip show-in-layout button', () => {
@@ -529,13 +545,13 @@ describe('initVisualEditing (site SDK end-to-end)', () => {
 
     document.querySelector('[data-pve-row]')!.dispatchEvent(new Event('pointermove', { bubbles: true }))
     post.mockClear()
-    const chip = document.querySelector('[data-pve-chip]') as HTMLElement
+    const chip = overlayRoot().querySelector('[data-pve-chip]') as HTMLElement
     ;(chip.querySelector('[data-pve-chip-action="show-in-layout"]') as HTMLElement).click()
 
     const messages = outgoing(post)
     expect(messages.map((m) => m.type)).toEqual(['payload-visual-editor:reveal'])
     expect(messages[0]!.payload).toMatchObject({ path: 'layout.0', scope: 'collection:pages;id:abc' })
-    expect((document.querySelector('[data-pve-locked-box]') as HTMLElement).style.display).toBe('block')
+    expect((overlayRoot().querySelector('[data-pve-locked-box]') as HTMLElement).style.display).toBe('block')
   })
 
   it('offers no chip to read-only users', () => {
@@ -546,7 +562,7 @@ describe('initVisualEditing (site SDK end-to-end)', () => {
     })
 
     document.querySelector('[data-pve-row]')!.dispatchEvent(new Event('pointermove', { bubbles: true }))
-    expect((document.querySelector('[data-pve-chip]') as HTMLElement).style.display).toBe('none')
+    expect((overlayRoot().querySelector('[data-pve-chip]') as HTMLElement).style.display).toBe('none')
   })
 
   it('shows a pending shimmer after op-ack until the page re-renders', async () => {
@@ -555,20 +571,20 @@ describe('initVisualEditing (site SDK end-to-end)', () => {
 
     document.querySelector('[data-pve-row]')!.dispatchEvent(new Event('pointermove', { bubbles: true }))
     post.mockClear()
-    const chip = document.querySelector('[data-pve-chip]') as HTMLElement
+    const chip = overlayRoot().querySelector('[data-pve-chip]') as HTMLElement
     ;(chip.querySelector('[data-pve-chip-action="remove"]') as HTMLElement).click()
     const { opId } = outgoing(post)[0]!.payload as { opId: string }
 
     sendFromAdmin('op-ack', { ok: true, opId })
-    expect(document.querySelector('[data-pve-pending]')).toBeNull()
+    expect(overlayRoot().querySelector('[data-pve-pending]')).toBeNull()
     // Shimmer only starts if the page hasn't re-rendered shortly after the ack (SSR mode)
     await new Promise((resolve) => setTimeout(resolve, 350))
-    expect(document.querySelector('[data-pve-pending]')).not.toBeNull()
+    expect(overlayRoot().querySelector('[data-pve-pending]')).not.toBeNull()
 
     // The live-preview re-render lands → region set changes → shimmer clears
     document.querySelector('[data-pve-row]')!.remove()
     await new Promise((resolve) => setTimeout(resolve, 150))
-    expect(document.querySelector('[data-pve-pending]')).toBeNull()
+    expect(overlayRoot().querySelector('[data-pve-pending]')).toBeNull()
   })
 
   it('skips the shimmer when the re-render happens quickly (client mode)', async () => {
@@ -577,7 +593,7 @@ describe('initVisualEditing (site SDK end-to-end)', () => {
 
     document.querySelector('[data-pve-row]')!.dispatchEvent(new Event('pointermove', { bubbles: true }))
     post.mockClear()
-    const chip = document.querySelector('[data-pve-chip]') as HTMLElement
+    const chip = overlayRoot().querySelector('[data-pve-chip]') as HTMLElement
     ;(chip.querySelector('[data-pve-chip-action="duplicate"]') as HTMLElement).click()
     const { opId } = outgoing(post)[0]!.payload as { opId: string }
 
@@ -588,7 +604,7 @@ describe('initVisualEditing (site SDK end-to-end)', () => {
     clone.setAttribute('data-pve-row', 'row2')
     document.querySelector('[data-pve-container]')!.appendChild(clone)
     await new Promise((resolve) => setTimeout(resolve, 450))
-    expect(document.querySelector('[data-pve-pending]')).toBeNull()
+    expect(overlayRoot().querySelector('[data-pve-pending]')).toBeNull()
   })
 
   it('renders an add affordance over empty containers and posts the add op', () => {
@@ -599,7 +615,7 @@ describe('initVisualEditing (site SDK end-to-end)', () => {
     sendFromAdmin('hello', helloPayload)
     post.mockClear()
 
-    const affordances = document.querySelectorAll('[data-pve-empty-add]')
+    const affordances = overlayRoot().querySelectorAll('[data-pve-empty-add]')
     expect(affordances).toHaveLength(1)
     ;(affordances[0] as HTMLElement).click()
     const messages = outgoing(post)
@@ -626,13 +642,13 @@ describe('initVisualEditing (site SDK end-to-end)', () => {
     sendFromAdmin('hello', helloPayload)
 
     rows[0]!.dispatchEvent(new Event('pointermove', { bubbles: true }))
-    const chip = document.querySelector('[data-pve-chip]') as HTMLElement
+    const chip = overlayRoot().querySelector('[data-pve-chip]') as HTMLElement
     const handle = chip.querySelector('[data-pve-chip-action="drag"]') as HTMLElement
     post.mockClear()
 
     handle.dispatchEvent(new MouseEvent('pointerdown', { bubbles: true, cancelable: true, clientX: 10, clientY: 10 }))
     window.dispatchEvent(new MouseEvent('pointermove', { cancelable: true, clientX: 10, clientY: 260 }))
-    const indicator = document.querySelector('[data-pve-drop-indicator]') as HTMLElement
+    const indicator = overlayRoot().querySelector('[data-pve-drop-indicator]') as HTMLElement
     expect(indicator.style.display).toBe('block')
     expect(indicator.style.top).toBe('298.5px')
     window.dispatchEvent(new MouseEvent('pointerup', { clientX: 10, clientY: 260 }))
@@ -655,9 +671,9 @@ describe('initVisualEditing (site SDK end-to-end)', () => {
       teardown = initVisualEditing({ serverURL: ADMIN_ORIGIN })
       sendFromAdmin('hello', helloPayload)
       // The row and the heading; the container only bounds drop zones
-      expect(document.querySelectorAll('[data-pve-outline]')).toHaveLength(2)
+      expect(overlayRoot().querySelectorAll('[data-pve-outline]')).toHaveLength(2)
       vi.advanceTimersByTime(1500)
-      expect(document.querySelectorAll('[data-pve-outline]')).toHaveLength(0)
+      expect(overlayRoot().querySelectorAll('[data-pve-outline]')).toHaveLength(0)
     } finally {
       vi.useRealTimers()
     }
@@ -669,20 +685,20 @@ describe('initVisualEditing (site SDK end-to-end)', () => {
       teardown = initVisualEditing({ serverURL: ADMIN_ORIGIN })
       sendFromAdmin('hello', { ...helloPayload, outlineAll: true })
       vi.advanceTimersByTime(5000)
-      expect(document.querySelectorAll('[data-pve-outline]')).toHaveLength(2)
+      expect(overlayRoot().querySelectorAll('[data-pve-outline]')).toHaveLength(2)
 
       sendFromAdmin('outline-all', { enabled: false })
-      expect(document.querySelectorAll('[data-pve-outline]')).toHaveLength(0)
+      expect(overlayRoot().querySelectorAll('[data-pve-outline]')).toHaveLength(0)
 
       sendFromAdmin('outline-all', { enabled: true })
-      expect(document.querySelectorAll('[data-pve-outline]')).toHaveLength(2)
+      expect(overlayRoot().querySelectorAll('[data-pve-outline]')).toHaveLength(2)
 
       // Edit mode off removes them with the rest of the overlay; back on, they return
       sendFromAdmin('edit-mode', { enabled: false })
-      expect(document.querySelectorAll('[data-pve-outline]')).toHaveLength(0)
+      expect(overlayRoot().querySelectorAll('[data-pve-outline]')).toHaveLength(0)
       sendFromAdmin('edit-mode', { enabled: true })
       vi.advanceTimersByTime(5000)
-      expect(document.querySelectorAll('[data-pve-outline]')).toHaveLength(2)
+      expect(overlayRoot().querySelectorAll('[data-pve-outline]')).toHaveLength(2)
     } finally {
       vi.useRealTimers()
     }

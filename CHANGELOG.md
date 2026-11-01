@@ -22,6 +22,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Changed
 
+- The page overlay renders inside a shadow root, so site CSS can no longer hide or restyle it: global `!important` resets, `div:empty { display: none }`, rules aimed at fixed elements and inherited typography (`text-transform`, `letter-spacing`, …) stop at the shadow boundary. Only the `[data-pve-overlay]` host stays in the page DOM, pinned with inline `!important` styles. Code that queried overlay elements (`[data-pve-chip]`, `[data-pve-hover-box]`, …) through `document` must go through `document.querySelector('[data-pve-overlay]').shadowRoot`; Playwright locators pierce it on their own.
 - Failed block actions (missing permission, a row that no longer exists, a disabled action, …) now show an error toast in the admin. Before, the only trace was a `console.warn` in the site iframe. Cancelling the block picker or the remove confirmation stays silent.
 - A preview that reports `draft={false}` now shows a warning next to the "Edit on page" toggle instead of logging to the console. Documents without drafts no longer get the warning at all, since there the published document is the one being edited.
 

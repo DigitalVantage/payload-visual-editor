@@ -163,6 +163,37 @@ test.describe('visual editor', () => {
 
   // Select → expand/scroll/focus; reverse focus flash. Editing takes a
   // double-click — a single click only selects.
+  test('site CSS cannot restyle or hide the overlay', async ({ page }) => {
+    await login(page, 'dev@payloadcms.com')
+    // The `hostile-css` slug prefix adds global !important resets, `div:empty`
+    // hiding, a fixed-element killer and inherited typography to the page
+    const { frame } = await openTestPage(page, 'hostile-css')
+
+    const heading = frame.locator('[data-pve-field="layout.0.heading"]')
+    await heading.hover()
+    const hoverBox = frame.locator('[data-pve-hover-box]')
+    const hoverLabel = frame.locator('[data-pve-hover-label]')
+    await expect(hoverBox).toBeVisible()
+    await expect(hoverBox).toHaveCSS('border-top-width', '2px')
+    await expect(hoverLabel).toHaveCSS('text-transform', 'none')
+    await expect(hoverLabel).toHaveCSS('font-size', '11px')
+    // Still fixed to the viewport, so the box lands on the element it outlines
+    const [boxRect, headingRect] = await Promise.all([hoverBox.boundingBox(), heading.boundingBox()])
+    expect(Math.abs(boxRect!.y - headingRect!.y)).toBeLessThan(2)
+    expect(Math.abs(boxRect!.width - headingRect!.width)).toBeLessThan(2)
+
+    // The layer stays click-through, so the page under it is still selectable
+    await heading.click()
+    await expect(frame.locator('[data-pve-locked-box]')).toBeVisible()
+
+    // And its own buttons keep their size and still work
+    const chip = await hoverRowChip(frame, '[data-pve-block-type="hero"]')
+    const duplicate = chip.locator('[data-pve-chip-action="duplicate"]')
+    expect((await duplicate.boundingBox())!.width).toBe(20)
+    await duplicate.click()
+    await expect(frame.locator('[data-pve-block-type="hero"]')).toHaveCount(2)
+  })
+
   test('double-click-to-edit focuses the admin form field', async ({ page }) => {
     await login(page, 'dev@payloadcms.com')
     // Throwaway page: the shared home draft accumulates blocks across runs,

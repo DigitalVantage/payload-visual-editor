@@ -32,6 +32,7 @@ Open-source inline visual editor plugin for Payload CMS 3.x (target `payload@^3.
 
 - **The stock Live Preview data pipeline stays untouched.** Document data flows through `payload-live-preview` messages only; our `payload-visual-editor:*` protocol carries intent/metadata only.
 - **The overlay renders inside the site iframe** (core SDK). Never do cross-frame rect math — Live Preview scales the iframe with a CSS transform.
+- **Overlay UI lives in an open shadow root** under the single `[data-pve-overlay]` host (inline `!important` styles, `all: initial`). Never append overlay elements to the page DOM directly; document-level listeners see overlay events retargeted to the host (`OverlayRenderer.layerContains` handles that). Hostile-CSS coverage: playground pages with a `hostile-css` slug prefix.
 - **`packages/core/src/protocol.ts` is the single source of truth** for message types; the plugin imports it from `@digitalvantage/payload-visual-editor-core`.
 - **Every `@payloadcms/ui` / Payload-internal import in the plugin goes through `packages/plugin/src/internal/payload-internals.ts`** — one choke point so version breakage surfaces in one file.
 - **postMessage security:** explicit `targetOrigin` (never `'*'`), admin checks `event.source` against the iframe, per-load `sessionId`, SDK stays inert until a valid `hello` from the allowed origin.

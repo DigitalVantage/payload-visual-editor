@@ -42,17 +42,28 @@ export type OverlayHoverTarget = {
   label: string
 }
 
+// The host is the one overlay element in the site's DOM, so it is the one
+// site CSS can reach (`div { display: none !important }`, `* { … }`): inline
+// `!important` beats every site stylesheet, and `all: initial` stops
+// typography and the like from being inherited into the shadow tree.
+const HOST_CSS =
+  'all:initial !important;display:block !important;position:fixed !important;inset:0 !important;' +
+  'pointer-events:none !important;z-index:2147483000 !important;'
+
 /**
- * Single fixed, pointer-events:none layer appended to <body>. Site CSS is
- * never mutated; chips re-enable pointer events locally. The layer is
- * position:fixed so getBoundingClientRect viewport coords map 1:1 — no scroll
- * offset math, and Live Preview's iframe zoom scales everything together.
+ * Single fixed, pointer-events:none layer appended to <body>, inside an open
+ * shadow root so site CSS cannot restyle it (site selectors stop at the
+ * shadow boundary). Site CSS is never mutated; chips re-enable pointer events
+ * locally. The layer is position:fixed so getBoundingClientRect viewport
+ * coords map 1:1 — no scroll offset math, and Live Preview's iframe zoom
+ * scales everything together.
  */
 export class OverlayRenderer {
   private box: HTMLDivElement | null = null
   private flashBox: HTMLDivElement | null = null
   private flashTarget: Element | null = null
   private flashTimer: null | ReturnType<typeof setTimeout> = null
+  private host: HTMLDivElement | null = null
   private hoverTarget: OverlayHoverTarget | null = null
   private label: HTMLDivElement | null = null
   private layer: HTMLDivElement | null = null
@@ -91,18 +102,24 @@ export class OverlayRenderer {
     }
   }
 
-  /** Whether a node belongs to the overlay's own UI (chips, buttons, …). */
+  /**
+   * Whether a node belongs to the overlay's own UI (chips, buttons, …).
+   * Listeners outside the shadow tree see its events retargeted to the host.
+   */
   layerContains(node: unknown): boolean {
-    return node instanceof Node && this.layer !== null && this.layer.contains(node)
+    return node instanceof Node && this.host !== null && (node === this.host || this.layer?.contains(node) === true)
   }
 
   mount(doc: Document = document): void {
     if (this.layer) {
       return
     }
+    const host = doc.createElement('div')
+    host.setAttribute(LAYER_ATTR, '')
+    host.style.cssText = HOST_CSS
     const layer = doc.createElement('div')
-    layer.setAttribute(LAYER_ATTR, '')
-    layer.style.cssText = 'position:fixed;inset:0;pointer-events:none;z-index:2147483000;'
+    layer.style.cssText = 'position:fixed;inset:0;pointer-events:none;'
+    host.attachShadow({ mode: 'open' }).appendChild(layer)
 
     const box = doc.createElement('div')
     box.setAttribute('data-pve-hover-box', '')
@@ -135,7 +152,8 @@ export class OverlayRenderer {
       `background:${ACCENT_FILL};border-radius:2px;`
     layer.appendChild(flashBox)
 
-    doc.body.appendChild(layer)
+    doc.body.appendChild(host)
+    this.host = host
     this.layer = layer
     this.box = box
     this.label = label
@@ -242,10 +260,10 @@ export class OverlayRenderer {
   }
 
   unmount(): void {
-    if (!this.layer) {
+    if (!this.host) {
       return
     }
-    const doc = this.layer.ownerDocument
+    const doc = this.host.ownerDocument
     const win = doc.defaultView ?? window
     win.removeEventListener('resize', this.scheduleRefresh)
     doc.removeEventListener('scroll', this.scheduleRefresh, { capture: true })
@@ -264,7 +282,8 @@ export class OverlayRenderer {
       this.flashTimer = null
     }
     this.flashTarget = null
-    this.layer.remove()
+    this.host.remove()
+    this.host = null
     this.layer = null
     this.box = null
     this.label = null

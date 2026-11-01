@@ -5,12 +5,15 @@ import React from 'react'
 
 import type { HeaderData, PageDoc } from '@/lib/types'
 
+import { HostileCss } from '@/components/HostileCss'
+
 import { PageClient } from './page.client'
 
 export const dynamic = 'force-dynamic'
 
 // `?preview=published` makes the page claim it renders published content —
-// e2e uses it to exercise the admin's draft warning
+// e2e uses it to exercise the admin's draft warning. A `hostile-css` slug
+// prefix adds site CSS that a naively mounted overlay would not survive.
 export default async function ClientModePage({
   params,
   searchParams,
@@ -32,5 +35,10 @@ export default async function ClientModePage({
     notFound()
   }
 
-  return <PageClient draft={preview !== 'published'} header={header as HeaderData} initialPage={page} />
+  return (
+    <>
+      {slug.startsWith('hostile-css') && <HostileCss />}
+      <PageClient draft={preview !== 'published'} header={header as HeaderData} initialPage={page} />
+    </>
+  )
 }
