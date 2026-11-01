@@ -81,3 +81,20 @@ export const planBlockOp = (args: { enabledOps: PveBlockOps; fields: FormRowsLik
       return { rowIndex, type: 'remove' }
   }
 }
+
+const BLOCK_OP_ERROR_MESSAGES: Record<string, string> = {
+  disabled: 'This block action is turned off for this document.',
+  'invalid-move': 'The block cannot be moved there.',
+  'invalid-path': 'The page points at a field this document does not have.',
+  'not-allowed': 'You do not have permission to edit this document.',
+  'unknown-container': 'The page points at a field this document does not have.',
+  'unknown-row': 'That block no longer exists — the page may be out of date.',
+}
+
+/** Human-readable text for a failed `op-ack`; `undefined` for a user cancel. */
+export const blockOpErrorMessage = (error: string | undefined): string | undefined => {
+  if (error === 'cancelled') {
+    return undefined
+  }
+  return `Block action failed: ${(error && BLOCK_OP_ERROR_MESSAGES[error]) || 'unexpected error.'}`
+}

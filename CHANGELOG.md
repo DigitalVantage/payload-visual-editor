@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [1.0.3] — Unreleased (candidate: 1.0.3-rc.0)
 
+### Changed
+
+- Failed block actions (missing permission, a row that no longer exists, a disabled action, …) now show an error toast in the admin. Before, the only trace was a `console.warn` in the site iframe. Cancelling the block picker or the remove confirmation stays silent.
+
 ### Fixed
 
 - The admin controller no longer calls `useDocumentDrawerContext` conditionally (it sat behind a `||` short-circuit), which violated the Rules of Hooks and could break hook order if the drawer context changed between renders.

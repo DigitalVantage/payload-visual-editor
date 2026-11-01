@@ -15,6 +15,7 @@ export {
   LoadingOverlay,
   RenderFields,
   ShimmerEffect,
+  toast,
   useConfig,
   useDocumentDrawer,
   useDocumentDrawerContext,

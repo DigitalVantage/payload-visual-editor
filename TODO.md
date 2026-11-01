@@ -14,7 +14,7 @@ Single source of truth for project tasks. Context for each item: the project ana
 
 ## UX
 
-- [ ] Surface failed block ops in the admin UI (toast) instead of only `console.warn` in the iframe
+- [x] Surface failed block ops in the admin UI (toast) instead of only `console.warn` in the iframe
 - [ ] Show the "preview is not rendering drafts" warning in the UI (toolbar banner), not just the console
 - [ ] Undo/redo for block operations (add↔remove, move↔move)
 - [ ] i18n: admin strings via Payload `useTranslation` / `i18n.translations`; SDK overlay strings delivered in `hello`

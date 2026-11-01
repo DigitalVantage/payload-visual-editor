@@ -23,10 +23,11 @@ import {
   useForm,
   useLivePreviewContext,
   useLocale,
+  toast,
   useModal,
 } from '../../internal/payload-internals.js'
 import { AdminBridge } from '../../utils/adminBridge.js'
-import { normalizeBlockOps, planBlockOp, resolveRowIndexById } from '../../utils/blockOps.js'
+import { blockOpErrorMessage, normalizeBlockOps, planBlockOp, resolveRowIndexById } from '../../utils/blockOps.js'
 import { resolveDataPath } from '../../utils/fieldPaths.js'
 import {
   collectRowExpansions,
@@ -277,6 +278,10 @@ export const VisualEditorController = ({ blockOps, debug }: VisualEditorControll
   const ackRef = useRef<(opId: string, ok: boolean, error?: string) => void>(null!)
   ackRef.current = (opId, ok, error) => {
     bridgeRef.current?.send('op-ack', { error, ok, opId })
+    const message = ok ? undefined : blockOpErrorMessage(error)
+    if (message) {
+      toast.error(message)
+    }
   }
 
   const handleOpRef = useRef<(op: PveOp) => void>(null!)

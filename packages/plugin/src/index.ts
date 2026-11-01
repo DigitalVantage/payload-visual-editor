@@ -2,7 +2,7 @@ import type { CollectionConfig, Config, GlobalConfig, LivePreviewConfig } from '
 
 export { AdminBridge } from './utils/adminBridge.js'
 export type { AdminBridgeOptions, AdminMessageHandler } from './utils/adminBridge.js'
-export { normalizeBlockOps, planBlockOp, resolveRowIndexById } from './utils/blockOps.js'
+export { blockOpErrorMessage, normalizeBlockOps, planBlockOp, resolveRowIndexById } from './utils/blockOps.js'
 export type { BlockOpPlan, FormRowsLike } from './utils/blockOps.js'
 export { resolveDataPath } from './utils/fieldPaths.js'
 export type {

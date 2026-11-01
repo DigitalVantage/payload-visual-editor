@@ -2,7 +2,12 @@ import type { PveOp } from '@digitalvantage/payload-visual-editor-core'
 import type { FormRowsLike } from '@digitalvantage/payload-visual-editor'
 
 import { ALL_BLOCK_OPS } from '@digitalvantage/payload-visual-editor-core'
-import { normalizeBlockOps, planBlockOp, resolveRowIndexById } from '@digitalvantage/payload-visual-editor'
+import {
+  blockOpErrorMessage,
+  normalizeBlockOps,
+  planBlockOp,
+  resolveRowIndexById,
+} from '@digitalvantage/payload-visual-editor'
 import { describe, expect, it } from 'vitest'
 
 const fields: FormRowsLike = {
@@ -137,5 +142,23 @@ describe('planBlockOp', () => {
         op: op({ op: 'move', rowId: 'row-a' }),
       }),
     ).toEqual({ error: 'invalid-move', type: 'error' })
+  })
+})
+
+describe('blockOpErrorMessage', () => {
+  it('stays silent for a user cancel', () => {
+    expect(blockOpErrorMessage('cancelled')).toBeUndefined()
+  })
+
+  it('explains known error codes', () => {
+    expect(blockOpErrorMessage('not-allowed')).toBe(
+      'Block action failed: You do not have permission to edit this document.',
+    )
+    expect(blockOpErrorMessage('unknown-row')).toContain('no longer exists')
+  })
+
+  it('falls back to a generic message for unknown or missing codes', () => {
+    expect(blockOpErrorMessage('something-new')).toBe('Block action failed: unexpected error.')
+    expect(blockOpErrorMessage(undefined)).toBe('Block action failed: unexpected error.')
   })
 })
