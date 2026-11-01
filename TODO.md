@@ -22,7 +22,7 @@ Single source of truth for project tasks. Context for each item: the project ana
 
 ## Refactoring
 
-- [ ] Split `packages/core/src/index.ts` (`initVisualEditing`, ~700 lines) into selection / block-op / drag / message-routing modules — no behavior change
+- [x] Split `packages/core/src/index.ts` (`initVisualEditing`, ~700 lines) into selection / block-op / drag / message-routing modules — no behavior change
 - [x] Split `VisualEditorController` (~600 lines) into hooks: `useAdminBridgeSession`, `useBlockOpHandler`, `useFieldPopover`, `useReverseFocusSync` — no behavior change
 - [ ] Enable the React Compiler rules of `eslint-plugin-react-hooks` (`refs`, `set-state-in-effect`, `preserve-manual-memoization`). They flag the latest-ref pattern, now concentrated in `useLatestCallback` (plus `FieldPopover`, `DocSwitchDrawer`, `VisualEditorScreen`). `useEffectEvent` would replace it but needs React 19.2, above the `^19.0` peer
 
