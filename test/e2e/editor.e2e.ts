@@ -249,6 +249,34 @@ test.describe('visual editor', () => {
     await expect(layoutRows.nth(1)).toHaveAttribute('data-pve-block-type', 'content')
   })
 
+  test('dismissing the BlocksDrawer acks the add as cancelled', async ({ page }) => {
+    await login(page, 'dev@payloadcms.com')
+    const { frame } = await openTestPage(page)
+
+    // Record op-acks as the SDK receives them
+    const siteFrame = (await (await page.locator('iframe#live-preview-iframe').elementHandle())!.contentFrame())!
+    const readAcks = () => siteFrame.evaluate(() => (window as unknown as { __pveAcks: unknown[] }).__pveAcks)
+    await siteFrame.evaluate(() => {
+      const acks: unknown[] = []
+      ;(window as unknown as { __pveAcks: unknown[] }).__pveAcks = acks
+      window.addEventListener('message', (event: MessageEvent<{ payload?: unknown; type?: string }>) => {
+        if (event.data?.type === 'payload-visual-editor:op-ack') {
+          acks.push(event.data.payload)
+        }
+      })
+    })
+
+    const chip = await hoverRowChip(frame, '[data-pve-block-type="hero"]')
+    await chip.locator('[data-pve-chip-action="add-below"]').click()
+    const drawer = page.locator('.drawer__content', { has: page.locator('button.thumbnail-card') })
+    await expect(drawer).toBeVisible()
+    await page.keyboard.press('Escape')
+    await expect(drawer).toBeHidden()
+
+    await expect.poll(readAcks).toEqual([expect.objectContaining({ error: 'cancelled', ok: false })])
+    await expect(frame.locator('[data-pve-container="layout"] [data-pve-row]')).toHaveCount(2)
+  })
+
   test('chip duplicate clones the row', async ({ page }) => {
     await login(page, 'dev@payloadcms.com')
     const { frame } = await openTestPage(page)

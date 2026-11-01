@@ -93,7 +93,7 @@ export const VisualEditorController = ({ blockOps, debug }: VisualEditorControll
   const { collectionSlug, docConfig, docPermissions, globalSlug, hasPublishPermission, hasSavePermission, id } =
     useDocumentInfo()
   const { addFieldRow, dispatchFields, getFields, moveFieldRow, removeFieldRow, setModified } = useForm()
-  const { openModal } = useModal()
+  const { isModalOpen, openModal } = useModal()
   const { config } = useConfig()
   // Global blocks referenced by slug from `blockReferences`
   const blocksMap = (config.blocksMap ?? {}) as BlocksMapLike
@@ -109,6 +109,9 @@ export const VisualEditorController = ({ blockOps, debug }: VisualEditorControll
   const [editMode, setEditMode] = useState(Boolean(shell))
   const [connected, setConnected] = useState(false)
   const [pendingAdd, setPendingAdd] = useState<null | PendingAdd>(null)
+  // Read by handleOpRef, which runs from a message listener between renders
+  const pendingAddRef = useRef(pendingAdd)
+  pendingAddRef.current = pendingAdd
   const [pendingRemove, setPendingRemove] = useState<null | PendingRemove>(null)
   const [docSwitch, setDocSwitch] = useState<null | PveScopeRef>(null)
   const [popover, setPopover] = useState<null | PopoverState>(null)
@@ -304,7 +307,11 @@ export const VisualEditorController = ({ blockOps, debug }: VisualEditorControll
           return
         }
         // Blocks: the native picker takes over; the ack is sent when a block
-        // is actually chosen (drawer cancel = no ack, the SDK times out)
+        // is chosen or the drawer is dismissed. A newer add supersedes one
+        // still waiting in the open drawer — the latest click wins.
+        if (pendingAddRef.current) {
+          ack(pendingAddRef.current.opId, false, 'cancelled')
+        }
         setPendingAdd({
           blocks: container.blockReferences ?? (container.blocks as unknown as ClientBlock[]) ?? [],
           labels: container.labels ?? { plural: 'Blocks', singular: 'Block' },
@@ -416,6 +423,23 @@ export const VisualEditorController = ({ blockOps, debug }: VisualEditorControll
       openModal(blocksDrawerSlug)
     }
   }, [pendingAdd, openModal, blocksDrawerSlug])
+
+  // BlocksDrawer has no cancel callback — a drawer that was open and closed
+  // with the add still pending was dismissed. Picking a block clears
+  // pendingAdd in the same batch as the close, so it never lands here.
+  const blocksDrawerOpen = isModalOpen(blocksDrawerSlug)
+  const blocksDrawerWasOpenRef = useRef(false)
+  useEffect(() => {
+    if (blocksDrawerOpen) {
+      blocksDrawerWasOpenRef.current = true
+      return
+    }
+    if (blocksDrawerWasOpenRef.current && pendingAdd) {
+      ackRef.current(pendingAdd.opId, false, 'cancelled')
+      setPendingAdd(null)
+    }
+    blocksDrawerWasOpenRef.current = false
+  }, [blocksDrawerOpen, pendingAdd])
 
   useEffect(() => {
     if (pendingRemove) {
