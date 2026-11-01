@@ -30,13 +30,7 @@ import {
 import { AdminBridge } from '../../utils/adminBridge.js'
 import { blockOpErrorMessage, normalizeBlockOps, planBlockOp, resolveRowIndexById } from '../../utils/blockOps.js'
 import { resolveDataPath } from '../../utils/fieldPaths.js'
-import {
-  collectRowExpansions,
-  collectRowIsolation,
-  focusFormField,
-  isValidDataPath,
-  pathFromFormElement,
-} from '../../utils/formFocus.js'
+import { collectRowExpansions, collectRowIsolation, focusFormField, isValidDataPath } from '../../utils/formFocus.js'
 import { buildDocRef, buildPermissionSummary, collectBlockLabels } from '../../utils/helloPayload.js'
 import { translateIframePoint } from '../../utils/popoverPosition.js'
 import { popoverLabel, resolvePopoverPermissions, resolvePopoverTarget } from '../../utils/popoverTarget.js'
@@ -46,6 +40,7 @@ import { DraftWarning } from '../DraftWarning/index.js'
 import { FieldPopover } from '../FieldPopover/index.js'
 import { LocaleSwitcher } from '../LocaleSwitcher/index.js'
 import { usePveDocDrawer, usePveShell } from '../VisualEditorScreen/shellContext.js'
+import { useReverseFocusSync } from './useReverseFocusSync.js'
 
 export type VisualEditorControllerProps = {
   blockOps?: BlockOpsOptions | false
@@ -458,39 +453,11 @@ export const VisualEditorController = ({ blockOps, debug }: VisualEditorControll
     }
   }, [pendingRemove, openModal, removeConfirmSlug])
 
-  // Reverse sync: focusing/hovering a marked field in the form flashes it on the page
-  useEffect(() => {
-    if (!editMode || !connected) {
-      return
-    }
-    let lastSentPath: null | string = null
-
-    const sendFocus = (target: EventTarget | null, force: boolean): void => {
-      if (!(target instanceof Element)) {
-        return
-      }
-      const path = pathFromFormElement(target)
-      if (!path || !regionPathsRef.current.has(path)) {
-        lastSentPath = null
-        return
-      }
-      if (!force && lastSentPath === path) {
-        return
-      }
-      lastSentPath = path
-      bridgeRef.current?.send('focus', { path })
-    }
-
-    const onFocusIn = (event: FocusEvent): void => sendFocus(event.target, true)
-    const onPointerOver = (event: PointerEvent): void => sendFocus(event.target, false)
-
-    document.addEventListener('focusin', onFocusIn)
-    document.addEventListener('pointerover', onPointerOver, { passive: true })
-    return () => {
-      document.removeEventListener('focusin', onFocusIn)
-      document.removeEventListener('pointerover', onPointerOver)
-    }
-  }, [editMode, connected])
+  useReverseFocusSync({
+    enabled: editMode && connected,
+    isRegionPath: (path) => regionPathsRef.current.has(path),
+    onFocus: (path) => bridgeRef.current?.send('focus', { path }),
+  })
 
   const clearDocSwitch = useCallback(() => setDocSwitch(null), [])
 
