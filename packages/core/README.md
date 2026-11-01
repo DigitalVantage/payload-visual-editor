@@ -35,4 +35,4 @@ See the [full documentation](https://github.com/DigitalVantage/payload-visual-ed
 
 ## License
 
-MIT
+MIT · Built and maintained by [Digital Vantage](https://www.digitalvantage.pl/go/pve-npm)

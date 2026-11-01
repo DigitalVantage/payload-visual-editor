@@ -35,4 +35,4 @@ By default the editor enables itself for every collection and global with a Live
 
 ## License
 
-MIT
+MIT · Built and maintained by [Digital Vantage](https://www.digitalvantage.pl/go/pve-npm)

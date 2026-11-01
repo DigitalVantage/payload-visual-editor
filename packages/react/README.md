@@ -45,4 +45,4 @@ Requires the [`@digitalvantage/payload-visual-editor`](https://www.npmjs.com/pac
 
 ## License
 
-MIT
+MIT · Built and maintained by [Digital Vantage](https://www.digitalvantage.pl/go/pve-npm)

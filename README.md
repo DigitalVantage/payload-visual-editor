@@ -9,7 +9,7 @@ Inline visual editing for [Payload CMS](https://payloadcms.com) 3.x — browse y
 
 The editor is layered on top of core Live Preview: the standard save / publish / autosave / versions / locales flow keeps working unchanged, document data flows through the stock Live Preview pipeline, and every field type (Lexical, uploads, relationships, custom plugin fields) gets native editing for free.
 
-> **Status: 1.x.** The public API is stable; changes follow semver. Built and maintained by [Digital Vantage](https://www.digitalvantage.pl), used on our own production sites first.
+> **Status: 1.x.** The public API is stable; changes follow semver. Built and maintained by [Digital Vantage](https://www.digitalvantage.pl/go/pve-github), used on our own production sites first.
 
 ## A look around
 
@@ -290,4 +290,4 @@ Coming from `payload-inline-visual-editor`? Import paths change scope only: `pay
 
 ## License
 
-[MIT](./LICENSE)
+[MIT](./LICENSE) · Built by [Digital Vantage](https://www.digitalvantage.pl/go/pve-github)
