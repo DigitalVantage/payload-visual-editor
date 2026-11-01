@@ -166,6 +166,15 @@ describe('visualEditor config mutation', () => {
     expect(translations.de?.pluginVisualEditor?.editOnPage).toBe('Edit on page')
   })
 
+  it('ships a Polish translation', () => {
+    const config = visualEditor()({
+      ...baseConfig(),
+      i18n: { supportedLanguages: { en: {}, pl: {} } },
+    } as unknown as Config)
+    const translations = config.i18n?.translations as Record<string, { pluginVisualEditor?: Record<string, string> }>
+    expect(translations.pl?.pluginVisualEditor?.editOnPage).toBe('Edytuj na stronie')
+  })
+
   it('lets project translations override plugin strings', () => {
     const config = visualEditor()({
       ...baseConfig(),

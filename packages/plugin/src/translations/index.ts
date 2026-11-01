@@ -3,12 +3,13 @@ import type { Config } from 'payload'
 import { deepMergeSimple } from 'payload/shared'
 
 import { en } from './en.js'
+import { pl } from './pl.js'
 
 export type PluginTranslations = typeof en
 
 export type PluginTranslationKey = `pluginVisualEditor:${keyof PluginTranslations['pluginVisualEditor']}`
 
-const pluginTranslations: Record<string, PluginTranslations> = { en }
+const pluginTranslations: Record<string, PluginTranslations> = { en, pl }
 
 /**
  * Adds the plugin's strings to every admin language. A language without its

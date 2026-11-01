@@ -10,6 +10,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 - Admin strings are translatable through Payload's i18n under the `pluginVisualEditor` namespace. English ships built in and fills every admin language without its own translation; projects can override any string via `i18n.translations`. Close, Locale and Remove reuse Payload's own translated labels.
 - The overlay on the page (chip button titles, the empty-container "Add block" button) follows the admin language too: the admin sends translated text in `hello` (new optional `strings` field). An SDK talking to an older admin keeps English.
+- Polish translation (`pl`).
 
 ### Changed
 

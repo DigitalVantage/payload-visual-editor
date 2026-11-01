@@ -207,7 +207,7 @@ Per-entity `blockOps` gates which row operations the overlay offers. Field-level
 
 ## Translations
 
-Admin-side strings follow the admin language through Payload's i18n, and so does the overlay on the page: the admin sends it its text in the handshake. The plugin ships English and falls back to it for any language it has no translation for. Override any string, or add a language, under the `pluginVisualEditor` namespace in your config — your entries win over the plugin's:
+Admin-side strings follow the admin language through Payload's i18n, and so does the overlay on the page: the admin sends it its text in the handshake. The plugin ships English and Polish, and falls back to English for any other language. Override any string, or add a language, under the `pluginVisualEditor` namespace in your config — your entries win over the plugin's:
 
 ```ts
 export default buildConfig({
