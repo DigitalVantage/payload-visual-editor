@@ -9,12 +9,13 @@ export * from './protocol.js'
 export * from './scanner.js'
 
 import type { RowChipAction } from './overlay/chips.js'
-import type { PveBlockOps, PveDocRef, PveOp, PvePermissionSummary } from './protocol.js'
+import type { PveBlockOps, PveOp } from './protocol.js'
 import type { ScannedRegion } from './scanner.js'
 
-import { parseScope, PVE_ATTR } from './attrs.js'
+import { PVE_ATTR } from './attrs.js'
 import { SiteBridge } from './bridge.js'
-import { containerPathOf, humanizePathTail, isRowPath, rowIndexOf, scopeMatchesDoc } from './editor/paths.js'
+import { createDocAccess } from './editor/docAccess.js'
+import { containerPathOf, isRowPath, rowIndexOf } from './editor/paths.js'
 import { createTimers } from './editor/timers.js'
 import { RowChip } from './overlay/chips.js'
 import {
@@ -26,8 +27,6 @@ import {
 } from './overlay/dnd.js'
 import { OverlayRenderer } from './overlay/index.js'
 import { DropIndicator, EmptyContainerAffordances, PendingOverlay } from './overlay/indicators.js'
-import { canUpdatePath } from './permissions.js'
-import { ALL_BLOCK_OPS } from './protocol.js'
 import { RegionRegistry, toProtocolRegions } from './scanner.js'
 
 export type VisualEditingOptions = {
@@ -66,11 +65,7 @@ export const initVisualEditing = (options: VisualEditingOptions): (() => void) =
   let editMode = false
   let hovered: null | ScannedRegion = null
   let locked: null | ScannedRegion = null
-  let labels: Record<string, string> = {}
-  let docs: PveDocRef[] = []
-  let permissions: null | PvePermissionSummary = null
-  let blockOps: PveBlockOps = ALL_BLOCK_OPS
-  let rowBlockTypes = new Map<string, string>()
+  const access = createDocAccess({ isReadOnly: () => bridge.readOnly })
 
   let chipRegion: null | ScannedRegion = null
   let dragCleanup: (() => void) | null = null
@@ -83,62 +78,19 @@ export const initVisualEditing = (options: VisualEditingOptions): (() => void) =
   const pending = new PendingOverlay()
   const emptyAffordances = new EmptyContainerAffordances()
 
-  const regionLabel = (region: ScannedRegion): string => {
-    if (region.kind === 'row' && region.blockType) {
-      return labels[region.blockType] ?? region.blockType
-    }
-    return humanizePathTail(region.path)
-  }
-
-  /** Label for a region of another document: the entity name. */
-  const scopeLabel = (scope: string): string => {
-    const parsed = parseScope(scope)
-    if (!parsed) {
-      return scope
-    }
-    return humanizePathTail('global' in parsed ? parsed.global : parsed.collection)
-  }
-
-  const indexRowBlockTypes = (regions: ScannedRegion[]): void => {
-    rowBlockTypes = new Map()
-    for (const region of regions) {
-      if (region.kind === 'row' && region.blockType) {
-        rowBlockTypes.set(region.path, region.blockType)
-      }
-    }
-  }
-
-  const getBlockType = (rowPath: string): string | undefined => rowBlockTypes.get(rowPath)
-
-  // Affordance-level gating only — the admin form and server access
-  // control remain authoritative for anything the iframe requests.
-  const isEditable = (region: ScannedRegion): boolean => {
-    if (!scopeMatchesDoc(region.scope, docs)) {
-      return false
-    }
-    return permissions ? canUpdatePath(region.path, permissions, getBlockType) : true
-  }
-
-  const canUpdateContainer = (containerPath: string, scope: string): boolean => {
-    if (!scopeMatchesDoc(scope, docs)) {
-      return false
-    }
-    return permissions ? canUpdatePath(containerPath, permissions, getBlockType) : true
-  }
-
   /** Chip ops for a row: plugin config ∧ container updatable ∧ stable row id. */
   const opsForRow = (row: ScannedRegion): null | PveBlockOps => {
     if (row.kind !== 'row' || !row.rowId || !isRowPath(row.path)) {
       return null
     }
-    if (!canUpdateContainer(containerPathOf(row.path), row.scope)) {
+    if (!access.canUpdateContainer(containerPathOf(row.path), row.scope)) {
       return null
     }
     const ops: PveBlockOps = {
-      add: blockOps.add,
-      duplicate: blockOps.duplicate,
-      move: blockOps.move && siblingRows(row).length > 1,
-      remove: blockOps.remove,
+      add: access.blockOps.add,
+      duplicate: access.blockOps.duplicate,
+      move: access.blockOps.move && siblingRows(row).length > 1,
+      remove: access.blockOps.remove,
     }
     return ops.add || ops.duplicate || ops.move || ops.remove ? ops : null
   }
@@ -196,7 +148,7 @@ export const initVisualEditing = (options: VisualEditingOptions): (() => void) =
   }
 
   const updateEmptyContainers = (regions: ScannedRegion[]): void => {
-    if (!editMode || !blockOps.add || bridge.readOnly) {
+    if (!editMode || !access.blockOps.add || bridge.readOnly) {
       emptyAffordances.set([])
       return
     }
@@ -210,7 +162,7 @@ export const initVisualEditing = (options: VisualEditingOptions): (() => void) =
         (region) =>
           region.kind === 'container' &&
           !rowContainers.has(`${region.scope}|${region.path}`) &&
-          canUpdateContainer(region.path, region.scope),
+          access.canUpdateContainer(region.path, region.scope),
       )
       .map((region) => ({
         element: region.element,
@@ -224,12 +176,12 @@ export const initVisualEditing = (options: VisualEditingOptions): (() => void) =
     onChange: (regions) => {
       regionsVersion += 1
       pending.clear()
-      indexRowBlockTypes(regions)
+      access.indexRows(regions)
       updateEmptyContainers(regions)
       bridge.send('regions', { regions: toProtocolRegions(regions) })
     },
     onRescan: (regions) => {
-      indexRowBlockTypes(regions)
+      access.indexRows(regions)
       updateEmptyContainers(regions)
       // Nodes may be replaced (live-preview re-render) or removed (block op);
       // re-resolve the hover and lock highlights by identity.
@@ -353,10 +305,6 @@ export const initVisualEditing = (options: VisualEditingOptions): (() => void) =
     emptyAffordances.refresh()
   })
 
-  /** A foreign-scope region is clickable as a document switch, not editable in place. */
-  const isSwitchRegion = (region: ScannedRegion): boolean =>
-    !scopeMatchesDoc(region.scope, docs) && parseScope(region.scope) !== null && !bridge.readOnly
-
   // Switch regions highlight locally but are not admin hovers — dedupe on what
   // the admin actually saw last
   let lastHoverSent: null | string = null
@@ -367,10 +315,10 @@ export const initVisualEditing = (options: VisualEditingOptions): (() => void) =
   // show-in-layout ride on row editability alone, independent of block-op config.
   const syncChip = (): void => {
     const active = locked ?? hovered
-    const switching = active ? isSwitchRegion(active) : false
+    const switching = active ? access.isSwitchRegion(active) : false
     const chipRow = active && !switching ? rowRegionFor(active) : null
     const ops = chipRow && !bridge.readOnly ? opsForRow(chipRow) : null
-    const editable = chipRow !== null && !bridge.readOnly && isEditable(chipRow)
+    const editable = chipRow !== null && !bridge.readOnly && access.isEditable(chipRow)
     if (chipRow && (ops || editable)) {
       chipRegion = chipRow
       chip.show(chipRow.element, {
@@ -390,9 +338,11 @@ export const initVisualEditing = (options: VisualEditingOptions): (() => void) =
     }
     const changedIdentity = hovered?.regionId !== region?.regionId
     hovered = region
-    const switching = region ? isSwitchRegion(region) : false
+    const switching = region ? access.isSwitchRegion(region) : false
     overlay.setHover(
-      region ? { element: region.element, label: switching ? scopeLabel(region.scope) : regionLabel(region) } : null,
+      region
+        ? { element: region.element, label: switching ? access.scopeLabel(region.scope) : access.regionLabel(region) }
+        : null,
     )
     syncChip()
 
@@ -418,7 +368,7 @@ export const initVisualEditing = (options: VisualEditingOptions): (() => void) =
     const hadLock = locked !== null
     const changedIdentity = locked?.regionId !== region?.regionId
     locked = region
-    overlay.setLocked(region ? { element: region.element, label: regionLabel(region) } : null)
+    overlay.setLocked(region ? { element: region.element, label: access.regionLabel(region) } : null)
     syncChip()
     if (opts.notify && hadLock && changedIdentity) {
       bridge.send('deselect', null)
@@ -450,7 +400,7 @@ export const initVisualEditing = (options: VisualEditingOptions): (() => void) =
       element = element.parentElement?.closest(`[${PVE_ATTR.field}]`) ?? null
     ) {
       const region = registry.regionForElement(element)
-      if (region && (isEditable(region) || isSwitchRegion(region))) {
+      if (region && (access.isEditable(region) || access.isSwitchRegion(region))) {
         return region
       }
     }
@@ -488,7 +438,7 @@ export const initVisualEditing = (options: VisualEditingOptions): (() => void) =
     }
     event.preventDefault()
     event.stopPropagation()
-    if (!isSwitchRegion(region)) {
+    if (!access.isSwitchRegion(region)) {
       setLocked(rowRegionFor(region) ?? region)
     }
   }
@@ -504,7 +454,7 @@ export const initVisualEditing = (options: VisualEditingOptions): (() => void) =
     event.preventDefault()
     event.stopPropagation()
     window.getSelection?.()?.removeAllRanges()
-    if (isSwitchRegion(region)) {
+    if (access.isSwitchRegion(region)) {
       bridge.send('doc-switch-request', { scope: region.scope })
     } else {
       sendSelect(region, { x: event.clientX, y: event.clientY })
@@ -575,7 +525,7 @@ export const initVisualEditing = (options: VisualEditingOptions): (() => void) =
       .filter((region) => region.path === path && region.element.isConnected)
       .sort(
         (a, b) =>
-          Number(scopeMatchesDoc(b.scope, docs)) - Number(scopeMatchesDoc(a.scope, docs)) ||
+          Number(access.matchesDoc(b.scope)) - Number(access.matchesDoc(a.scope)) ||
           kindOrder[a.kind] - kindOrder[b.kind],
       )
     const target = candidates[0]
@@ -605,10 +555,7 @@ export const initVisualEditing = (options: VisualEditingOptions): (() => void) =
         flashPath(message.payload.path)
         break
       case 'payload-visual-editor:hello':
-        labels = message.payload.labels ?? {}
-        docs = message.payload.docs ?? []
-        permissions = message.payload.permissions ?? null
-        blockOps = message.payload.blockOps ?? ALL_BLOCK_OPS
+        access.applyHello(message.payload)
         if (message.payload.editMode && editMode) {
           // New admin session while already editing: re-report to the new
           // session and recompute affordances (docs/permissions may differ)
