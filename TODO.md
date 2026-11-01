@@ -65,7 +65,8 @@ From the 2026-11-01 market research (competing plugins, Payload 4, user demand).
 
 - [x] Dev warnings for `data-pve-*` markup that cannot work: paths, row/container kinds and block types checked against the schema (admin console), elements outside any scope (page console)
 - [ ] Setup diagnostics panel: "why is the overlay not showing" (origin, `hello`, draft mode, package versions). Note: the SDK ignores messages from a wrong origin silently, so the panel has to infer that from a missing `hello-ack`
-- [ ] Orientation layer: "highlight all editable" toggle, hold Alt to hide the overlay, brief outline flash on entering edit mode, breadcrumb of the selected region
+- [x] Orientation layer: "Outline all" toggle + brief outline flash on entering edit mode. Hold-Alt-to-hide dropped: it collides with Alt+↑/↓ row moves and with the browser menu bar Firefox shows on Alt release; the edit-mode toggle already hides the overlay
+- [ ] Breadcrumb of the selected region (block › field) in the overlay label
 - [x] Surface the stock `livePreview.breakpoints` viewports in the dedicated view — the stock toolbar already shows them; README now points at `admin.livePreview.breakpoints`. The plugin's own `breakpoints` option turned out to be dead (never read since the scaffold): deprecated, remove it in 2.0
 - [ ] Large-page performance: measure on ~100 blocks, observer-based rects, debounce; publish the numbers
 - [x] Block picker thumbnails from blocks' `imageURL` — works through the native BlocksDrawer; the playground draws SVG sketches, e2e asserts them, README says so
