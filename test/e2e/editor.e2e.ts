@@ -321,7 +321,9 @@ test.describe('visual editor', () => {
     await chip.locator('[data-pve-chip-action="add-below"]').click()
     const drawer = page.locator('.drawer__content', { has: page.locator('button.thumbnail-card') })
     await expect(drawer).toBeVisible()
-    await page.keyboard.press('Escape')
+    // The drawer's own close button: Escape depends on which frame has focus,
+    // and Firefox keeps it in the iframe after the chip click
+    await page.locator('.drawer__header__close').click()
     await expect(drawer).toBeHidden()
 
     await expect.poll(readAcks).toEqual([expect.objectContaining({ error: 'cancelled', ok: false })])
