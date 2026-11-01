@@ -20,7 +20,6 @@ import {
   useLivePreviewContext,
   useLocale,
 } from '../../internal/payload-internals.js'
-import { AdminBridge } from '../../utils/adminBridge.js'
 import { normalizeBlockOps } from '../../utils/blockOps.js'
 import { collectRowExpansions, collectRowIsolation, focusFormField, isValidDataPath } from '../../utils/formFocus.js'
 import { buildDocRef, buildPermissionSummary, collectBlockLabels } from '../../utils/helloPayload.js'
@@ -30,6 +29,7 @@ import { DraftWarning } from '../DraftWarning/index.js'
 import { FieldPopover } from '../FieldPopover/index.js'
 import { LocaleSwitcher } from '../LocaleSwitcher/index.js'
 import { usePveDocDrawer, usePveShell } from '../VisualEditorScreen/shellContext.js'
+import { useAdminBridgeSession } from './useAdminBridgeSession.js'
 import { useBlockOpHandler } from './useBlockOpHandler.js'
 import { useFieldPopover } from './useFieldPopover.js'
 import { useReverseFocusSync } from './useReverseFocusSync.js'
@@ -63,10 +63,7 @@ export const VisualEditorController = ({ blockOps, debug }: VisualEditorControll
   const inDrawer = inPveDocDrawer || Boolean(drawerSlug)
 
   const [editMode, setEditMode] = useState(Boolean(shell))
-  const [connected, setConnected] = useState(false)
-  const [previewIsPublished, setPreviewIsPublished] = useState(false)
   const [docSwitch, setDocSwitch] = useState<null | PveScopeRef>(null)
-  const bridgeRef = useRef<AdminBridge | null>(null)
   const regionPathsRef = useRef<Set<string>>(new Set())
   const regionsRef = useRef<Map<string, PveRegion>>(new Map())
   const selectSeqRef = useRef(0)
@@ -84,18 +81,7 @@ export const VisualEditorController = ({ blockOps, debug }: VisualEditorControll
 
   const enabledOps = useMemo(() => normalizeBlockOps(blockOps), [blockOps])
 
-  const targetOrigin = useMemo(() => {
-    if (!loadedURL) {
-      return null
-    }
-    try {
-      return new URL(loadedURL, window.location.href).origin
-    } catch {
-      return null
-    }
-  }, [loadedURL])
-
-  const buildHello = useLatestCallback((): PveMessagePayloads['hello'] => ({
+  const buildHello = (): PveMessagePayloads['hello'] => ({
     blockOps: enabledOps,
     breakpoint,
     docs: [buildDocRef({ collectionSlug, globalSlug, id })],
@@ -107,14 +93,14 @@ export const VisualEditorController = ({ blockOps, debug }: VisualEditorControll
       canSave: Boolean(hasSavePermission),
       docPermissions,
     }),
-  }))
+  })
 
   const { dialogs, handleOp } = useBlockOpHandler({
     blocksMap,
     canSave: Boolean(hasSavePermission),
     enabledOps,
     schemaFields: (docConfig?.fields ?? []) as unknown as FieldSchemaLike[],
-    sendAck: (ack) => bridgeRef.current?.send('op-ack', ack),
+    sendAck: (ack) => send('op-ack', ack),
   })
 
   const { clearPopover, openPopover, popover } = useFieldPopover({
@@ -186,21 +172,13 @@ export const VisualEditorController = ({ blockOps, debug }: VisualEditorControll
     }
   })
 
-  useEffect(() => {
-    if (!isLivePreviewing || !targetOrigin || inDrawer) {
-      return
-    }
-    const iframe = iframeRef.current
-    const bridge = new AdminBridge({
-      getTargetWindow: () => iframeRef.current?.contentWindow,
-      targetOrigin,
-    })
-    bridgeRef.current = bridge
-
-    const offMessage = bridge.onMessage((message) => {
-      if (debug) {
-        console.debug('[@digitalvantage/payload-visual-editor] admin ←', message.type, message.payload)
-      }
+  const { connected, previewIsPublished, send } = useAdminBridgeSession({
+    buildHello,
+    debug,
+    enabled: isLivePreviewing && !inDrawer,
+    iframeRef,
+    loadedURL,
+    onMessage: (message) => {
       switch (message.type) {
         case 'payload-visual-editor:deselect':
           // The SDK cleared its selection (Escape / click-away / region gone)
@@ -208,10 +186,6 @@ export const VisualEditorController = ({ blockOps, debug }: VisualEditorControll
           break
         case 'payload-visual-editor:doc-switch-request':
           handleDocSwitch(message.payload.scope)
-          break
-        case 'payload-visual-editor:hello-ack':
-          setConnected(true)
-          setPreviewIsPublished(message.payload.draft === false)
           break
         case 'payload-visual-editor:op':
           handleOp(message.payload)
@@ -227,45 +201,18 @@ export const VisualEditorController = ({ blockOps, debug }: VisualEditorControll
           handleSelect(message.payload)
           break
       }
-    })
-
-    const startSession = (): void => {
-      setConnected(false)
-      setPreviewIsPublished(false)
+    },
+    onSessionStart: () => {
       regionPathsRef.current = new Set()
       regionsRef.current = new Map()
       clearPopover()
-      bridge.startSession(buildHello())
-    }
-    startSession()
-    iframe?.addEventListener('load', startSession)
-
-    return () => {
-      iframe?.removeEventListener('load', startSession)
-      offMessage()
-      bridge.destroy()
-      bridgeRef.current = null
-      setConnected(false)
-    }
-  }, [
-    buildHello,
-    clearPopover,
-    debug,
-    handleDocSwitch,
-    handleOp,
-    handleReveal,
-    handleSelect,
-    iframeRef,
-    inDrawer,
-    isLivePreviewing,
-    loadedURL,
-    targetOrigin,
-  ])
+    },
+  })
 
   useReverseFocusSync({
     enabled: editMode && connected,
     isRegionPath: (path) => regionPathsRef.current.has(path),
-    onFocus: (path) => bridgeRef.current?.send('focus', { path }),
+    onFocus: (path) => send('focus', { path }),
   })
 
   const clearDocSwitch = useCallback(() => setDocSwitch(null), [])
@@ -306,13 +253,13 @@ export const VisualEditorController = ({ blockOps, debug }: VisualEditorControll
     if (!enabled) {
       clearPopover()
     }
-    bridgeRef.current?.send('edit-mode', { enabled })
+    send('edit-mode', { enabled })
   }
 
   const closePopover = (): void => {
     clearPopover()
     // Clear the page-side selection highlight too
-    bridgeRef.current?.send('deselect', null)
+    send('deselect', null)
   }
 
   return (
