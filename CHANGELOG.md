@@ -32,6 +32,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Fixed
 
+- The "Add block" button over an empty container no longer shows up in the top-left corner when the container is not rendered (`display: none`, such as a column the site hides at the current breakpoint). It now hides until the container renders.
 - Toolbar button labels ("Open visual editor" and others) no longer wrap onto several lines when Live Preview narrows the document controls.
 - `LICENSE` keeps the original `payload-inline-visual-editor contributors` copyright line again, alongside ours, as MIT requires; the scope move had replaced it.
 - The page selection now follows its row when the row moves (drag or keyboard). It used to keep the row's old path, so Enter, the chip's edit and add-above/below could act on whichever row took that index.

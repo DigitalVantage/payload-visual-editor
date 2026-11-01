@@ -623,6 +623,23 @@ describe('initVisualEditing (site SDK end-to-end)', () => {
     expect(messages[0]!.payload).toMatchObject({ containerPath: 'sidebar', op: 'add', rowIndex: 0 })
   })
 
+  it('hides the add affordance while its empty container is not rendered', async () => {
+    teardown = initVisualEditing({ serverURL: ADMIN_ORIGIN })
+    document
+      .querySelector('[data-pve-scope]')!
+      .insertAdjacentHTML('beforeend', '<div data-pve-container="sidebar"></div>')
+    const container = document.querySelector<HTMLElement>('[data-pve-container="sidebar"]')!
+    // jsdom renders nothing: no client rects, as for a `display: none` element in a browser
+    sendFromAdmin('hello', helloPayload)
+    const affordance = overlayRoot().querySelector<HTMLElement>('[data-pve-empty-add]')!
+    expect(affordance.style.display).toBe('none')
+
+    container.getClientRects = () => [{}] as unknown as DOMRectList
+    window.dispatchEvent(new Event('resize'))
+    await new Promise((resolve) => requestAnimationFrame(resolve))
+    expect(affordance.style.display).toBe('flex')
+  })
+
   it('reorders rows via drag with a drop indicator', () => {
     document.body.innerHTML = `
       <main data-pve-scope="collection:pages;id:abc">

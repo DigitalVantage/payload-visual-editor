@@ -141,7 +141,9 @@ export class EmptyContainerAffordances {
 
   refresh(): void {
     for (const { button, element } of this.items.values()) {
-      if (!element.isConnected) {
+      // No client rects = not rendered (display: none, e.g. a column hidden at
+      // this breakpoint); its rect would be all zeros and pin the button top-left
+      if (!element.isConnected || element.getClientRects().length === 0) {
         button.style.display = 'none'
         continue
       }
