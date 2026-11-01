@@ -267,6 +267,21 @@ test.describe('visual editor', () => {
     await expect(rows.first()).toHaveAttribute('data-pve-block-type', 'hero')
   })
 
+  test('markup that matches no field is reported in the admin console', async ({ expectPluginWarning, page }) => {
+    const warning = expectPluginWarning(
+      /data-pve-field="layout\.0\.headline" \(scope "collection:pages;id:[^"]+"\) matches no field/,
+    )
+    const frame = await openHomePageInLivePreview(page, 'dev@payloadcms.com')
+    // The SDK scans and reports regions while edit mode is on
+    await enableEditMode(page)
+
+    // A typo in a path, as a site might ship it: the SDK rescans on DOM changes
+    await frame.locator('[data-pve-field="layout.0.heading"]').evaluate((element) => {
+      element.setAttribute('data-pve-field', 'layout.0.headline')
+    })
+    await expect.poll(() => warning.seen.length).toBe(1)
+  })
+
   test('a preview rendering published content shows a draft warning', async ({ page }) => {
     await openHomePageInLivePreview(page, 'dev@payloadcms.com')
     await expect(page.getByRole('button', { name: 'Edit on page' })).toBeEnabled({ timeout: 15_000 })

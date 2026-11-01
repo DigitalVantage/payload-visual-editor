@@ -36,6 +36,7 @@ import { useBlockOpHandler } from './useBlockOpHandler.js'
 import { useBlockOpHistory } from './useBlockOpHistory.js'
 import { useFieldPopover } from './useFieldPopover.js'
 import { useHistoryShortcuts } from './useHistoryShortcuts.js'
+import { useRegionWarnings } from './useRegionWarnings.js'
 import { useReverseFocusSync } from './useReverseFocusSync.js'
 
 export type VisualEditorControllerProps = {
@@ -111,6 +112,7 @@ export const VisualEditorController = ({ blockOps, debug }: VisualEditorControll
     },
   })
 
+  const warnAboutRegions = useRegionWarnings({ blocksMap, config })
   const history = useBlockOpHistory({ blocksMap, schemaFields })
   const { dialogs, handleOp } = useBlockOpHandler({
     blocksMap,
@@ -216,6 +218,7 @@ export const VisualEditorController = ({ blockOps, debug }: VisualEditorControll
         case 'payload-visual-editor:regions':
           regionPathsRef.current = new Set(message.payload.regions.map((region) => region.path))
           regionsRef.current = new Map(message.payload.regions.map((region) => [region.regionId, region]))
+          warnAboutRegions(message.payload.regions)
           break
         case 'payload-visual-editor:reveal':
           handleReveal(message.payload)

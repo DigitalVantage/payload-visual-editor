@@ -29,6 +29,8 @@ export {
 export type { FocusFormFieldArgs, RowExpansion, RowLike } from './utils/formFocus.js'
 export { buildDocRef, buildPermissionSummary, collectBlockLabels } from './utils/helloPayload.js'
 export { placePopover, translateIframePoint } from './utils/popoverPosition.js'
+export { checkRegions } from './utils/regionCheck.js'
+export type { CheckRegionsArgs } from './utils/regionCheck.js'
 export type { IframeRectLike, PopoverPoint, PopoverSize } from './utils/popoverPosition.js'
 export { popoverLabel, resolvePopoverPermissions, resolvePopoverTarget } from './utils/popoverTarget.js'
 export type { PopoverTarget, ResolvePopoverPermissionsArgs, ResolvePopoverTargetArgs } from './utils/popoverTarget.js'

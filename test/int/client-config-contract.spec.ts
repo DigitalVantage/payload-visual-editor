@@ -7,9 +7,15 @@
  * render-field server function.
  */
 import type { BlocksMapLike, FieldSchemaLike } from '@digitalvantage/payload-visual-editor'
+import type { PveRegion } from '@digitalvantage/payload-visual-editor-core'
 import type { Block, ClientConfig, SanitizedConfig } from 'payload'
 
-import { collectBlockLabels, resolveDataPath, resolvePopoverTarget } from '@digitalvantage/payload-visual-editor'
+import {
+  checkRegions,
+  collectBlockLabels,
+  resolveDataPath,
+  resolvePopoverTarget,
+} from '@digitalvantage/payload-visual-editor'
 import { buildFieldSchemaMap } from '@payloadcms/ui/utilities/buildFieldSchemaMap/index'
 import { initI18n } from '@payloadcms/translations'
 import { buildConfig, createClientConfig } from 'payload'
@@ -147,6 +153,35 @@ describe('client config contract (real Payload config)', () => {
     const keys = await schemaMapKeys({ globalSlug: 'header' })
     const resolved = resolveDataPath({ ...entity('global', 'header'), path: 'nav.0.label' })
     expect(keys).toContain(`header.${resolved!.schemaPath}`)
+  })
+
+  it('accepts correct page markup in the region check', () => {
+    const page = 'collection:pages;id:1'
+    const regions = [
+      { kind: 'field', path: 'title' },
+      { kind: 'field', path: 'meta.description' },
+      { kind: 'container', path: 'layout' },
+      { blockType: 'hero', kind: 'row', path: 'layout.0' },
+      { kind: 'field', path: 'layout.0.heading' },
+      { blockType: 'section', kind: 'row', path: 'layout.1' },
+      { kind: 'field', path: 'layout.1.style.background' },
+      { kind: 'container', path: 'layout.1.children' },
+      { blockType: 'gallery', kind: 'row', path: 'layout.1.children.0' },
+      { blockType: 'hero', kind: 'row', path: 'layout.1.children.0.items.0' },
+      { kind: 'field', path: 'layout.1.children.0.items.0.heading' },
+      { blockType: 'cta', kind: 'row', path: 'sidebar.0' },
+      { kind: 'row', path: 'sidebar.0.links.0' },
+    ].map((region) => ({ ...region, regionId: region.path, scope: page }) as PveRegion)
+    regions.push({ kind: 'row', path: 'nav.0', regionId: 'nav.0', scope: 'global:header' })
+
+    expect(
+      checkRegions({
+        blocksMap: clientConfig.blocksMap as unknown as BlocksMapLike,
+        fieldsForScope: (scope) =>
+          ('global' in scope ? entity('global', scope.global) : entity('collection', scope.collection)).fields,
+        regions,
+      }),
+    ).toEqual([])
   })
 
   it('labels referenced and inline blocks from the client config', () => {
