@@ -41,7 +41,7 @@ Release confidence — tests that touch the real thing (real Payload config, rea
 
 - [ ] React component tests for the plugin (Controller, FieldPopover, DocSwitchDrawer, LocaleSwitcher) — cancel/race paths
 
-- [ ] Plugin peer range `next: ^15.2.9 || ^16.0.0` promises more than Payload supports (`payload@3.85` accepts next `>=15.4.11 <15.5` or `>=16.2.6`); align it, or document that Payload's range wins
+- [x] Plugin peer range `next: ^15.2.9 || ^16.0.0` promises more than Payload supports — now mirrors `payload@3.85`'s range; README notes that newer Payload ranges win
 
 ## Docs / ecosystem
 

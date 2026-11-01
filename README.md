@@ -32,6 +32,7 @@ The editor is layered on top of core Live Preview: the standard save / publish /
 
 - `payload@^3.85` (and `@payloadcms/ui@^3.85`)
 - React 19 (the version Payload 3.x uses)
+- A Next.js version your Payload release supports. The plugin's `next` peer range mirrors `payload@3.85` (`>=15.2.9 <15.3`, `>=15.3.9 <15.4`, `>=15.4.11 <15.5`, `>=16.2.6`); newer Payload releases may narrow it further, and their range wins
 - A working [Live Preview](https://payloadcms.com/docs/live-preview/overview) setup for the collections/globals you want to edit
 
 ## Installation

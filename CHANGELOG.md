@@ -13,6 +13,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Fixed
 
+- The plugin's `next` peer range no longer promises Next versions Payload itself rejects (15.5+, 16.0–16.2.5). It now mirrors the range of `payload@3.85`, the lowest supported release.
 - The admin controller no longer calls `useDocumentDrawerContext` conditionally (it sat behind a `||` short-circuit), which violated the Rules of Hooks and could break hook order if the drawer context changed between renders.
 - Global blocks referenced through `blockReferences` now work beyond the row itself: double-clicking a field inside a referenced block opens its popover (it previously fell back to the panel), adding to an array/blocks container nested in a referenced block no longer fails with `unknown-container`, and the overlay labels referenced blocks with their `labels.singular` instead of the slug. `resolveDataPath` and `collectBlockLabels` accept an optional `blocksMap`.
 - Dismissing the native block picker now acks the add as `cancelled` instead of leaving the SDK's pending op to expire after 60 s, and a second add arriving while the picker is still open cancels the first one instead of silently dropping its ack.
