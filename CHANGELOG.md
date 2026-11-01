@@ -16,6 +16,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - Undo/redo shortcuts (Ctrl/⌘+Z, Ctrl/⌘+Shift+Z, Ctrl+Y) on the page and in the admin, outside text fields. The page forwards them over a new `history` message.
 - Keyboard navigation on the page in edit mode: ↓ / ↑ step the selection through editable regions in page order (scrolling them into view), Enter opens the selected one for editing, Alt+↓ / Alt+↑ move the selected row (keyboard alternative to drag).
 - Development warnings for page markup that cannot work. While edit mode is on, the admin checks every `data-pve-*` region against the document schema and warns once in its console about paths that match no field, rows and containers that point at the wrong kind of field, block types the field does not allow, and scopes that match no collection or global. Production builds skip the check. The page's own console flags marked elements outside any `data-pve-scope`, which the editor used to drop silently.
+- Orientation on the page: entering edit mode briefly outlines every editable row and field, and an **Outline all** toolbar toggle keeps the outlines on. The admin sends the toggle over a new `outline-all` message and in `hello` (new optional `outlineAll` field); an older SDK ignores both.
 - Polish translation (`pl`).
 - README: new screenshots and demo recording, an architecture diagram, and credits for the project the code started from; `pnpm docs:media` regenerates the media.
 

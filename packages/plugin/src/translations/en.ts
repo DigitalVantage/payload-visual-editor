@@ -23,6 +23,8 @@ export const en = {
     openStandardView: 'Open it in the standard edit view',
     openVisualEditor: 'Open visual editor',
     openVisualEditorTooltip: 'Open the full-screen visual editor',
+    outlineAll: 'Outline all',
+    outlineAllTooltip: 'Outline every editable region on the page',
     previewIsPublished: 'Preview shows published content — edits appear after publishing',
     redo: 'Redo',
     removeBlock: 'Remove block',

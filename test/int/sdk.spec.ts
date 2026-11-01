@@ -649,6 +649,45 @@ describe('initVisualEditing (site SDK end-to-end)', () => {
     })
   })
 
+  it('flashes outlines around rows and fields on entering edit mode', () => {
+    vi.useFakeTimers()
+    try {
+      teardown = initVisualEditing({ serverURL: ADMIN_ORIGIN })
+      sendFromAdmin('hello', helloPayload)
+      // The row and the heading; the container only bounds drop zones
+      expect(document.querySelectorAll('[data-pve-outline]')).toHaveLength(2)
+      vi.advanceTimersByTime(1500)
+      expect(document.querySelectorAll('[data-pve-outline]')).toHaveLength(0)
+    } finally {
+      vi.useRealTimers()
+    }
+  })
+
+  it('keeps outlines while outline-all is on, from hello or a later message', () => {
+    vi.useFakeTimers()
+    try {
+      teardown = initVisualEditing({ serverURL: ADMIN_ORIGIN })
+      sendFromAdmin('hello', { ...helloPayload, outlineAll: true })
+      vi.advanceTimersByTime(5000)
+      expect(document.querySelectorAll('[data-pve-outline]')).toHaveLength(2)
+
+      sendFromAdmin('outline-all', { enabled: false })
+      expect(document.querySelectorAll('[data-pve-outline]')).toHaveLength(0)
+
+      sendFromAdmin('outline-all', { enabled: true })
+      expect(document.querySelectorAll('[data-pve-outline]')).toHaveLength(2)
+
+      // Edit mode off removes them with the rest of the overlay; back on, they return
+      sendFromAdmin('edit-mode', { enabled: false })
+      expect(document.querySelectorAll('[data-pve-outline]')).toHaveLength(0)
+      sendFromAdmin('edit-mode', { enabled: true })
+      vi.advanceTimersByTime(5000)
+      expect(document.querySelectorAll('[data-pve-outline]')).toHaveLength(2)
+    } finally {
+      vi.useRealTimers()
+    }
+  })
+
   it('tears down the overlay on edit-mode off and full teardown', () => {
     teardown = initVisualEditing({ serverURL: ADMIN_ORIGIN })
     sendFromAdmin('hello', helloPayload)

@@ -267,6 +267,28 @@ test.describe('visual editor', () => {
     await expect(rows.first()).toHaveAttribute('data-pve-block-type', 'hero')
   })
 
+  test('Outline all outlines every editable region until turned off', async ({ page }) => {
+    const frame = await openHomePageInLivePreview(page, 'dev@payloadcms.com')
+    await enableEditMode(page)
+    const outlines = frame.locator('[data-pve-outline]')
+    // Entering edit mode flashes them briefly
+    await expect(outlines).toHaveCount(0, { timeout: 5_000 })
+
+    const toggle = page.getByRole('button', { name: 'Outline all' })
+    await toggle.click()
+    const regions = await frame.locator('[data-pve-field]').count()
+    await expect(outlines).not.toHaveCount(0)
+    expect(await outlines.count()).toBeLessThanOrEqual(regions)
+    await page.waitForTimeout(2_000)
+    await expect(outlines).not.toHaveCount(0)
+    if (process.env.PVE_SHOT) {
+      await page.screenshot({ path: process.env.PVE_SHOT })
+    }
+
+    await toggle.click()
+    await expect(outlines).toHaveCount(0)
+  })
+
   test('markup that matches no field is reported in the admin console', async ({ expectPluginWarning, page }) => {
     const warning = expectPluginWarning(
       /data-pve-field="layout\.0\.headline" \(scope "collection:pages;id:[^"]+"\) matches no field/,

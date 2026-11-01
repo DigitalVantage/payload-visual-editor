@@ -25,6 +25,8 @@ export const pl: typeof en = {
     openStandardView: 'Otwórz go w standardowym widoku edycji',
     openVisualEditor: 'Otwórz edytor wizualny',
     openVisualEditorTooltip: 'Otwórz pełnoekranowy edytor wizualny',
+    outlineAll: 'Pokaż obrysy',
+    outlineAllTooltip: 'Obrysuj wszystkie edytowalne obszary na stronie',
     previewIsPublished: 'Podgląd pokazuje opublikowaną treść — zmiany będą widoczne po publikacji',
     redo: 'Ponów',
     removeBlock: 'Usuń blok',

@@ -97,6 +97,8 @@ export type PveMessagePayloads = {
     editMode: boolean
     labels: Record<string, string>
     locale?: string
+    /** Outline every editable region until turned off; omitted = off. */
+    outlineAll?: boolean
     permissions: PvePermissionSummary
     /** Translated overlay text; missing entries fall back to English. */
     strings?: Partial<PveOverlayStrings>
@@ -106,6 +108,8 @@ export type PveMessagePayloads = {
   locale: { locale: string }
   op: PveOp
   'op-ack': { error?: string; ok: boolean; opId: string }
+  /** Toolbar "Outline all": outline every editable region on the page. */
+  'outline-all': { enabled: boolean }
   regions: { regions: PveRegion[] }
   /** Chip "show in layout": reveal the region's field in the admin fields panel, isolating its ancestor rows. */
   reveal: { path: string; regionId: string; scope: string }

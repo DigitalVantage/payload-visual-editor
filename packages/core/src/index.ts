@@ -5,11 +5,13 @@ export * from './overlay/chips.js'
 export * from './overlay/dnd.js'
 export * from './overlay/index.js'
 export * from './overlay/indicators.js'
+export * from './overlay/outlines.js'
 export * from './permissions.js'
 export * from './protocol.js'
 export * from './scanner.js'
 
 import type { PveOverlayStrings } from './protocol.js'
+import type { ScannedRegion } from './scanner.js'
 
 import { SiteBridge } from './bridge.js'
 import { createBlockOps } from './editor/blockOps.js'
@@ -20,6 +22,7 @@ import { createTimers } from './editor/timers.js'
 import { RowChip } from './overlay/chips.js'
 import { OverlayRenderer } from './overlay/index.js'
 import { DropIndicator, EmptyContainerAffordances, PendingOverlay } from './overlay/indicators.js'
+import { RegionOutlines } from './overlay/outlines.js'
 import { DEFAULT_OVERLAY_STRINGS } from './protocol.js'
 import { RegionRegistry, toProtocolRegions } from './scanner.js'
 
@@ -43,6 +46,7 @@ export const initVisualEditing = (options: VisualEditingOptions): (() => void) =
   const overlay = new OverlayRenderer()
 
   let editMode = false
+  let outlineAll = false
   const access = createDocAccess({ isReadOnly: () => bridge.readOnly })
 
   const timers = createTimers()
@@ -50,6 +54,11 @@ export const initVisualEditing = (options: VisualEditingOptions): (() => void) =
   const dropIndicator = new DropIndicator()
   const pending = new PendingOverlay()
   const emptyAffordances = new EmptyContainerAffordances()
+  const outlines = new RegionOutlines()
+  // Rows and fields: containers only bound drop zones
+  const outlineTargets = (regions: ScannedRegion[]): Element[] => [
+    ...new Set(regions.filter((region) => region.kind !== 'container').map((region) => region.element)),
+  ]
 
   const blockOps = createBlockOps({
     access,
@@ -68,12 +77,14 @@ export const initVisualEditing = (options: VisualEditingOptions): (() => void) =
       pending.clear()
       access.indexRows(regions)
       blockOps.updateEmptyContainers(regions)
+      outlines.setTargets(outlineTargets(regions))
       bridge.send('regions', { regions: toProtocolRegions(regions) })
     },
     onRescan: (regions) => {
       access.indexRows(regions)
       blockOps.updateEmptyContainers(regions)
       selection.resolveAfterRescan(regions)
+      outlines.setTargets(outlineTargets(regions))
       overlay.refresh()
     },
   })
@@ -87,6 +98,7 @@ export const initVisualEditing = (options: VisualEditingOptions): (() => void) =
     chip.refresh()
     pending.refresh()
     emptyAffordances.refresh()
+    outlines.refresh()
   })
 
   const selection = createSelection({ access, blockOps, bridge, chip, overlay, registry, rowDrag })
@@ -109,8 +121,15 @@ export const initVisualEditing = (options: VisualEditingOptions): (() => void) =
       dropIndicator.mount(layer)
       pending.mount(layer)
       emptyAffordances.mount(layer)
+      outlines.mount(layer)
       registry.start()
       selection.attach()
+      // Show what is editable: for good when "outline all" is on, else a brief flash
+      if (outlineAll) {
+        outlines.setPersistent(true)
+      } else {
+        outlines.flash()
+      }
     } else {
       selection.detach()
       rowDrag.cancel()
@@ -118,11 +137,22 @@ export const initVisualEditing = (options: VisualEditingOptions): (() => void) =
       blockOps.clearPending()
       selection.reset()
       registry.stop()
+      outlines.unmount()
       emptyAffordances.unmount()
       pending.unmount()
       dropIndicator.unmount()
       chip.unmount()
       overlay.unmount()
+    }
+  }
+
+  const setOutlineAll = (enabled: boolean): void => {
+    if (enabled === outlineAll) {
+      return
+    }
+    outlineAll = enabled
+    if (editMode) {
+      outlines.setPersistent(enabled)
     }
   }
 
@@ -145,6 +175,7 @@ export const initVisualEditing = (options: VisualEditingOptions): (() => void) =
       case 'payload-visual-editor:hello':
         access.applyHello(message.payload)
         applyStrings(message.payload.strings)
+        setOutlineAll(message.payload.outlineAll ?? false)
         if (message.payload.editMode && editMode) {
           // New admin session while already editing: re-report to the new
           // session and recompute affordances (docs/permissions may differ)
@@ -157,6 +188,9 @@ export const initVisualEditing = (options: VisualEditingOptions): (() => void) =
         break
       case 'payload-visual-editor:op-ack':
         blockOps.handleAck(message.payload)
+        break
+      case 'payload-visual-editor:outline-all':
+        setOutlineAll(message.payload.enabled)
         break
     }
   })

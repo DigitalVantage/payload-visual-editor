@@ -69,6 +69,7 @@ export const VisualEditorController = ({ blockOps, debug }: VisualEditorControll
   const inDrawer = inPveDocDrawer || Boolean(drawerSlug)
 
   const [editMode, setEditMode] = useState(Boolean(shell))
+  const [outlineAll, setOutlineAll] = useState(false)
   const [docSwitch, setDocSwitch] = useState<null | PveScopeRef>(null)
   const regionPathsRef = useRef<Set<string>>(new Set())
   const regionsRef = useRef<Map<string, PveRegion>>(new Map())
@@ -95,6 +96,7 @@ export const VisualEditorController = ({ blockOps, debug }: VisualEditorControll
     editMode,
     labels: collectBlockLabels(schemaFields, blocksMap),
     locale: locale?.code,
+    outlineAll,
     permissions: buildPermissionSummary({
       canPublish: Boolean(hasPublishPermission),
       canSave: Boolean(hasSavePermission),
@@ -300,6 +302,12 @@ export const VisualEditorController = ({ blockOps, debug }: VisualEditorControll
     send('edit-mode', { enabled })
   }
 
+  const toggleOutlineAll = (): void => {
+    const enabled = !outlineAll
+    setOutlineAll(enabled)
+    send('outline-all', { enabled })
+  }
+
   const closePopover = (): void => {
     clearPopover()
     // Clear the page-side selection highlight too
@@ -336,6 +344,17 @@ export const VisualEditorController = ({ blockOps, debug }: VisualEditorControll
             {t('pluginVisualEditor:redo')}
           </Button>
         </>
+      ) : null}
+      {editMode ? (
+        <Button
+          buttonStyle={outlineAll ? 'primary' : 'secondary'}
+          disabled={!connected}
+          onClick={toggleOutlineAll}
+          size="small"
+          tooltip={t('pluginVisualEditor:outlineAllTooltip')}
+        >
+          {t('pluginVisualEditor:outlineAll')}
+        </Button>
       ) : null}
       {previewIsPublished && hasDrafts ? <DraftWarning /> : null}
       {shell ? (
