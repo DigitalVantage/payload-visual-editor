@@ -1,11 +1,10 @@
 'use client'
 
-import type { PveMessagePayloads, PveOp, PveRegion, PveScopeRef } from '@digitalvantage/payload-visual-editor-core'
-import type { ClientBlock, Labels } from 'payload'
+import type { PveMessagePayloads, PveRegion, PveScopeRef } from '@digitalvantage/payload-visual-editor-core'
 
 import { parseScope } from '@digitalvantage/payload-visual-editor-core'
 import { formatAdminURL } from 'payload/shared'
-import { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import type { BlockOpsOptions } from '../../index.js'
 import type { BlocksMapLike, FieldSchemaLike } from '../../utils/fieldPaths.js'
@@ -13,21 +12,16 @@ import type { BlocksMapLike, FieldSchemaLike } from '../../utils/fieldPaths.js'
 import { useLatestCallback } from '../../hooks/useLatestCallback.js'
 import { visualEditorRuntime } from '../../index.js'
 import {
-  BlocksDrawer,
   Button,
-  ConfirmationModal,
   useConfig,
   useDocumentDrawerContext,
   useDocumentInfo,
   useForm,
   useLivePreviewContext,
   useLocale,
-  toast,
-  useModal,
 } from '../../internal/payload-internals.js'
 import { AdminBridge } from '../../utils/adminBridge.js'
-import { blockOpErrorMessage, normalizeBlockOps, planBlockOp, resolveRowIndexById } from '../../utils/blockOps.js'
-import { resolveDataPath } from '../../utils/fieldPaths.js'
+import { normalizeBlockOps } from '../../utils/blockOps.js'
 import { collectRowExpansions, collectRowIsolation, focusFormField, isValidDataPath } from '../../utils/formFocus.js'
 import { buildDocRef, buildPermissionSummary, collectBlockLabels } from '../../utils/helloPayload.js'
 import { buildViewPath } from '../../utils/viewPath.js'
@@ -36,36 +30,13 @@ import { DraftWarning } from '../DraftWarning/index.js'
 import { FieldPopover } from '../FieldPopover/index.js'
 import { LocaleSwitcher } from '../LocaleSwitcher/index.js'
 import { usePveDocDrawer, usePveShell } from '../VisualEditorScreen/shellContext.js'
+import { useBlockOpHandler } from './useBlockOpHandler.js'
 import { useFieldPopover } from './useFieldPopover.js'
 import { useReverseFocusSync } from './useReverseFocusSync.js'
 
 export type VisualEditorControllerProps = {
   blockOps?: BlockOpsOptions | false
   debug?: boolean
-}
-
-type PendingAdd = {
-  blocks: (ClientBlock | string)[]
-  labels: Labels
-  opId: string
-  path: string
-  rowIndex: number
-  schemaPath: string
-}
-
-type PendingRemove = {
-  label: string
-  opId: string
-  path: string
-  rowId?: string
-  rowIndex: number
-}
-
-// The container field config resolved from the client schema carries more than
-// FieldSchemaLike models — pull what BlocksDrawer needs.
-type ContainerFieldLike = FieldSchemaLike & {
-  blockReferences?: (ClientBlock | string)[]
-  labels?: Labels
 }
 
 /**
@@ -79,8 +50,7 @@ export const VisualEditorController = ({ blockOps, debug }: VisualEditorControll
   const { breakpoint, iframeRef, isLivePreviewing, loadedURL, setIsLivePreviewing } = useLivePreviewContext()
   const { collectionSlug, docConfig, docPermissions, globalSlug, hasPublishPermission, hasSavePermission, id } =
     useDocumentInfo()
-  const { addFieldRow, dispatchFields, getFields, moveFieldRow, removeFieldRow, setModified } = useForm()
-  const { isModalOpen, openModal } = useModal()
+  const { dispatchFields, getFields } = useForm()
   const { config } = useConfig()
   // Global blocks referenced by slug from `blockReferences`
   const blocksMap = (config.blocksMap ?? {}) as BlocksMapLike
@@ -91,16 +61,10 @@ export const VisualEditorController = ({ blockOps, debug }: VisualEditorControll
   const inPveDocDrawer = usePveDocDrawer()
   const { drawerSlug } = useDocumentDrawerContext()
   const inDrawer = inPveDocDrawer || Boolean(drawerSlug)
-  const uid = useId()
 
   const [editMode, setEditMode] = useState(Boolean(shell))
   const [connected, setConnected] = useState(false)
   const [previewIsPublished, setPreviewIsPublished] = useState(false)
-  const [pendingAdd, setPendingAdd] = useState<null | PendingAdd>(null)
-  // Read by handleOpRef, which runs from a message listener between renders
-  const pendingAddRef = useRef(pendingAdd)
-  pendingAddRef.current = pendingAdd
-  const [pendingRemove, setPendingRemove] = useState<null | PendingRemove>(null)
   const [docSwitch, setDocSwitch] = useState<null | PveScopeRef>(null)
   const bridgeRef = useRef<AdminBridge | null>(null)
   const regionPathsRef = useRef<Set<string>>(new Set())
@@ -118,8 +82,6 @@ export const VisualEditorController = ({ blockOps, debug }: VisualEditorControll
   // Without drafts, the published document is what gets edited — nothing to warn about
   const hasDrafts = Boolean(docConfig?.versions && docConfig.versions.drafts)
 
-  const blocksDrawerSlug = `pve-blocks-drawer-${uid}`
-  const removeConfirmSlug = `pve-remove-row-${uid}`
   const enabledOps = useMemo(() => normalizeBlockOps(blockOps), [blockOps])
 
   const targetOrigin = useMemo(() => {
@@ -146,6 +108,14 @@ export const VisualEditorController = ({ blockOps, debug }: VisualEditorControll
       docPermissions,
     }),
   }))
+
+  const { dialogs, handleOp } = useBlockOpHandler({
+    blocksMap,
+    canSave: Boolean(hasSavePermission),
+    enabledOps,
+    schemaFields: (docConfig?.fields ?? []) as unknown as FieldSchemaLike[],
+    sendAck: (ack) => bridgeRef.current?.send('op-ack', ack),
+  })
 
   const { clearPopover, openPopover, popover } = useFieldPopover({
     blocksMap,
@@ -213,85 +183,6 @@ export const VisualEditorController = ({ blockOps, debug }: VisualEditorControll
       }
     } else if (parsed.id != null && config.collections.some((collection) => collection.slug === parsed.collection)) {
       setDocSwitch(parsed)
-    }
-  })
-
-  const ack = useLatestCallback((opId: string, ok: boolean, error?: string): void => {
-    bridgeRef.current?.send('op-ack', { error, ok, opId })
-    const message = ok ? undefined : blockOpErrorMessage(error)
-    if (message) {
-      toast.error(message)
-    }
-  })
-
-  const handleOp = useLatestCallback((op: PveOp): void => {
-    if (!hasSavePermission) {
-      ack(op.opId, false, 'not-allowed')
-      return
-    }
-    const fields = getFields()
-    const plan = planBlockOp({ enabledOps, fields, op })
-
-    switch (plan.type) {
-      case 'add': {
-        const resolved = resolveDataPath({
-          blocksMap,
-          fields: (docConfig?.fields ?? []) as unknown as FieldSchemaLike[],
-          path: op.containerPath,
-        })
-        const container = resolved?.field as ContainerFieldLike | undefined
-        if (!container || (container.type !== 'array' && container.type !== 'blocks')) {
-          ack(op.opId, false, 'unknown-container')
-          return
-        }
-        if (container.type === 'array') {
-          addFieldRow({ path: op.containerPath, rowIndex: plan.rowIndex, schemaPath: resolved!.schemaPath })
-          ack(op.opId, true)
-          return
-        }
-        // Blocks: the native picker takes over; the ack is sent when a block
-        // is chosen or the drawer is dismissed. A newer add supersedes one
-        // still waiting in the open drawer — the latest click wins.
-        if (pendingAddRef.current) {
-          ack(pendingAddRef.current.opId, false, 'cancelled')
-        }
-        setPendingAdd({
-          blocks: container.blockReferences ?? (container.blocks as unknown as ClientBlock[]) ?? [],
-          labels: container.labels ?? { plural: 'Blocks', singular: 'Block' },
-          opId: op.opId,
-          path: op.containerPath,
-          rowIndex: plan.rowIndex,
-          schemaPath: resolved!.schemaPath,
-        })
-        return
-      }
-      case 'duplicate':
-        dispatchFields({ path: op.containerPath, rowIndex: plan.rowIndex, type: 'DUPLICATE_ROW' })
-        setModified(true)
-        ack(op.opId, true)
-        return
-      case 'error':
-        ack(op.opId, false, plan.error)
-        return
-      case 'move':
-        moveFieldRow({ moveFromIndex: plan.moveFromIndex, moveToIndex: plan.moveToIndex, path: op.containerPath })
-        ack(op.opId, true)
-        return
-      case 'noop':
-        ack(op.opId, true)
-        return
-      case 'remove': {
-        const blockType = fields[op.containerPath]?.rows?.[plan.rowIndex]?.blockType
-        const labels = collectBlockLabels((docConfig?.fields ?? []) as unknown as FieldSchemaLike[], blocksMap)
-        setPendingRemove({
-          label: (blockType && (labels[blockType] ?? blockType)) || 'block',
-          opId: op.opId,
-          path: op.containerPath,
-          rowId: op.rowId,
-          rowIndex: plan.rowIndex,
-        })
-        return
-      }
     }
   })
 
@@ -371,35 +262,6 @@ export const VisualEditorController = ({ blockOps, debug }: VisualEditorControll
     targetOrigin,
   ])
 
-  useEffect(() => {
-    if (pendingAdd) {
-      openModal(blocksDrawerSlug)
-    }
-  }, [pendingAdd, openModal, blocksDrawerSlug])
-
-  // BlocksDrawer has no cancel callback — a drawer that was open and closed
-  // with the add still pending was dismissed. Picking a block clears
-  // pendingAdd in the same batch as the close, so it never lands here.
-  const blocksDrawerOpen = isModalOpen(blocksDrawerSlug)
-  const blocksDrawerWasOpenRef = useRef(false)
-  useEffect(() => {
-    if (blocksDrawerOpen) {
-      blocksDrawerWasOpenRef.current = true
-      return
-    }
-    if (blocksDrawerWasOpenRef.current && pendingAdd) {
-      ack(pendingAdd.opId, false, 'cancelled')
-      setPendingAdd(null)
-    }
-    blocksDrawerWasOpenRef.current = false
-  }, [ack, blocksDrawerOpen, pendingAdd])
-
-  useEffect(() => {
-    if (pendingRemove) {
-      openModal(removeConfirmSlug)
-    }
-  }, [pendingRemove, openModal, removeConfirmSlug])
-
   useReverseFocusSync({
     enabled: editMode && connected,
     isRegionPath: (path) => regionPathsRef.current.has(path),
@@ -453,39 +315,6 @@ export const VisualEditorController = ({ blockOps, debug }: VisualEditorControll
     bridgeRef.current?.send('deselect', null)
   }
 
-  const confirmRemove = (): void => {
-    if (!pendingRemove) {
-      return
-    }
-    // Re-resolve by id — the form may have changed while the modal was open
-    const rowIndex = pendingRemove.rowId
-      ? resolveRowIndexById(getFields(), pendingRemove.path, pendingRemove.rowId)
-      : pendingRemove.rowIndex
-    if (rowIndex === null) {
-      ack(pendingRemove.opId, false, 'unknown-row')
-    } else {
-      removeFieldRow({ path: pendingRemove.path, rowIndex })
-      ack(pendingRemove.opId, true)
-    }
-    setPendingRemove(null)
-  }
-
-  const cancelRemove = (): void => {
-    if (pendingRemove) {
-      ack(pendingRemove.opId, false, 'cancelled')
-      setPendingRemove(null)
-    }
-  }
-
-  const drawerAddRow = (rowIndex: number, blockType?: string): void => {
-    if (!pendingAdd) {
-      return
-    }
-    addFieldRow({ blockType, path: pendingAdd.path, rowIndex, schemaPath: pendingAdd.schemaPath })
-    ack(pendingAdd.opId, true)
-    setPendingAdd(null)
-  }
-
   return (
     <>
       <Button
@@ -534,25 +363,7 @@ export const VisualEditorController = ({ blockOps, debug }: VisualEditorControll
           onClose={clearDocSwitch}
         />
       ) : null}
-      {pendingAdd ? (
-        <BlocksDrawer
-          addRow={drawerAddRow}
-          addRowIndex={pendingAdd.rowIndex}
-          blocks={pendingAdd.blocks}
-          drawerSlug={blocksDrawerSlug}
-          labels={pendingAdd.labels}
-        />
-      ) : null}
-      {pendingRemove ? (
-        <ConfirmationModal
-          body={`Are you sure you want to remove this ${pendingRemove.label}?`}
-          confirmLabel="Remove"
-          heading="Remove block"
-          modalSlug={removeConfirmSlug}
-          onCancel={cancelRemove}
-          onConfirm={confirmRemove}
-        />
-      ) : null}
+      {dialogs}
     </>
   )
 }
