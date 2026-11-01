@@ -14,6 +14,8 @@ import type { ScannedRegion } from './scanner.js'
 
 import { parseScope, PVE_ATTR } from './attrs.js'
 import { SiteBridge } from './bridge.js'
+import { containerPathOf, humanizePathTail, isRowPath, rowIndexOf, scopeMatchesDoc } from './editor/paths.js'
+import { createTimers } from './editor/timers.js'
 import { RowChip } from './overlay/chips.js'
 import {
   computeDropGap,
@@ -46,40 +48,6 @@ const SHIMMER_DELAY_MS = 300
 const SHIMMER_TIMEOUT_MS = 8000
 const PENDING_OP_TTL_MS = 60_000
 
-const humanizePathTail = (path: string): string => {
-  const segments = path.split('.')
-  let tail = segments.pop()
-  while (tail !== undefined && /^\d+$/.test(tail)) {
-    tail = segments.pop()
-  }
-  if (!tail) {
-    return path
-  }
-  const spaced = tail.replace(/[_-]+/g, ' ').replace(/([a-z\d])([A-Z])/g, '$1 $2')
-  return spaced.charAt(0).toUpperCase() + spaced.slice(1)
-}
-
-const scopeMatchesDoc = (scope: string, docs: PveDocRef[]): boolean => {
-  const parsed = parseScope(scope)
-  if (!parsed) {
-    return false
-  }
-  return docs.some((doc) => {
-    if ('global' in parsed) {
-      return doc.global === parsed.global
-    }
-    return (
-      doc.collection === parsed.collection && (parsed.id === undefined || doc.id === undefined || doc.id === parsed.id)
-    )
-  })
-}
-
-const isRowPath = (path: string): boolean => /\.\d+$/.test(path)
-
-const containerPathOf = (rowPath: string): string => rowPath.replace(/\.\d+$/, '')
-
-const rowIndexOf = (rowPath: string): number => Number(rowPath.split('.').pop())
-
 const randomOpId = (): string => {
   if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
     return crypto.randomUUID()
@@ -108,26 +76,12 @@ export const initVisualEditing = (options: VisualEditingOptions): (() => void) =
   let dragCleanup: (() => void) | null = null
   let regionsVersion = 0
   const pendingOps = new Map<string, { containerPath: string; scope: string }>()
-  const timers = new Set<ReturnType<typeof setTimeout>>()
+  const timers = createTimers()
+  const { later } = timers
 
   const dropIndicator = new DropIndicator()
   const pending = new PendingOverlay()
   const emptyAffordances = new EmptyContainerAffordances()
-
-  const later = (fn: () => void, ms: number): void => {
-    const timer = setTimeout(() => {
-      timers.delete(timer)
-      fn()
-    }, ms)
-    timers.add(timer)
-  }
-
-  const clearTimers = (): void => {
-    for (const timer of timers) {
-      clearTimeout(timer)
-    }
-    timers.clear()
-  }
 
   const regionLabel = (region: ScannedRegion): string => {
     if (region.kind === 'row' && region.blockType) {
@@ -599,7 +553,7 @@ export const initVisualEditing = (options: VisualEditingOptions): (() => void) =
       document.removeEventListener('keydown', onKeyDown)
       dragCleanup?.()
       dragCleanup = null
-      clearTimers()
+      timers.clear()
       pendingOps.clear()
       setLocked(null, { notify: false })
       setHovered(null)
@@ -688,7 +642,7 @@ export const initVisualEditing = (options: VisualEditingOptions): (() => void) =
   return () => {
     offMessage()
     setEditMode(false)
-    clearTimers()
+    timers.clear()
     disconnect()
   }
 }
