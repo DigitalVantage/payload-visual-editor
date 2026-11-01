@@ -29,10 +29,10 @@ export default tseslint.config(
     },
   },
   // Classic hook rules only. The React Compiler rules in `recommended`
-  // (refs, set-state-in-effect, …) reject the controller's latest-ref
-  // pattern; adopting them is part of the controller refactor (TODO.md).
+  // (refs, set-state-in-effect, …) reject the latest-ref pattern
+  // (`useLatestCallback` and a few components); adopting them is in TODO.md.
   {
-    files: ['packages/plugin/src/**/*.tsx', 'packages/react/src/**/*.{ts,tsx}', 'dev/**/*.tsx'],
+    files: ['packages/plugin/src/**/*.{ts,tsx}', 'packages/react/src/**/*.{ts,tsx}', 'dev/**/*.tsx'],
     plugins: { 'react-hooks': reactHooks },
     rules: {
       'react-hooks/exhaustive-deps': 'error',
