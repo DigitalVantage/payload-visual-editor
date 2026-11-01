@@ -19,6 +19,7 @@ Single source of truth for project tasks. Context for each item: the project ana
 - [x] Undo/redo for block operations (add↔remove, move↔move) — toolbar buttons + Ctrl/⌘+Z shortcuts (page and admin)
 - [x] i18n: admin strings via Payload `useTranslation` / `i18n.translations`; SDK overlay strings delivered in `hello`
 - [x] Keyboard a11y for the overlay: navigate regions, Enter to edit, keyboard alternative to drag-reorder (e.g. Alt+↑/↓)
+- [ ] The "Open visual editor" button label wraps onto two lines in the document controls when Live Preview is open (seen on the website template at 1440 px); the controller has no stylesheet of its own (attw), so the fix needs a class from an existing stylesheet or a small wrapper component
 
 ## Refactoring
 
@@ -54,7 +55,7 @@ From the 2026-11-01 market research (competing plugins, Payload 4, user demand).
 - [ ] Stable 1.1.0: finish the rc dogfood in the DV project + manual checklist, then publish to `latest`
 - [ ] Payload 4 beta line (`2.0.0-beta`, peer `^4.0.0-beta`): `v4-beta` entry in the `release:verify` matrix; adapt `payload-internals.ts` (edit-view slot `elements` → `edit`, globals' `beforeDocumentControls`, `useDocumentTitle`, `useField` without `readOnly`, `useLocale` → `Locale | null`, `RouterAdapter`, Next ≥16.4); check `RenderFields`/`useForm` in the unread part of the v4 migration guide; review styles against the redesigned admin. 1.x stays for Payload 3
 - [ ] Isolate the overlay from host-site CSS (Shadow DOM or the top layer) + a "hostile CSS" test; never write to the host `<html>`
-- [ ] README recipe for the official website template (SSR `RefreshRouteOnSave`, `/next/preview` redirect + `PREVIEW_SECRET`, `RenderBlocks` markup, mount `<VisualEditing/>` under the same `draftMode()` gate; confirm the handshake survives the redirect), for Payload 3 and 4
+- [x] README recipe for the official website template (Payload 3; verified on the template from Payload 3.92 + Next 16.3: handshake through the `/next/preview` redirect, overlay, block ops, undo, popovers). The Payload 4 version goes with the beta line
 - [x] Migration guide from `payload-inline-visual-editor` (package names, attribute compatibility, option differences, what changed)
 - [ ] Docs: why explicit attributes instead of stega (string comparisons, SEO/meta, copy-paste) + cross-origin troubleshooting (CSRF, `SameSite=None; Secure`, `frame-ancestors`, HTTPS on localhost)
 - [ ] Distribution: "Show and tell" in payloadcms/payload Discussions; useful answers in #7916, #18166, #16561; listing on payload.market
