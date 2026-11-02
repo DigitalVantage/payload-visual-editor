@@ -391,6 +391,8 @@ pnpm docs:media   # regenerate the README screenshots, GIF and diagram
 
 Playground admin: `http://localhost:3000/admin` — `dev@payloadcms.com` / `test` (seeded on first run; `viewer@payloadcms.com` / `test` is a read-only account for permission testing). Open the seeded **Home** page and switch to Live Preview.
 
+Contributions are welcome — see [CONTRIBUTING.md](./CONTRIBUTING.md) and the [open issues](https://github.com/DigitalVantage/payload-visual-editor/issues).
+
 ## Changelog
 
 Release notes live in [CHANGELOG.md](./CHANGELOG.md).
