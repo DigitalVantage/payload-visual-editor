@@ -67,5 +67,6 @@ pnpm publish -r --access public
 ## 6. After publishing
 
 - Tag the release: `git tag v1.1.0 && git push origin v1.1.0`.
+- Create the GitHub release from the version's `CHANGELOG.md` section (plus the install command and the `release:verify` version pairs): `gh release create v1.1.0 --verify-tag --notes-file <notes.md> --latest`. Delete draft releases of candidates the version supersedes.
 - Add the `payload-plugin` topic to the GitHub repository (Settings → Topics) so the plugin is discoverable.
 - Point the candidate projects at the final version: `pnpm add @digitalvantage/payload-visual-editor@latest …`.
