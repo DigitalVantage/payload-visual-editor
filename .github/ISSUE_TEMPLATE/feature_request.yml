@@ -1,0 +1,24 @@
+name: Feature request
+description: Suggest something the editor should do
+labels: [enhancement]
+body:
+  - type: markdown
+    attributes:
+      value: Check the open issues first — if the idea is there, a comment with your use case helps more than a new issue.
+  - type: textarea
+    id: problem
+    attributes:
+      label: The problem
+      description: What are you or your editors trying to do, and what gets in the way today?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: What you would like
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Workarounds you use now

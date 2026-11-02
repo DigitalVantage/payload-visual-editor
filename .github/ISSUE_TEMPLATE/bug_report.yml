@@ -1,0 +1,65 @@
+name: Bug report
+description: Something in the editor does not work as documented
+labels: [bug]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened
+      description: What you did, what you expected, and what happened instead.
+    validations:
+      required: true
+  - type: textarea
+    id: repro
+    attributes:
+      label: Steps to reproduce
+      description: A minimal repo or the markup and config involved help most.
+      placeholder: |
+        1. Open the page in Live Preview
+        2. Toggle "Edit on page"
+        3. Double-click …
+    validations:
+      required: true
+  - type: input
+    id: pve
+    attributes:
+      label: Plugin version
+      placeholder: '1.1.0'
+    validations:
+      required: true
+  - type: input
+    id: payload
+    attributes:
+      label: Payload and Next versions
+      placeholder: 'payload 3.92.1, next 16.4.4'
+    validations:
+      required: true
+  - type: dropdown
+    id: mode
+    attributes:
+      label: Live Preview mode
+      options:
+        - Client (useLivePreview)
+        - SSR (RefreshRouteOnSave)
+        - Not sure
+    validations:
+      required: true
+  - type: dropdown
+    id: origin
+    attributes:
+      label: Site and admin origin
+      options:
+        - Same origin
+        - Different origins
+        - Not sure
+  - type: input
+    id: browser
+    attributes:
+      label: Browser
+      placeholder: 'Chrome 142'
+  - type: textarea
+    id: console
+    attributes:
+      label: Console output
+      description: Warnings or errors from the admin and the preview frame. Turn on the plugin's `debug` option for more.
+      render: text
