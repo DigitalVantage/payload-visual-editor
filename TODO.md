@@ -53,7 +53,7 @@ Release confidence — tests that touch the real thing (real Payload config, rea
 
 From the 2026-11-01 market research (competing plugins, Payload 4, user demand). Order is priority.
 
-- [ ] Stable 1.1.0: finish the rc dogfood in the DV project + manual checklist, then publish to `latest`
+- [x] Stable 1.1.0: finish the rc dogfood in the DV project + manual checklist, then publish to `latest`
 - [ ] Payload 4 beta line (`2.0.0-beta`, peer `^4.0.0-beta`): `v4-beta` entry in the `release:verify` matrix; adapt `payload-internals.ts` (edit-view slot `elements` → `edit`, globals' `beforeDocumentControls`, `useDocumentTitle`, `useField` without `readOnly`, `useLocale` → `Locale | null`, `RouterAdapter`, Next ≥16.4); check `RenderFields`/`useForm` in the unread part of the v4 migration guide; review styles against the redesigned admin. 1.x stays for Payload 3
 - [x] Isolate the overlay from host-site CSS: open shadow root under a `[data-pve-overlay]` host pinned with inline `!important`; `hostile-css` playground pages + e2e on three browsers (the old overlay failed it on `div:empty`). The SDK never writes to the host `<html>`
 - [ ] Top layer for the overlay (`popover="manual"` on the host, `z-index` fallback): covers what Shadow DOM cannot — a `transform`/`filter` on the site's `body` (re-anchors `position: fixed`) and site modals opened with `showModal()`, which sit above any `z-index`. Needs Safari 17+ / Firefox 125+
